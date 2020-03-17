@@ -1,0 +1,9 @@
+*.rpyb
+*.rpyc
+*.rpymc
+*.save
+game/saves/navigation.json
+game/saves/persistent
+errors.txt
+log.txt
+traceback.txt
