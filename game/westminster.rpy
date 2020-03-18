@@ -5,9 +5,10 @@ init python:
         '''
         Custom Displayable
         '''
-        def __init__(self, the_list, **kwargs):
+        def __init__(self, the_list, bg=False, **kwargs):
             super(Westminster, self).__init__(**kwargs)
             self.the_list = the_list
+            self.bg = bg
 
         def render(self, width, height, st, at):
             poslist, blocksize, svgwidth, svgheight = self.seats(self.the_list)
@@ -54,6 +55,8 @@ init python:
             # mettre des marges de 10 pixels en haut et en bas, si on garde la norme sortante
             render = renpy.Render(width, height)
             # render.fill('#0f0') # debug, pour voir les limites du render
+            if self.bg:
+                render.fill(self.bg)
             canvas = render.canvas()
             # on parcourt les types de partis
             for wing in {'head', 'left', 'right', 'center'}:
@@ -76,7 +79,7 @@ init python:
             # Keep a running total of the number of delegates in each part of the diagram, for use later.
             sumdelegates = {'left': 0, 'right': 0, 'center': 0, 'head': 0}
             for p in the_list:
-                if len(p)<2:
+                if len(p)<3:
                     raise IndexError(_("The number of seats, the wing alignment and the color must be supplied for each party"))
                     # Le nombre de siège, l'aile où siéger et la couleur doivent être fournis pour chaque parti
                 if type(p[0]) not in {int, bool}:

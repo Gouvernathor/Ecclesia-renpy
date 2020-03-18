@@ -3,13 +3,14 @@ init python:
 
     class Newarch(renpy.Displayable):
         '''
-        Custom displayable
+        Custom Displayable
         Zoom .5 to have the real size
-        Not to use directly, use the newarch function as a proxy handler
+        Not to use directly, use the newarch function as a handler proxy
         '''
-        def __init__(self, the_list, sizex=config.screen_width, sizey=config.screen_height, **kwargs):
+        def __init__(self, the_list, bg=False, **kwargs):
             super(Newarch, self).__init__(**kwargs)
             self.the_list = the_list
+            self.bg = bg
 
             totals = []
             for rows in range(1, 75):
@@ -33,6 +34,8 @@ init python:
                 height=width/2
             render = renpy.Render(width, height)
             # render.fill('#0f0') # debug, pour voir les limites du render
+            if self.bg:
+                render.fill(self.bg)
             canvas = render.canvas()
             poslist, rad = self.seats(self.the_list)
             diam = 1.6*rad
@@ -58,7 +61,7 @@ init python:
             sumdelegates = 0
             # addition des sièges et vérifications défensives
             for p in the_list:
-                if len(p)!=2:
+                if len(p)<2:
                     raise IndexError(_("The number of seats and the color must be supplied for each party"))
                     # Le nombre de siège et la couleur doivent être fournis pour chaque parti
                 if type(p[0]) is not int:
