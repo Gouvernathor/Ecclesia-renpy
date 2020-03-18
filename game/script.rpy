@@ -11,6 +11,7 @@ define gvt = Character("GOUVERNEMENT", boldChar)
 # The game starts here.
 
 label start:
+    call after_load
     scene expression '#fff'
 
     # These display lines of dialogue.
@@ -36,3 +37,15 @@ label start:
     # This ends the game.
 
     return
+
+label after_load:
+    python:
+        totals = []
+        for rows in range(1, maxrows):
+            tot = 0
+            rad = 1/float(4*rows-2)
+            for r in range(1, rows+1):
+                R = .5 + 2*(r-1)*rad
+                tot += int(math.pi*R/(2*rad))
+            totals.append(tot)
+        # totals[i] : nombre max de sièges quand on a i+1 rangs

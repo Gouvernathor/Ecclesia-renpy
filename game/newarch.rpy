@@ -1,3 +1,5 @@
+default maxrows = 75
+
 init python:
     import math
 
@@ -11,23 +13,11 @@ init python:
             super(Newarch, self).__init__(**kwargs)
             self.the_list = the_list
             self.bg = bg
-
-            totals = []
-            for rows in range(1, 75):
-                tot = 0
-                rad = 1/float(4*rows-2)
-                for r in range(1, rows+1):
-                    R = .5 + 2*(r-1)*rad
-                    tot += int(math.pi*R/(2*rad))
-                totals.append(tot)
-            # totals[i] : nombre max de sièges quand on a i+1 rangs
             self.totals = totals
 
         def render(self, width, height, st, at):
             width*=2
             height*=2
-            width = max(self.style.xminimum, width)
-            height = max(self.style.yminimum, height)
             if width>2*height:
                 width=2*height
             else:
@@ -62,17 +52,17 @@ init python:
             # addition des sièges et vérifications défensives
             for p in the_list:
                 if len(p)<2:
-                    raise IndexError(_("The number of seats and the color must be supplied for each party"))
+                    raise IndexError(_("The number of seats and the color must be supplied for each party."))
                     # Le nombre de siège et la couleur doivent être fournis pour chaque parti
                 if type(p[0]) is not int:
-                    raise TypeError(_("The number of seats must be an integer"))
+                    raise TypeError(_("The number of seats must be an integer."))
                     # Le nombre de sièges doit être un entier
                 sumdelegates += p[0]
                 if sumdelegates>self.totals[-1]:
                     # raise ValueError(_("More than [self.totals[-1]] seats have been supplied"))
-                    raise ValueError(_("Too much seats (more than {}) have been supplied").format(self.totals[-1]))
+                    raise ValueError(_("Too much seats (more than {}) have been supplied. Consider increasing the maxrows variable.").format(self.totals[-1]))
             if not sumdelegates:
-                raise ValueError(_("There are no delegate seats to be found"))
+                raise ValueError(_("There are no delegate seats to be found."))
                 # Aucun siège n'a été trouvé
             # détermination du nombre de rangées
             for i in range(len(self.totals)):
