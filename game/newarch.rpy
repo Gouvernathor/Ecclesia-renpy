@@ -81,11 +81,14 @@ init python:
                 # nombre de sièges sur cette rangée
                 if r==rows:
                     J = sumdelegates-len(poslist)
+                elif sumdelegates in {3, 4}:
+                    # place tous les sièges au dernier rang, pas indispensable mais plus joli
+                    continue
                 else:
                     # taux de remplissage général (par rapport au totals correspondant) fois le maximum de la rangée
                     J = int(float(sumdelegates) / self.totals[rows-1] * math.pi*R/(2*rad))
                 if J==1:
-                    poslist.append([math.pi/2.0, 1.0*R, R])
+                    poslist.append([math.pi/2.0, 1.0, R])
                 else:
                     for j in range(J):
                         # angle de position du siège
