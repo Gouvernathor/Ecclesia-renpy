@@ -29,6 +29,17 @@ label start:
 
     e "Once you add a story, pictures, and music, you can release it to the world!"
 
+    pause
+    $ seats = 1
+    label printer:
+        show expression newarch([(seats, '#f00'), (24, '#009')]) as parli at Transform(align=(.5, .0))
+        pause
+        # show expression Solid('#c60', xsize=.25) as solido behind parli
+        show expression Westminster([(seats, 'left', '#f00'), (24, 'right', '#009'), (1, 'head', '#000')]) as parli at Transform(align=(.5, .5))
+        pause
+        $ seats += 1
+        jump printer
+
     # This ends the game.
 
     return
