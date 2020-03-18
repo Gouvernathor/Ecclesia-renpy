@@ -103,7 +103,9 @@ init python:
                 centerrows = 0
             # calcul du nombre total de colonnes
             leftoffset = sumdelegates['head']# si il y a un speaker
-            totalcols = wingcols + leftoffset + bool(sumdelegates['center'])
+            totalcols = wingcols + leftoffset
+            if sumdelegates['center']:
+                totalcols += 1 + centercols
             # calcul du nombre total de rangs
             totalrows = max(2*(wingrows+1), centerrows)
             # taille d'un carré/siège, maximale, en comptant la marge retirée après
