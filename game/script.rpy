@@ -4,24 +4,14 @@
 # name of the character.
 
 define e = Character("Eileen")
-define gvt = Character("GOUVERNEMENT", who_prefix='{b}', who_suffix='{/b}')
+define boldChar = Character(who_prefix='{b}', who_suffix='{/b}')
+define gvt = Character("GOUVERNEMENT", boldChar)
 
 
 # The game starts here.
 
 label start:
-
-    # Show a background. This uses a placeholder by default, but you can
-    # add a file (named either "bg room.png" or "bg room.jpg") to the
-    # images directory to show it.
-
-    scene bg room
-
-    # This shows a character sprite. A placeholder is used, but you can
-    # replace it by adding a file named "eileen happy.png" to the images
-    # directory.
-
-    show eileen happy
+    scene expression '#fff'
 
     # These display lines of dialogue.
 
@@ -29,13 +19,16 @@ label start:
 
     e "Once you add a story, pictures, and music, you can release it to the world!"
 
+    gvt "lol non"
+
     pause
+    # gouvernement à droite, opposition à gauche
     $ seats = 1
     label printer:
-        show expression newarch([(seats, '#f00'), (24, '#009')]) as parli at Transform(align=(.5, .0))
+        show expression newarch([(seats, '#f00', 'left'), (23, '#090', 'center'), (24, '#009', 'right')]) as parli at Transform(align=(.5, .5))
         pause
         # show expression Solid('#c60', xsize=.25) as solido behind parli
-        show expression Westminster([(seats, 'left', '#f00'), (24, 'right', '#009'), (1, 'head', '#000')]) as parli at Transform(align=(.5, .5))
+        show expression Westminster([(1, '#000', 'head'), (seats, '#f00', 'left'), (23, '#090', 'center'), (24, '#009', 'right')]) as parli at Transform(align=(.5, .5))
         pause
         $ seats += 1
         jump printer

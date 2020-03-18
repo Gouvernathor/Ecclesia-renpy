@@ -11,7 +11,8 @@ init python:
             self.bg = bg
 
         def render(self, width, height, st, at):
-            poslist, blocksize, svgwidth, svgheight = self.seats(self.the_list)
+            poslist, blocksize, svgwidth, svgheight = self.seats([(p[0], p[2]) for p in self.the_list])
+            # réorganisation des indices pour avoir le même format d'entrée que Newarch
             ratio=svgwidth/svgheight
             ratioc=float(width)/height
             # tâtonnements, testés par disjonction de cas
@@ -62,11 +63,10 @@ init python:
             for wing in {'head', 'left', 'right', 'center'}:
                 # on parcourt les partis
                 counter=0
-                for p in [party for party in self.the_list if party[1] == wing]:
-                    color = p[2]
+                for p in [party for party in self.the_list if party[2] == wing]:
                     for kant in range(counter, counter+p[0]):
                         rkt = Rect(poslist[wing][kant][0]*fact, poslist[wing][kant][1]*fact, blocksize*.9*fact, blocksize*.9*fact)
-                        canvas.rect(renpy.color.Color(p[2]), # the color
+                        canvas.rect(renpy.color.Color(p[1]), # the color
                                     rkt, # le rectangle
                                     )
                         # écrire un retangle sur le canvas de coordonnées (poslist['head'][kant][0], poslist['head'][kant][1], blocksize*.9, blocksize*.9)
@@ -75,11 +75,11 @@ init python:
             return render
 
         def seats(self, the_list):
-            # éléments de the_list : nombre de sièges, groupe (droite/gauche/speaker/centre), éventuellement couleur
+            # éléments des éléments de the_list : nombre de sièges, groupe (droite/gauche/speaker/centre)
             # Keep a running total of the number of delegates in each part of the diagram, for use later.
             sumdelegates = {'left': 0, 'right': 0, 'center': 0, 'head': 0}
             for p in the_list:
-                if len(p)<3:
+                if len(p)<2:
                     raise IndexError(_("The number of seats, the wing alignment and the color must be supplied for each party"))
                     # Le nombre de siège, l'aile où siéger et la couleur doivent être fournis pour chaque parti
                 if type(p[0]) not in {int, bool}:
