@@ -2,6 +2,7 @@
 *.rpyc
 *.rpymc
 *.save
+*.bak
 game/saves/navigation.json
 game/saves/persistent
 errors.txt
