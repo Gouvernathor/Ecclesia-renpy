@@ -10,7 +10,7 @@ init python:
             self.the_list = the_list
 
         def render(self, width, height, st, at):
-            poslist, blocksize, svgwidth, svgheight = self.westminster_seats(self.the_list)
+            poslist, blocksize, svgwidth, svgheight = self.seats(self.the_list)
             ratio=svgwidth/svgheight
             ratioc=float(width)/height
             # tâtonnements, testés par disjonction de cas
@@ -71,7 +71,7 @@ init python:
                     counter = kant+1
             return render
 
-        def westminster_seats(self, the_list):
+        def seats(self, the_list):
             # éléments de the_list : nombre de sièges, groupe (droite/gauche/speaker/centre), éventuellement couleur
             # Keep a running total of the number of delegates in each part of the diagram, for use later.
             sumdelegates = {'left': 0, 'right': 0, 'center': 0, 'head': 0}

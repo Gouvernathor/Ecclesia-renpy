@@ -34,7 +34,7 @@ init python:
             render = renpy.Render(width, height)
             # render.fill('#0f0') # debug, pour voir les limites du render
             canvas = render.canvas()
-            poslist, rad = self.newarch_seats(self.the_list)
+            poslist, rad = self.seats(self.the_list)
             diam = 1.6*rad
             counter=0
             for p in self.the_list:
@@ -52,7 +52,7 @@ init python:
                           )
             return render
 
-        def newarch_seats(self, the_list, **properties):
+        def seats(self, the_list, **properties):
             # the_list : liste de tuples
             # tuple : nombre de sièges, couleur
             sumdelegates = 0
