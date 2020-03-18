@@ -1,4 +1,6 @@
 init python:
+    import math
+
     class Newarch(renpy.Displayable):
         '''
         Custom displayable
@@ -17,7 +19,7 @@ init python:
                     R = .5 + 2*(r-1)*rad
                     tot += int(math.pi*R/(2*rad))
                 totals.append(tot)
-            # nombre max de sièges, le nombre de rangs est l'indice+1
+            # totals[i] : nombre max de sièges quand on a i+1 rangs
             self.totals = totals
 
         def render(self, width, height, st, at):
@@ -36,7 +38,6 @@ init python:
             diam = 1.6*rad
             counter=0
             for p in self.the_list:
-                color = p[1]
                 for kant in range(counter, counter+p[0]):
                     canvas.circle(renpy.color.Color(p[1]), # the color
                                   (poslist[kant][0]*height, (1-poslist[kant][1])*height), # the centre
@@ -54,8 +55,6 @@ init python:
         def newarch_seats(self, the_list, **properties):
             # the_list : liste de tuples
             # tuple : nombre de sièges, couleur
-            ccls = [(0, 0), 'transmask', (0, 0), 'notif']
-            # pour tester les arguments positionnels
             sumdelegates = 0
             # addition des sièges et vérifications défensives
             for p in the_list:
@@ -95,11 +94,7 @@ init python:
                         poslist.append([angle, R*math.cos(angle)+1.0, R*math.sin(angle)])
             # on range les points par angle croissant de gauche à droite
             poslist.sort(reverse=True)
-            # liste des Circle
-            ccls = []
-            counter=0
-            # vrai diamètre des cercles
             return [po[1:] for po in poslist], rad
 
     def newarch(the_list, *args, **kwargs):
-        return At(Newarch(the_list, *args, **kwargs), tr_zoom(.5))
+        return At(Newarch(the_list, *args, **kwargs), Transform(zoom=.5))
