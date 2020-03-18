@@ -76,16 +76,21 @@ init python:
             # Keep a running total of the number of delegates in each part of the diagram, for use later.
             sumdelegates = {'left': 0, 'right': 0, 'center': 0, 'head': 0}
             for p in the_list:
-                if len(p)<2 or type(p[0]) not in {int, bool}:
-                    return None
+                if len(p)<2:
+                    raise IndexError(_("The number of seats, the wing alignment and the color must be supplied for each party"))
+                    # Le nombre de siège, l'aile où siéger et la couleur doivent être fournis pour chaque parti
+                if type(p[0]) not in {int, bool}:
+                    raise TypeError(_("The number of seats must be an integer"))
+                    # Le nombre de sièges doit être un entier
                 for wing in sumdelegates:
                     if wing in p[1]:
                         sumdelegates[wing] += p[0]
-                # for g, n in sumdelegates.iteritems():
-                #     if g in p[1]:
-                #         sumdelegates[g] += p[0]
-            if sumdelegates < 1: # what ? plutôt if 0 in sumdelegates.values non ?
-                return None
+            if sumdelegates['head'] > 1:
+                raise ValueError(_("There can't be more than one Speaker"))
+                # Il ne peut y avoir plus d'un président pour la chambre
+            if sumdelegates.values() == [0, 0, 0, 0]:
+                raise ValueError(_("There are no delegate seats to be found"))
+                # Aucun siège n'a été trouvé
             # calcul du nombre de rangs
             wingrows = int(math.ceil(math.sqrt( max(sumdelegates['left'], sumdelegates['right']) /20.0 ))*2) # ???
             # calcul du nombre de colonnes de sièges

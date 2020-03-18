@@ -58,13 +58,19 @@ init python:
             sumdelegates = 0
             # addition des sièges et vérifications défensives
             for p in the_list:
-                if len(p)!=2 or type(p[0]) is not int:
-                    return None
+                if len(p)!=2:
+                    raise IndexError(_("The number of seats and the color must be supplied for each party"))
+                    # Le nombre de siège et la couleur doivent être fournis pour chaque parti
+                if type(p[0]) is not int:
+                    raise TypeError(_("The number of seats must be an integer"))
+                    # Le nombre de sièges doit être un entier
                 sumdelegates += p[0]
                 if sumdelegates>self.totals[-1]:
-                    return None
+                    # raise ValueError(_("More than [self.totals[-1]] seats have been supplied"))
+                    raise ValueError(_("Too much seats (more than {}) have been supplied").format(self.totals[-1]))
             if not sumdelegates:
-                return None
+                raise ValueError(_("There are no delegate seats to be found"))
+                # Aucun siège n'a été trouvé
             # détermination du nombre de rangées
             for i in range(len(self.totals)):
                 if self.totals[i] >= sumdelegates:
