@@ -1,4 +1,5 @@
 default maxrows = 75
+default aafactor = 1
 
 init python:
     import math
@@ -16,8 +17,8 @@ init python:
             self.totals = totals
 
         def render(self, width, height, st, at):
-            width*=2
-            height*=2
+            width*=aafactor
+            height*=aafactor
             if width>2*height:
                 width=2*height
             else:
@@ -99,7 +100,7 @@ init python:
             return [po[1:] for po in poslist], rad
 
     def newarch(the_list, *args, **kwargs):
-        return At(Newarch(the_list, *args, **kwargs), Transform(zoom=.5))
+        return At(Newarch(the_list, *args, **kwargs), Transform(zoom=1.0/aafactor))
 
 label after_load:
     python:
