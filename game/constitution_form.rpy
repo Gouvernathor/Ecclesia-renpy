@@ -1,4 +1,3 @@
-
 label constitution_form:
     call screen constit(1)# with None
     with Dissolve(3)
@@ -147,7 +146,9 @@ style constform_selector_text is constform_text
 style big_blue_button:
     background '#009'
     hover_background '#03f'
+    insensitive_background '#005'
     xalign .5
 style big_blue_button_text:
     color '#fff'
+    insensitive_color '#aaa'
     size 50
