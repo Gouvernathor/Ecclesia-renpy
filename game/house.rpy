@@ -1,8 +1,4 @@
 init python:
-    def proportional(): # fonction pour électon proportionnelle
-        # TODO
-        return None
-
     def house_election_check(houses, elapsed):
         '''
         Prend en paramètres un itérable des Houses du pays
@@ -24,7 +20,7 @@ init python:
         def __init__(self, name, children,
                      display='newarch',
                      impero=False,
-                     elect_type=proportional,
+                     elect_types=[],
                      election_period=48 # durée en mois
                      ):
             self.name = name
@@ -40,6 +36,8 @@ init python:
             self.election_period = election_period
             self.elect_type = elect_type
             self.display = display
+            # _(str(attrib_function).split()[1])
+            # donne le nom (à traduire, même en lang=None) de la fonction de répartition
 
         def seats(self):
             seat=0
