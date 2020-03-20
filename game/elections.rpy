@@ -55,6 +55,34 @@ init python:
                 return [(tup[0], nseats)]
         # on est censé ne jamais arriver ici
 
+    def tirage_au_sort_population(the_list, nseats, randomobj=renpy.random, **kwargs):
+        '''
+        Simule un tirage au sort parmi une population,
+        où chaque personne tirée au sort nommerait une personne
+        venant de son parti préféré
+        '''
+        retlist = [(tup[0], 0) for tup in the_list]
+        for seat in range(nseats):
+            sum = 0
+            ran = randomobj.random()*sub
+            for k in range(len(the_list)):
+                sum += the_list[k][1]
+                if ran<sum:
+                    retlist[k][1] += 1
+                    break
+        return retlist
+
+    def tirage_au_sort_partis(the_list, nseats, randomobj=renpy.random, **kwargs):
+        '''
+        Tire au sort parmi les candidats, en donnant un poids égal à tous les partis
+        indépendemment de la popularité de chacun
+        '''
+        npartis = len(the_list)
+        the_list = [list(tup)+[0] for tup in the_list]
+        for k in range(nseats):
+            the_list[randomobj.randint(0, npartis-1)][2] += 1
+        return [(tup[0], tup[2]) for tup in the_list]
+
     def proportionnelle_Hondt(the_list, nseats, thresh=False, **kwargs):
         '''
         Implémente la proportionnelle d'Hondt, à plus forte moyenne, avec seuil possible
