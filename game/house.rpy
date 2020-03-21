@@ -12,6 +12,15 @@ init python:
                         liz.add(uhouse)
         return liz
 
+# dans le script, à chaque mois :
+# check house_election_check en lui donnant en argument une liste des houses
+# parcourir le set d'underhouses renvoyé, en annonçant visuellement un élection (partielle ou non) à chaque underhouse
+# puis appeler lolor = [election(population, partis, electype) for electype in uhouse.elect_types]
+# assembler les résultats avec sum_results, garder lolor sous la main pour afficher tous les résultats dans un viewport
+
+# _(attrib_function.__name__)
+# donne le nom (à traduire, même en lang=None) de la fonction de répartition
+
     class House():
         '''
         A whole House, in which people all vote with the same power
@@ -20,7 +29,6 @@ init python:
         def __init__(self, name, children,
                      display='newarch',
                      impero=False,
-                     elect_types=[],
                      election_period=48 # durée en mois
                      ):
             self.name = name
@@ -34,10 +42,7 @@ init python:
                 self.children.append(uhouse)
             self.impero = impero
             self.election_period = election_period
-            self.elect_type = elect_type
             self.display = display
-            # _(str(attrib_function).split()[1])
-            # donne le nom (à traduire, même en lang=None) de la fonction de répartition
 
         def seats(self):
             seat=0
@@ -54,9 +59,17 @@ init python:
         '''
         def __init__(self,
                      seats=100,
+                     elect_types=[],
                      election_offset=0 # durée en mois
                      ):
             if seats<=0:
                 raise ValueError(_("The number of seats must be a positive integer"))
             self.seats = seats
             self.election_offset = election_offset
+            self.elect_types = elect_types
+            # elect_types :
+            # liste de tuples (nombre de sièges concernés, fonction de répartition, nombre de sièges par application)
+            # chaque tuple doit avoir une combinaison (fonction de répartition, sièges par application) unique
+            # la somme des nombres de sièges concernés doit être le nombre total de sièges dans la chambre
+            # le nombre de sièges par application doit être un diviseur du nombre de sièges concernés
+            # ou 0, et c'est comme si il était égal au nombre de sièges concernés

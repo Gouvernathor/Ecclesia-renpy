@@ -8,7 +8,7 @@ init python:
     # sortie : liste de tuples
     # éléments de la sortie : nom de parti, nombre de sièges
 
-    def election(population, partis, nb_circos, elus_par_circo, fonction):
+    def election(population, partis, (total_seats, fonction, elus_par_circo)):
         attrib_voix = [(p.name, 0) for p in partis]
         for circo in range(nb_circos):
             pass
@@ -57,9 +57,9 @@ init python:
 
     def tirage_au_sort_population(the_list, nseats, randomobj=renpy.random, **kwargs):
         '''
-        Simule un tirage au sort parmi une population,
-        où chaque personne tirée au sort nommerait une personne
-        venant de son parti préféré
+        Tire au sort parmi une population,
+        où chaque personne tirée au sort représente son parti préféré
+        Avec un seul siège, équivalente à une majoritaire random
         '''
         retlist = [(tup[0], 0) for tup in the_list]
         for seat in range(nseats):
@@ -147,3 +147,31 @@ init python:
                 if tup[0] == att[k][0]: # nom du gagnant
                     tup[2] += 1
         return [(tup[0], tup[2]) for tup in the_list]
+
+    def sum_results(lolor):
+        '''
+        Assemble les attributions par circo pour donner la répartition globale
+        Peut aussi servir à faire une union de deux chambres
+        Prend en entrée une liste de the_list
+        donc une liste de listes de tuples (parti, sièges)
+        Fournit une the_list avec pour chaque parti, son nombre total de sièges
+        '''
+        the_dict=[]
+        listovp = []
+        for the_list in lolor:
+            for tup in the_list:
+                if tup[0] not in the_dict:
+                    the_dict[tup[0]] = 0
+                    listovp.append(tup[0])
+                the_dict[tup[0]]+=tup[1]
+        the_list = []
+        for p in listovp:
+            the_list.append((p, the_dict[p]))
+        # return [(p, s) for p, s in the_dict]
+        return the_list
+
+        # partis : couleur TSV/HSV saturée
+        # teinte (premier composant) pris entre .0 (rouge) et .66 (bleu) ou .75 (bleu-violet)
+        # Color(hsv=(renpy.random.random()*.75, 1.0, 1.0))
+        # à classer par teinte
+        # col.hsv[0]
