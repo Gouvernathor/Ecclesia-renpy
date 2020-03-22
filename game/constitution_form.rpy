@@ -7,7 +7,7 @@ label constitution_form:
     jump start
 
 screen constit(npage, pagename=''):
-    add Null()
+    add Null() # pour empécher l'utilisateur de cliquer et de quitter la création de constitution
     style_prefix "constform"
     vbox:
         null height gui.choice_spacing+gui.pref_spacing
@@ -110,7 +110,6 @@ screen constit(npage, pagename=''):
                         style "big_blue_button"
                         sensitive ([bool(housenames[k].strip()) for k in range(nHouses)] == [True for k in range(nHouses)])
                         action [Function(create_houses, nHouses, housenames, houseperiods, houseseats, housestaggering), Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=2, pagename=('elections' if (nHouses and (True in [bool(houseperiods[k]) for k in range(nHouses)])) else 'executif'))]
-                    # ne pas oublier de strip les noms
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='elections':
@@ -136,7 +135,13 @@ screen constit(npage, pagename=''):
                 elif pagename=='opinions':
                     hbox:
                         xfill True
-                        text _("Annex : Population & Opinions")
+                        text _("Annex 1 : Population & Opinions")
+                    # TODO
+
+                elif pagename=='partis':
+                    hbox:
+                        xfill True
+                        text _("Annex 2 : Political Organizations")
                     # TODO
                     # dernière page, bouton rouge pour enact la constitution
                 # add "prison03"# maxsize (.8, 5.0)
@@ -177,6 +182,12 @@ style big_blue_button_text:
     color '#fff'
     insensitive_color '#aaa'
     size 50
+style big_red_button:
+    background '#900'
+    hover_background '#f00'
+    insensitive_background '#500'
+    xalign .5
+style big_red_button_text is big_blue_button_text
 
 init python:
     def create_houses(nhouses, housenames, houseperiods, houseseats, housestaggering):
