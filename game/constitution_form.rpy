@@ -1,12 +1,12 @@
 label constitution_form:
-    call screen constit(1)# with None
+    call screen constit(1) with Dissolve(.5)
     with Dissolve(3)
     e "hey"
     pause
     # hide screen constit
     jump start
 
-screen constit(page):
+screen constit(npage, pagename=''):
     add Null()
     style_prefix "constform"
     vbox:
@@ -22,7 +22,7 @@ screen constit(page):
             draggable True
             # scrollbars "vertical"
             vbox:
-                if page==1:
+                if npage==1:
                     hbox:
                         xfill True
                         text _("Page 1 : Legislature") xalign .5 color gui.hover_color size 50
@@ -30,7 +30,6 @@ screen constit(page):
                     default kHouses = 1
                     default housenames = [_("House n°")+str(k+1) for k in range(2)]
                     default housenames_edit = [DictInputValue(housenames, k, default=False) for k in range(2)]
-                    # default housenames_edit = [NotFalseDictInputValue(housenames, k, defaultvalue=_("House n°")+str(k+1), default=False) for k in range(2)]
                     default houseperiods = [48, 48]
                     default houseseats = [100, 100]
                     default housestaggering = [False, False]
@@ -50,8 +49,8 @@ screen constit(page):
                             style_prefix None
                             xalign 0.5
                             key_events True
-                            # action [If(housenames[khouse].strip(), None, SetDict(housenames, khouse, _("House n°")+str(khouse+1))), housenames_edit[khouse].Toggle()]
-                            action housenames_edit[khouse].Toggle()
+                            action [If(housenames[khouse].strip(), None, SetDict(housenames, khouse, _("House n°")+str(khouse+1))), housenames_edit[khouse].Toggle()]
+                            # action housenames_edit[khouse].Toggle()
                             input:
                                 value housenames_edit[khouse]
                                 color gui.hover_color
@@ -91,7 +90,9 @@ screen constit(page):
                                 xfill True
                                 style_prefix "constform_radio"
                                 text _("Staggering") yalign .5
-                                textbutton (_('Yes') if housestaggering[khouse] else _('No')) action If(housestaggering[khouse], SetDict(housestaggering, khouse, False), SetDict(housestaggering, khouse, 2)) selected housestaggering[khouse]
+                                textbutton (_('Yes') if housestaggering[khouse] else _('No')):
+                                    action If(housestaggering[khouse], SetDict(housestaggering, khouse, False), SetDict(housestaggering, khouse, 2))
+                                    selected housestaggering[khouse]
                         if housestaggering[khouse]:
                             hbox:
                                 xfill True
@@ -105,15 +106,34 @@ screen constit(page):
                         # ajouter le choix de la fonction de répartition des votes
                         null height gui.choice_spacing
                     null height gui.pref_spacing
-                    # bouton bleu confirmation pour passer à la page suivante
-                    textbutton _("Continue") style "big_blue_button" sensitive ([bool(k.strip()) for k in housenames] == [True for k in housenames]) action [Return()]
+                    textbutton _("Continue"):
+                        style "big_blue_button"
+                        sensitive ([bool(housenames[k].strip()) for k in range(kHouses)] == [True for k in range(kHouses)])
+                        # action [Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=2, pagename=('elections' if kHouses else 'executif'))]
+                        action [Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=2, pagename=('elections' if (kHouses and (True in [bool(houseperiods[k]) for k in range(kHouses)])) else 'executif'))]
                     # ne pas oublier de strip les noms
                     null height gui.choice_spacing+gui.pref_spacing
+                elif pagename=='elections':
+                    hbox:
+                        xfill True
+                        text _("Page {} : Elections").format(npage) xalign .5 color gui.hover_color size 50
+                    # TODO
 
-                    # page 2
+                elif pagename=='executif':
+                    hbox:
+                        xfill True
+                        text _("Page {} : Executive").format(npage) xalign .5 color gui.hover_color size 50
+                    # TODO
+                    # page exécutif
                     # si il n'y a pas de parlement, obliger que l'exécutif soit élu au suffrage direct
                     # constituer le pouvoir exécutif
-                # dernière page, bouton rouge pour enact la constitution
+
+                elif pagename=='opinions':
+                    hbox:
+                        xfill True
+                        text _("Annex : Population & Opinions")
+                    # TODO
+                    # dernière page, bouton rouge pour enact la constitution
                 # add "prison03"# maxsize (.8, 5.0)
                 # add "prison03"# maxsize (.8, 5.0)
                 # add "prison03"# maxsize (.8, 5.0)
