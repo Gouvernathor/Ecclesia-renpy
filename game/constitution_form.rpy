@@ -20,14 +20,13 @@ screen constit(npage, pagename=''):
             align (.5, .5)
             mousewheel True
             draggable True
-            # scrollbars "vertical"
             vbox:
                 if npage==1:
                     hbox:
                         xfill True
                         text _("Page 1 : Legislature") xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
-                    default kHouses = 1
+                    default nHouses = 1
                     default housenames = [_("House n°")+str(k+1) for k in range(2)]
                     default housenames_edit = [DictInputValue(housenames, k, default=False) for k in range(2)]
                     default houseperiods = [48, 48]
@@ -39,11 +38,11 @@ screen constit(npage, pagename=''):
                         vbox:
                             xalign 1.0
                             style_prefix "constform_radio"
-                            textbutton _("None") action [SetScreenVariable("kHouses", 0), DisableAllInputValues()]
-                            textbutton _("One") action [SetScreenVariable("kHouses", 1), DisableAllInputValues()]
-                            textbutton _("Two") action [SetScreenVariable("kHouses", 2), DisableAllInputValues()]
+                            textbutton _("None") action [SetScreenVariable("nHouses", 0), DisableAllInputValues()]
+                            textbutton _("One") action [SetScreenVariable("nHouses", 1), DisableAllInputValues()]
+                            textbutton _("Two") action [SetScreenVariable("nHouses", 2), DisableAllInputValues()]
                     null height gui.choice_spacing
-                    for khouse index khouse in range(kHouses):
+                    for khouse index khouse in range(nHouses):
                         button:
                             xmargin 30
                             style_prefix None
@@ -108,16 +107,21 @@ screen constit(npage, pagename=''):
                     null height gui.pref_spacing
                     textbutton _("Continue"):
                         style "big_blue_button"
-                        sensitive ([bool(housenames[k].strip()) for k in range(kHouses)] == [True for k in range(kHouses)])
-                        # action [Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=2, pagename=('elections' if kHouses else 'executif'))]
-                        action [Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=2, pagename=('elections' if (kHouses and (True in [bool(houseperiods[k]) for k in range(kHouses)])) else 'executif'))]
+                        sensitive ([bool(housenames[k].strip()) for k in range(nHouses)] == [True for k in range(nHouses)])
+                        action [Function(create_houses, nHouses, housenames, houseperiods, houseseats, housestaggering), Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=2, pagename=('elections' if (nHouses and (True in [bool(houseperiods[k]) for k in range(nHouses)])) else 'executif'))]
                     # ne pas oublier de strip les noms
                     null height gui.choice_spacing+gui.pref_spacing
+
                 elif pagename=='elections':
                     hbox:
                         xfill True
-                        text _("Page {} : Elections").format(npage) xalign .5 color gui.hover_color size 50
+                        text _("Page {} : Elections for the {}").format(npage, houses[npage-2].name) xalign .5 color gui.hover_color size 50
                     # TODO
+                    textbutton _("Continue"):
+                        style "big_blue_button"
+                        # sensitive True ([bool(housenames[k].strip()) for k in range(nHouses)] == [True for k in range(nHouses)])
+                        action [Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=npage+1, pagename=('elections' if (npage<=len(houses)) else 'executif'))]
+                    null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='executif':
                     hbox:
@@ -172,3 +176,24 @@ style big_blue_button_text:
     color '#fff'
     insensitive_color '#aaa'
     size 50
+
+init python:
+    def create_houses(nhouses, housenames, houseperiods, houseseats, housestaggering):
+        for khouse in range(nhouses):
+            childlist = []
+            if not housestaggering[khouse]:
+                housestaggering[khouse] = 1
+            for kclass in range(housestaggering[khouse]):
+                if housestaggering[khouse] == 1:
+                    sts = houseseats[khouse]
+                    off = 0
+                else:
+                    if kclass != housestaggering[khouse]:
+                        sts = int(houseseats[khouse]/float(housestaggering[khouse]))
+                    else:
+                        sts = houseseats[khouse] - housestaggering[khouse]*int(houseseats[khouse]/float(housestaggering[khouse]))
+                    off = kclass*houseperiods[khouse]/housestaggering[khouse]
+                childlist.append(UnderHouse(seats=sts, election_offset=off))
+            print(childlist)
+            houses.append(House(housenames[khouse].strip(), children=childlist, election_period=houseperiods[khouse]))
+        return

@@ -7,6 +7,8 @@ define e = Character("Eileen")
 define boldChar = Character(who_prefix='{b}', who_suffix='{/b}')
 define gvt = Character("GOUVERNEMENT", boldChar)
 
+default houses = []
+
 
 # The game starts here.
 
