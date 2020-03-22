@@ -7,6 +7,7 @@ define e = Character("Eileen")
 define boldChar = Character(who_prefix='{b}', who_suffix='{/b}')
 define gvt = Character("GOUVERNEMENT", boldChar)
 
+define maxnhouses = 2 # adapter aussi la création de constitution
 default houses = []
 
 

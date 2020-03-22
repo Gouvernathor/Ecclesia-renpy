@@ -27,11 +27,11 @@ screen constit(npage, pagename=''):
                         text _("Page 1 : Legislature") xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
                     default nHouses = 1
-                    default housenames = [_("House n°")+str(k+1) for k in range(2)]
-                    default housenames_edit = [DictInputValue(housenames, k, default=False) for k in range(2)]
-                    default houseperiods = [48, 48]
-                    default houseseats = [100, 100]
-                    default housestaggering = [False, False]
+                    default housenames = [_("House n°")+str(k+1) for k in range(maxnhouses)]
+                    default housenames_edit = [DictInputValue(housenames, k, default=False) for k in range(maxnhouses)]
+                    default houseperiods = [48 for k in range(maxnhouses)]
+                    default houseseats = [100 for k in range(maxnhouses)]
+                    default housestaggering = [False for k in range(maxnhouses)]
                     hbox:
                         xfill True
                         text _("Number of Houses of Congress/Parliament") yalign .5
@@ -41,6 +41,7 @@ screen constit(npage, pagename=''):
                             textbutton _("None") action [SetScreenVariable("nHouses", 0), DisableAllInputValues()]
                             textbutton _("One") action [SetScreenVariable("nHouses", 1), DisableAllInputValues()]
                             textbutton _("Two") action [SetScreenVariable("nHouses", 2), DisableAllInputValues()]
+                            # mettre à jour ici en cas de modification de maxnhouses
                     null height gui.choice_spacing
                     for khouse index khouse in range(nHouses):
                         button:
