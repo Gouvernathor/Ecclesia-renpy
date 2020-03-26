@@ -1,5 +1,8 @@
 label constitution_form:
-    call screen constit(1) with Dissolve(.5)
+    $ npage = 0
+    while _return != "finish":
+        $ npage += 1
+        call screen constit(npage, pagename=_return) with Fade(.5, .5, .5, color='#fff')
     with Dissolve(3)
     e "hey"
     pause
@@ -100,7 +103,7 @@ screen constit(npage, pagename=''):
                                 hbox:
                                     xalign 1.0
                                     style_prefix "constform_selector"
-                                    textbutton "-1" action SetDict(housestaggering, khouse, housestaggering[khouse]-1) sensitive (housestaggering[khouse]-1>2)
+                                    textbutton "-1" action SetDict(housestaggering, khouse, housestaggering[khouse]-1) sensitive (housestaggering[khouse]-1>=2)
                                     text str(housestaggering[khouse])
                                     textbutton "+1" action SetDict(housestaggering, khouse, housestaggering[khouse]+1) sensitive (housestaggering[khouse]+1<=houseseats[khouse])
                         # ajouter le choix de la fonction de répartition des votes
@@ -109,18 +112,56 @@ screen constit(npage, pagename=''):
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive ([bool(housenames[k].strip()) for k in range(nHouses)] == [True for k in range(nHouses)])
-                        action [Function(create_houses, nHouses, housenames, houseperiods, houseseats, housestaggering), Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=2, pagename=('elections' if (nHouses and (True in [bool(houseperiods[k]) for k in range(nHouses)])) else 'executif'))]
+                        # action [Function(create_houses, nHouses, housenames, houseperiods, houseseats, housestaggering), Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=2, pagename=('elections' if (nHouses and (True in [bool(houseperiods[k]) for k in range(nHouses)])) else 'executif'))]
+                        # action [Function(create_houses, nHouses, housenames, houseperiods, houseseats, housestaggering), Hide('constit', transition=Fade(.5, .5, .5, color='#fff')), Return(('elections' if (nHouses and (True in [bool(houseperiods[k]) for k in range(nHouses)])) else 'executif'))]
+                        action [Function(create_houses, nHouses, housenames, houseperiods, houseseats, housestaggering), Return(('elections' if (nHouses and (True in [bool(houseperiods[k]) for k in range(nHouses)])) else 'executif'))]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='elections':
                     hbox:
                         xfill True
                         text _("Page {} : Elections for the {}").format(npage, houses[npage-2].name) xalign .5 color gui.hover_color size 50
-                    # TODO
+                    null height gui.choice_spacing+gui.pref_spacing
+                    default distindex = 0
+                    default validhd = [0]+validnpdistricts(houses[npage-2])
+                    default electionfunc = False
+                    $ print(validhd)
+                    hbox:
+                        xfill True
+                        style_prefix "constform_radio"
+                        text _("Electoral Districts") yalign .5
+                        textbutton (_('Yes') if distindex else _('No')):
+                            action ToggleScreenVariable('distindex', 0, 1)
+                            selected distindex
+                    null height gui.choice_spacing
+                    hbox:
+                        xfill True
+                        text _("Number of seats per electoral district")+(_(" (Districts : {})").format(houses[npage-2].seats()/validhd[distindex]) if distindex else "") yalign .5
+                        hbox:
+                            xalign 1.0
+                            yalign .5
+                            style_prefix "constform_selector"
+                            textbutton "-1" action SetScreenVariable("distindex", distindex-1) sensitive (distindex-1 > 0)
+                            if distindex == 0:
+                                text _("{} (nationwide district)").format(houses[npage-2].seats())
+                            else:
+                                text str(validhd[distindex])
+                            textbutton "+1" action SetScreenVariable("distindex", distindex+1) sensitive (distindex+1 < len(validhd)) and distindex
+                    null height gui.choice_spacing
+                    hbox:
+                        xfill True
+                        text _("Election type") yalign .5
+                        vbox:
+                            xalign 1.0
+                            style_prefix "constform_radio"
+                            for fonk in [f for f in electypes]:
+                                textbutton _(fonk.__name__):
+                                    action SetScreenVariable("electionfunc", fonk)
+                                    sensitive (fonk in validfuncs(distindex))
                     textbutton _("Continue"):
                         style "big_blue_button"
-                        # sensitive True ([bool(housenames[k].strip()) for k in range(nHouses)] == [True for k in range(nHouses)])
-                        action [Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=npage+1, pagename=('elections' if (npage<=len(houses)) else 'executif'))]
+                        sensitive electionfunc in validfuncs(distindex)
+                        action [Function(applyelec, houses[npage-2], validhd[distindex], electionfunc), Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=npage+1, pagename=('elections' if (npage<=len(houses)) else 'executif'))]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='executif':
@@ -200,12 +241,27 @@ init python:
                     sts = houseseats[khouse]
                     off = 0
                 else:
-                    if kclass != housestaggering[khouse]:
+                    if kclass != housestaggering[khouse]-1:
                         sts = int(houseseats[khouse]/float(housestaggering[khouse]))
                     else:
-                        sts = houseseats[khouse] - housestaggering[khouse]*int(houseseats[khouse]/float(housestaggering[khouse]))
+                        sts = houseseats[khouse] - (housestaggering[khouse]-1)*int(houseseats[khouse]/float(housestaggering[khouse]))
                     off = kclass*houseperiods[khouse]/housestaggering[khouse]
                 childlist.append(UnderHouse(seats=sts, election_offset=off))
-            print(childlist)
             houses.append(House(housenames[khouse].strip(), children=childlist, election_period=houseperiods[khouse]))
+        return
+
+    def validnpdistricts(house):
+        liz = [x for x in range(1, house.seats()+1) if (float(house.seats())/x) == float(int(house.seats()/x)) and x != house.seats()]
+        for uhouse in house.children:
+            liz = [x for x in range(1, uhouse.seats+1) if (float(uhouse.seats)/x) == float(int(uhouse.seats/x)) and x in liz]
+        return liz
+
+    def validfuncs(circoseats):
+        if circoseats == 1: # si un seul district
+            return [f for f in electypes if f not in {majoritaire_random, proportionnelle_Hondt, proportionnelle_Hare}]
+        else:
+            return [f for f in electypes if f != majoritaire]
+
+    def applyelec(house, circoseats, fonk):
+        house.elect_types = [(house.seats(), fonk, circoseats)]
         return

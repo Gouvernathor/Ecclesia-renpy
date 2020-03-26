@@ -29,6 +29,7 @@ init python:
         def __init__(self, name, children,
                      display='newarch',
                      impero=False,
+                     elect_types=[],
                      election_period=48 # durée en mois
                      ):
             self.name = name
@@ -43,12 +44,19 @@ init python:
             self.impero = impero
             self.election_period = election_period
             self.display = display
+            self.elect_types = elect_types
+            # elect_types :
+            # liste de tuples (nombre de sièges concernés, fonction de répartition, nombre de sièges par circo)
+            # chaque tuple doit avoir une combinaison (fonction de répartition, sièges par circo) unique
+            # la somme des nombres de sièges concernés doit être le nombre total de sièges dans la chambre
+            # le nombre de sièges par circo doit être un diviseur du nombre de sièges concernés
+            # ou 0, et c'est comme si il était égal au nombre de sièges concernés
 
         def seats(self):
             seat=0
             for uhouse in self.children:
                 seat+=uhouse.seats
-            return seats
+            return seat
 
     class UnderHouse():
         '''
@@ -59,17 +67,9 @@ init python:
         '''
         def __init__(self,
                      seats=100,
-                     elect_types=[],
                      election_offset=0 # durée en mois
                      ):
             if seats<=0:
                 raise ValueError(_("The number of seats must be a positive integer"))
             self.seats = seats
             self.election_offset = election_offset
-            self.elect_types = elect_types
-            # elect_types :
-            # liste de tuples (nombre de sièges concernés, fonction de répartition, nombre de sièges par application)
-            # chaque tuple doit avoir une combinaison (fonction de répartition, sièges par application) unique
-            # la somme des nombres de sièges concernés doit être le nombre total de sièges dans la chambre
-            # le nombre de sièges par application doit être un diviseur du nombre de sièges concernés
-            # ou 0, et c'est comme si il était égal au nombre de sièges concernés

@@ -175,3 +175,16 @@ init python:
         # Color(hsv=(renpy.random.random()*.75, 1.0, 1.0))
         # à classer par teinte
         # col.hsv[0]
+
+# define electypes = {majoritaire : _(""),
+#                     majoritaire_random : _(""),
+#                     tirage_au_sort_population : _(""),
+#                     tirage_au_sort_partis : _(""),
+#                     proportionnelle_Hondt : _(""),
+#                     proportionnelle_Hare : _("")}
+define electypes = [majoritaire,
+                    majoritaire_random,
+                    tirage_au_sort_population,
+                    tirage_au_sort_partis,
+                    proportionnelle_Hondt,
+                    proportionnelle_Hare]
