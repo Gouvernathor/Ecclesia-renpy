@@ -21,6 +21,13 @@ label start:
 
     e "You've created a new Ren'Py game."
 
+    show sand6
+    pause
+    show bashar
+    pause
+    show expression Holo('bashar') as bashar
+    pause
+
     e "Once you add a story, pictures, and music, you can release it to the world!"
 
     gvt "lol non"
