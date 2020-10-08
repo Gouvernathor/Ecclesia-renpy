@@ -21,6 +21,8 @@ label start:
 
     e "You've created a new Ren'Py game."
 
+    call constitution_form
+
     show sand6
     pause
     show bashar
