@@ -75,27 +75,24 @@ init python:
     #         self.seats = seats
     #         self.election_offset = election_offset
 
-    class Executive():
+    class Executive(House):
         '''
         The head of the Executive branch,
         and its powers relative to the passing of laws by the parliament
         '''
-        def __init__(self, name,
+        def __init__(self,
                      origin, # qui l'élit (une House ou 'people')
-                     nseats, # nombre de sièges
                      vetopower, # si il a le droit de veto sur les lois du parlement
                      vetoverride, # qui peut l'override (une House ou 'each' ou 'joint' ou False)
                      supermajority, # la majorité qualifiée nécessaire pour override le veto
+                     election_period=None,
+                     *args,
+                     **kwargs
                      ):
-            super(Executive, self).__init__()
-            self.name = name
+            if election_period is None:
+                election_period = origin.election_period if (origin in houses) else 60
+            super(Executive, self).__init__(election_period=election_period, *args, **kwargs)
             self.origin = origin
-            self.circos = [(nseats, None)]
             self.vetopower = vetopower
             self.vetoverride = vetoverride
             self.supermajority = supermajority
-            self.population = {None : self.seats}
-
-        @property
-        def seats(self):
-            return sum([circo[0] for circo in self.circos])

@@ -313,6 +313,22 @@ screen constit(npage, pagename=''):
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
                     default validhd = [0]+validnpdistricts(executive.seats) # nombres de circonscriptions valides
                     default electionfunc = False # fonction d'attribution des sièges à partir des résultats du vote
+                    default execperiod = 60
+                    hbox:
+                        xfill True
+                        text _("Term of office") yalign .5
+                        hbox:
+                            xalign 1.0
+                            yalign .5
+                            style_prefix "constform_selector"
+                            textbutton "-12" action SetScreenVariable("execperiod", execperiod-12) sensitive (execperiod-12>=0)
+                            textbutton "-1" action SetScreenVariable("execperiod", execperiod-1) sensitive (execperiod-1>=0)
+                            if execperiod:
+                                text str(execperiod)+" month"+['s', ''][execperiod==1]
+                            else:
+                                text _("Life terms (no election)")
+                            textbutton "+1" action SetScreenVariable("execperiod", execperiod+1)
+                            textbutton "+12" action SetScreenVariable("execperiod", execperiod+12)
                     if executive.seats>1:
                         hbox:
                             xfill True
@@ -349,7 +365,7 @@ screen constit(npage, pagename=''):
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive electionfunc in validfuncs((distindex if executive.seats>1 else 1))
-                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), electionfunc), Return('population')]
+                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), electionfunc, execperiod), Return('population')]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='population':
@@ -449,18 +465,23 @@ init python:
         return [x for x in range(1, nseats+1) if (float(nseats)/x) == float(int(nseats/x)) and x != nseats]
 
     def validfuncs(circoseats):
+        '''
+        Renvoie les modes d'élection valides pour désigner circoseats dans une seule circonscription
+        '''
         if circoseats == 1: # si un seul district
             return [f for f in electypes if f not in {proportionnelle_Hondt, proportionnelle_Hare}]
         else:
             return [f for f in electypes]
 
-    def applyelec(house, circoseats, fonk):
+    def applyelec(house, circoseats, fonk, period=60):
         # house.elect_types = [(house.seats(), fonk, circoseats)]
         house.circos = [(circoseats, fonk) for k in range(house.seats/circoseats)]
+        if house == executive:
+            house.election_period = period
         return
 
     def create_exec(name, origin, nseats, vetopower, vetoverride, supermajority):
         if origin:
             global executive
-            executive = Executive(name, origin, nseats, vetopower, vetoverride, supermajority)
+            executive = Executive(name=name, nseats=nseats, origin=origin, vetopower=vetopower, vetoverride=vetoverride, supermajority=supermajority)
         return
