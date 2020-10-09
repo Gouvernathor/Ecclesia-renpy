@@ -3,10 +3,10 @@ label constitution_form:
     while _return != "finish":
         if _return in {'executif', 'execelect'}:
             if not "Hail to the Chief" in renpy.music.get_playing():
-                play music "/music/Hail to the Chief instrumental.mp3" fadein 1.0 fadeout 1.0
+                play music "/music/Hail to the Chief instrumental.mp3" fadeout 3.0
         elif not renpy.music.get_playing() in audio.anthems:
             $ renpy.random.shuffle(audio.anthems)
-            play music anthems fadein 1.0 fadeout 1.0
+            play music anthems fadein .5 fadeout 1.0
         $ npage += 1
         call screen constit(npage, pagename=_return) with Fade(.5, .5, .5, color='#fff')
     with Dissolve(3)
@@ -34,7 +34,7 @@ screen constit(npage, pagename=''):
                 if npage==1:
                     hbox:
                         xfill True
-                        text _("Page 1 : Legislature") xalign .5 color gui.hover_color size 50
+                        text _("Article 1 : Legislature") xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
                     default nHouses = 1
                     default housenames = [_("House n°")+str(k+1) for k in range(maxnhouses)]
@@ -128,7 +128,7 @@ screen constit(npage, pagename=''):
                 elif pagename=='elections':
                     hbox:
                         xfill True
-                        text _("Page {} : Elections for the {}").format(npage, houses[npage-2].name) xalign .5 color gui.hover_color size 50
+                        text _("Article {} : Elections for the {}").format(npage, houses[npage-2].name) xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
                     default validhd = [0]+validnpdistricts(houses[npage-2].seats) # nombres de circonscriptions valides
@@ -175,7 +175,7 @@ screen constit(npage, pagename=''):
                 elif pagename=='executif':
                     hbox:
                         xfill True
-                        text _("Page {} : Executive").format(npage) xalign .5 color gui.hover_color size 50
+                        text _("Article {} : Executive").format(npage) xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
                     default execorigin = 'people'
                     default nseats = 1
@@ -308,7 +308,7 @@ screen constit(npage, pagename=''):
                 elif pagename=='execelect':
                     hbox:
                         xfill True
-                        text _("Page {} : Elections for the {}").format(npage, executive.name) xalign .5 color gui.hover_color size 50
+                        text _("Article {} : Elections for the {}").format(npage, executive.name) xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
                     default validhd = [0]+validnpdistricts(executive.seats) # nombres de circonscriptions valides
@@ -371,9 +371,13 @@ screen constit(npage, pagename=''):
                 elif pagename=='population':
                     hbox:
                         xfill True
-                        text _("Annex 1 : Population & Opinions")
+                        text _("Annex 1 : Population & Opinions") xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
-                    # default
+                    # afficher le nombre de subdivisions administratives (PPCM de tous les nombres de circos)
+                    # demander le nombre d'habitant représentatif par circo
+                        # mettre un truc RP, genre enlightened minds
+                    # afficher le nombre total d'habitants
+                    # afficher le nombre d'habitant par parlementaire
                     # TODO
 
                 elif pagename=='partis':
