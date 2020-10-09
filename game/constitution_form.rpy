@@ -1,7 +1,12 @@
 label constitution_form:
-    # play music laplaylistaléatoiredesmusiquespolitiques
     $ npage = 0
     while _return != "finish":
+        if _return in {'executif', 'execelect'}:
+            if not "Hail to the Chief" in renpy.music.get_playing():
+                play music "/music/Hail to the Chief instrumental.mp3" fadein 1.0 fadeout 1.0
+        elif not renpy.music.get_playing() in audio.anthems:
+            $ renpy.random.shuffle(audio.anthems)
+            play music anthems fadein 1.0 fadeout 1.0
         $ npage += 1
         call screen constit(npage, pagename=_return) with Fade(.5, .5, .5, color='#fff')
     with Dissolve(3)

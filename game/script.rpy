@@ -11,6 +11,24 @@ define maxnhouses = 2 # adapter aussi la création de constitution
 default houses = []
 default executive = None
 
+define audio.anthems = ["/music/china-national-anthem-instrumental.mp3",
+"/music/canada-national-anthem-instrumental.mp3",
+"/music/finland-national-anthem-instrumental.mp3",
+"/music/france-national-anthem-la-marseillaise-instrumental.mp3",
+"/music/Jesse_Stiles_L'internationale.mp3",
+"/music/new-zealand-national-anthem-instrumental.mp3",
+"/music/north-korea-national-anthem-instrumental.mp3",
+"/music/russia-national-anthem-instrumental.mp3",
+"/music/united-kingdom-national-anthem-instrumental.mp3",
+"/music/united-states-of-america-national-anthem-instrumental.mp3"]
+
+init python:
+    def playnoreplace(song):
+        pla = renpy.music.get_playing()
+        if pla == song or pla in song:
+            return
+        renpy.music.play(song)
+
 
 # The game starts here.
 
