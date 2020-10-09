@@ -1,0 +1,59 @@
+série de sujets politiques
+    avortement, immigration, adoption, mariage gay, OGM, nucléaire...
+simulation d'un votant représentatif pour un certain nombre de citoyens
+    simulations 1/1000 à 1/100000000 i guess
+    les votants sont distribués dans les zones du pays proportionnellement à la population
+à chaque votant on associe une approbation aléatoire pour chaque sujet
+    entre -5 et 5 i guess
+on génère une série de partis politiques (entre 2 et 15 ou 20)
+on génère là aussi une préférence pour chaque sujet par parti
+    aléatoire, mais pondérer en fonction de la popularité de chaque avis sur chaque sujet
+        il faut une part d'aléatoire, parce que les vrais partis ne lisent pas dans les pensées des gens
+        éventuellement essayer de rassembler les électeurs en ayant le même avis sur des sujets qui vont ensemble, mais comment ?
+pour chaque élection, pour chaque votant-type, on choisit le parti qui lui correspond le mieux et pour qui il va voter
+    le vote utile n'est pas simulé
+on désigne le résultat en fonction des votes et de la méthode de désignation des élus
+on fait tourner la simulation parlementaire pendant 1 à 3 mandats
+    pendant ce temps le parlement vote librement (le soft power n'est pas simulé) les mesures qui y sont populaires
+    on suppose chaque élu totalement constant dans ses opinions et totalement aligné avec la ligne du parti qui l'a élu
+    on ne tient pas compte des lois précédentes, on suppose le pays en état de vide juridique total en amont de la simulation
+à la fin on compare les scores des mesures adoptées par le parlement dans chaque sujet avec l'overall avis de la population
+    typiquement faire une liste des avis
+        avec un graphe indiquant la proportion de gens ayant chaque grade d'avis sur la question
+        mettre la liste des avis en viewport, et mettre au-dessus des cochables pour afficher ou masquer :
+            les moyennes et médianes des avis du peuple
+            l'avis des partis
+            la moyenne/médiane des avis des partis, pondérée par leur score aux élections
+            le pourcentage de score de chaque parti
+            la moyenne des décisions prises par le parlement
+        les moyennes et médianes étant indiquées par des barres verticales
+    on peut faire des statistiques, des pourcentages globaux de fidélité aux avis du peuple et de chaque parti
+
+décisions d'implémentation :
+# supprimer le staggering dans les chambres
+#    on ne sait pas quoi mettre comme élus au début de la simulation
+#    problèmes de divisibilité pour coller aux US
+#    applicable que pour les US
+retirer les majoritaires aléatoires
+calculer l'exécutif en cours de partie uniquement si il a un rôle dans le processus législatif
+#     genre le veto typiquement
+#     rentrer aussi la supermajority qu'il faut pour l'override
+#     rentrer aussi qui l'élit, et comment se passe l'élection quand elle est directe
+rentrer la liste des subdivisions électorales du pays
+    si entré in-game, doit être un multiple commun du nombre de circos pour chaque chambre et pour l'exécutif
+    nombre d'habitants-représentatifs par subdivision (au moins 10 à 25 pour avoir une vraie simulation)
+    long et chiant, ajouter des presets, par pays par exemple
+    ou alors automatiser, et uniformiser la taille de population par circo
+faire un user-defined displayable pour les graphes (de fin de partie et autres)
+
+graphe :
+borders
+    les 3 cotés entourant le graphe (le y=0 et les bords gauche et droite)
+data border / data lines
+    la ligne des données
+data
+    le polygone des données
+spokes
+    les barres verticales qui servent de repère à chaque valeur de x
+webs
+    les lignes horizontales arbitraires qui servent de repère
