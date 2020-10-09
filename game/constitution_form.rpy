@@ -164,7 +164,7 @@ screen constit(npage, pagename=''):
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive electionfunc in validfuncs(distindex)
-                        action [Function(applyelec, houses[npage-2], validhd[distindex], electionfunc), Return('elections' if (npage<=len(houses)) else 'executif')]
+                        action [Function(applyelec, houses[npage-2], (validhd[distindex] if distindex else houses[npage-2].seats), electionfunc), Return('elections' if (npage<=len(houses)) else 'executif')]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='executif':
@@ -344,7 +344,7 @@ screen constit(npage, pagename=''):
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive electionfunc in validfuncs((distindex if executive.seats>1 else 1))
-                        action [Function(applyelec, executive, (validhd[distindex] if executive.seats>1 else 1), electionfunc), Return('population')]
+                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), electionfunc), Return('population')]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='population':
