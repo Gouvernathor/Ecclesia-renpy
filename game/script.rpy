@@ -9,6 +9,7 @@ define gvt = Character("GOUVERNEMENT", boldChar)
 
 define maxnhouses = 2 # adapter aussi la création de constitution
 default houses = []
+default executive = None
 
 
 # The game starts here.

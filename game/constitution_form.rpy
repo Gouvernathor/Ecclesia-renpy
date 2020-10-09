@@ -126,7 +126,7 @@ screen constit(npage, pagename=''):
                         text _("Page {} : Elections for the {}").format(npage, houses[npage-2].name) xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
-                    default validhd = [0]+validnpdistricts(houses[npage-2]) # nombres de circonscriptions valides
+                    default validhd = [0]+validnpdistricts(houses[npage-2].seats) # nombres de circonscriptions valides
                     default electionfunc = False # fonction d'attribution des sièges à partir des résultats du vote
                     # $ print(validhd)
                     hbox:
@@ -171,12 +171,183 @@ screen constit(npage, pagename=''):
                     hbox:
                         xfill True
                         text _("Page {} : Executive").format(npage) xalign .5 color gui.hover_color size 50
+                    null height gui.choice_spacing+gui.pref_spacing
+                    default execorigin = 'people'
+                    default nseats = 1
+                    default exenamea = _('President')
+                    default exenamea_edit = ScreenVariableInputValue('exenamea')
+                    default exenameb = _('Consul')
+                    default exenameb_edit = ScreenVariableInputValue('exenameb')
+                    default exenamec = _('Executive')
+                    default exenamec_edit = ScreenVariableInputValue('exenamec')
+                    default vetopower = False
+                    default vetoverride = False
+                    default superindex = 0
+                    default superlist = [(_("50%"), .5), (_("Three fifth, or 60%"), .6), (_("Two thirds, or 67%"), 2.0/3), (_("Three fourths, or 75%"), .75), (_("Four fifths, or 80%"), .8), (_("Nine tenths, or 90%"), .9), (_("Unanimity"), 1)]
+                    hbox:
+                        xfill True
+                        text _("Origin of the Executive branch") yalign .5
+                        vbox:
+                            xalign 1.0
+                            # xfill True
+                            xmaximum .6
+                            style_prefix "constform_radio"
+                            textbutton _("No executive branch (Parliament governs directly)"):
+                                action SetScreenVariable("execorigin", False)
+                                sensitive houses
+                            for hous in houses:
+                                textbutton hous.name action SetScreenVariable("execorigin", hous)
+                            # if not len(houses):
+                            #     textbutton _("No parliamentary House")
+                            textbutton _("Direct Popular Vote") action SetScreenVariable("execorigin", 'people')
+                    null height gui.choice_spacing
+                    if execorigin:
+                        if nseats==1:
+                            button:
+                                xmargin 30
+                                style_prefix None
+                                xalign 0.5
+                                key_events True
+                                action [If(exenamea.strip(), None, SetScreenVariable('exenamea', _("Chancellor"))), exenamea_edit.Toggle()]
+                                input:
+                                    value exenamea_edit
+                                    color gui.hover_color
+                                    size 50
+                                    pixel_width 1000
+                        elif nseats in {2, 3}:
+                            button:
+                                xmargin 30
+                                style_prefix None
+                                xalign 0.5
+                                key_events True
+                                action [If(exenameb.strip(), None, SetScreenVariable('exenameb', _("President"))), exenameb_edit.Toggle()]
+                                input:
+                                    prefix _('Co-')
+                                    suffix _('s')
+                                    value exenameb_edit
+                                    color gui.hover_color
+                                    size 50
+                                    pixel_width 1000
+                        else:
+                            button:
+                                xmargin 30
+                                style_prefix None
+                                xalign 0.5
+                                key_events True
+                                action [If(exenamec.strip(), None, SetScreenVariable('exenamec', _("National"))), exenamec_edit.Toggle()]
+                                input:
+                                    suffix _(' Council')
+                                    value exenamec_edit
+                                    color gui.hover_color
+                                    size 50
+                                    pixel_width 1000
+                        hbox:
+                            xfill True
+                            text _("Head of the Executive branch") yalign .5
+                            hbox:
+                                xalign 1.0
+                                yalign .5
+                                style_prefix "constform_selector"
+                                textbutton "-1" action SetScreenVariable("nseats", nseats-1) sensitive (nseats-1 > 0)
+                                if nseats == 1:
+                                    text _("{} {}").format(nseats, exenamea)
+                                elif nseats in {2, 3}:
+                                    text _("{} {}s").format(nseats, exenameb)
+                                else:
+                                    text _("{} members of the {} Council").format(nseats, exenamec)
+                                textbutton "+1" action SetScreenVariable("nseats", nseats+1) sensitive (nseats+1 <= (.1*min([house.seats for house in houses]) if houses else 25))
+                                # on ne peut pas avoir plus de sièges que 1 ou 10% de la chambre moins peuplée si on a des chambres, ou 25 si on n'en a pas
+                        if houses:
+                            hbox:
+                                xfill True
+                                style_prefix "constform_radio"
+                                text _("Veto power") yalign .5
+                                textbutton (_('Yes') if vetopower else _('No')):
+                                    action ToggleScreenVariable("vetopower", True, False)
+                                    selected vetopower
+                        if vetopower:
+                            hbox:
+                                xfill True
+                                text _("Overridable") yalign .5
+                                vbox:
+                                    xalign 1.0
+                                    # xfill True
+                                    xmaximum .6
+                                    style_prefix "constform_radio"
+                                    textbutton _("No") action SetScreenVariable("vetoverride", False)
+                                    for hous in houses:
+                                        textbutton _("by Supermajority in the {}").format(hous.name) action SetScreenVariable("vetoverride", hous)
+                                    textbutton _("by Supermajority in every House") action SetScreenVariable("vetoverride", 'each')
+                                    textbutton _("by Supermajority in joint Congress") action SetScreenVariable("vetoverride", 'joint')
+                            if vetoverride:
+                                hbox:
+                                    xfill True
+                                    text _("Supermajority") yalign .5
+                                    hbox:
+                                        xalign 1.0
+                                        yalign .5
+                                        style_prefix "constform_selector"
+                                        textbutton "Less" action SetScreenVariable("superindex", superindex-1) sensitive (superindex-1 >= 0)
+                                        text str(superlist[superindex][0])
+                                        textbutton "More" action SetScreenVariable("superindex", superindex+1) sensitive (superindex+1 < len(superlist))# and superindex
+                    textbutton _("Continue"):
+                        style "big_blue_button"
+                        sensitive (exenamea if nseats==1 else exenameb if nseats in {2, 3} else exenamec)
+                        action [Function(create_exec, (exenamea if nseats==1 else 'Co-'+exenameb+'s' if nseats in {2, 3} else exenamec+' Council'), execorigin, nseats, vetopower, vetoverride, superlist[superindex][1]), Return('execelect' if execorigin=='people' else "population")]
+                    null height gui.choice_spacing+gui.pref_spacing
                     # TODO
                     # page exécutif
                     # si il n'y a pas de parlement, obliger que l'exécutif soit élu au suffrage direct
                     # constituer le pouvoir exécutif
 
-                elif pagename=='opinions':
+                elif pagename=='execelect':
+                    hbox:
+                        xfill True
+                        text _("Page {} : Elections for the {}").format(npage, executive.name) xalign .5 color gui.hover_color size 50
+                    null height gui.choice_spacing+gui.pref_spacing
+                    default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
+                    default validhd = [0]+validnpdistricts(executive.seats) # nombres de circonscriptions valides
+                    default electionfunc = False # fonction d'attribution des sièges à partir des résultats du vote
+                    if executive.seats>1:
+                        hbox:
+                            xfill True
+                            style_prefix "constform_radio"
+                            text _("Electoral Districts") yalign .5
+                            textbutton (_('Yes') if distindex else _('No')):
+                                action ToggleScreenVariable('distindex', 0, 1)
+                                selected distindex
+                        null height gui.choice_spacing
+                        hbox:
+                            xfill True
+                            text _("Number of seats per electoral district")+(_(" (Districts : {})").format(executive.seats/validhd[distindex]) if distindex else "") yalign .5
+                            hbox:
+                                xalign 1.0
+                                yalign .5
+                                style_prefix "constform_selector"
+                                textbutton "-1" action SetScreenVariable("distindex", distindex-1) sensitive (distindex-1 > 0)
+                                if distindex == 0:
+                                    text _("{} (nationwide district)").format(executive.seats)
+                                else:
+                                    text str(validhd[distindex])
+                                textbutton "+1" action SetScreenVariable("distindex", distindex+1) sensitive (distindex+1 < len(validhd)) and distindex
+                        null height gui.choice_spacing
+                    hbox:
+                        xfill True
+                        text _("Election type") yalign .5
+                        vbox:
+                            xalign 1.0
+                            style_prefix "constform_radio"
+                            for fonk in [f for f in electypes]:
+                                textbutton _(fonk.__name__):
+                                    action SetScreenVariable("electionfunc", fonk)
+                                    sensitive (fonk in validfuncs((distindex if executive.seats>1 else 1)))
+                    textbutton _("Continue"):
+                        style "big_blue_button"
+                        sensitive electionfunc in validfuncs((distindex if executive.seats>1 else 1))
+                        action [Function(applyelec, executive, (validhd[distindex] if executive.seats>1 else 1), electionfunc), Return('population')]
+                    null height gui.choice_spacing+gui.pref_spacing
+
+                elif pagename=='population':
                     hbox:
                         xfill True
                         text _("Annex 1 : Population & Opinions")
@@ -239,12 +410,10 @@ init python:
     def create_houses(nhouses, housenames, houseperiods, houseseats):
         '''
         Crée les House pour chacune des chambres
-        avec le bon nom et la bonne période de renouvellement
-        mais avec tous les sièges dans une seule circo et sans fonction de répartition
-        (qui sera à rentrer manuellement plus tard)
+        avec le bon nom, la bonne période de renouvellement et le bon nombre de sièges
         '''
         for khouse in range(nhouses):
-            houses.append(House(housenames[khouse], circos=[(houseseats[khouse], None)], election_period=houseperiods[khouse]))
+            houses.append(House(housenames[khouse], nseats=houseseats[khouse], election_period=houseperiods[khouse]))
             # childlist = []
             # if not housestaggering[khouse]:
             #     housestaggering[khouse] = 1
@@ -262,11 +431,17 @@ init python:
             # houses.append(House(housenames[khouse].strip(), children=childlist, election_period=houseperiods[khouse]))
         return
 
-    def validnpdistricts(house):
+    def old_validnpdistricts(house):
         liz = [x for x in range(1, house.seats+1) if (float(house.seats)/x) == float(int(house.seats/x)) and x != house.seats]
-        # for uhouse in house.children:
-        #     liz = [x for x in range(1, uhouse.seats+1) if (float(uhouse.seats)/x) == float(int(uhouse.seats/x)) and x in liz]
+        for uhouse in house.children:
+            liz = [x for x in range(1, uhouse.seats+1) if (float(uhouse.seats)/x) == float(int(uhouse.seats/x)) and x in liz]
         return liz
+
+    def validnpdistricts(nseats):
+        '''
+        Les nombres valides d'élus par circonscription, pour partager nseats sièges
+        '''
+        return [x for x in range(1, nseats+1) if (float(nseats)/x) == float(int(nseats/x)) and x != nseats]
 
     def validfuncs(circoseats):
         if circoseats == 1: # si un seul district
@@ -277,4 +452,10 @@ init python:
     def applyelec(house, circoseats, fonk):
         # house.elect_types = [(house.seats(), fonk, circoseats)]
         house.circos = [(circoseats, fonk) for k in range(house.seats/circoseats)]
+        return
+
+    def create_exec(name, origin, nseats, vetopower, vetoverride, supermajority):
+        if origin:
+            global executive
+            executive = Executive(name, origin, nseats, vetopower, vetoverride, supermajority)
         return

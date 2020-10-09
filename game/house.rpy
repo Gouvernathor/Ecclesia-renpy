@@ -23,12 +23,12 @@ init python:
         # Must be supplied one or more UnderHouse instances as children
         # '''
         def __init__(self, name,
-                     circos,
+                     nseats,
                      election_period=48, # durée en mois
                      display='newarch',
                      ):
             self.name = name
-            self.circos = circos
+            self.circos = [(nseats, None)]
             # circos :
             # liste de (nombre de sièges dans la circo, fonction d'attribution)
             self.population = {None : self.seats}
@@ -74,3 +74,28 @@ init python:
     #             raise ValueError(_("The number of seats must be a positive integer"))
     #         self.seats = seats
     #         self.election_offset = election_offset
+
+    class Executive():
+        '''
+        The head of the Executive branch,
+        and its powers relative to the passing of laws by the parliament
+        '''
+        def __init__(self, name,
+                     origin, # qui l'élit (une House ou 'people')
+                     nseats, # nombre de sièges
+                     vetopower, # si il a le droit de veto sur les lois du parlement
+                     vetoverride, # qui peut l'override (une House ou 'each' ou 'joint' ou False)
+                     supermajority, # la majorité qualifiée nécessaire pour override le veto
+                     ):
+            super(Executive, self).__init__()
+            self.name = name
+            self.origin = origin
+            self.circos = [(nseats, None)]
+            self.vetopower = vetopower
+            self.vetoverride = vetoverride
+            self.supermajority = supermajority
+            self.population = {None : self.seats}
+
+        @property
+        def seats(self):
+            return sum([circo[0] for circo in self.circos])
