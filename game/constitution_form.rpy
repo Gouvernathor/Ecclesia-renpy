@@ -450,9 +450,9 @@ init python:
 
     def validfuncs(circoseats):
         if circoseats == 1: # si un seul district
-            return [f for f in electypes if f not in {majoritaire_random, proportionnelle_Hondt, proportionnelle_Hare}]
+            return [f for f in electypes if f not in {proportionnelle_Hondt, proportionnelle_Hare}]
         else:
-            return [f for f in electypes if f != majoritaire]
+            return [f for f in electypes]
 
     def applyelec(house, circoseats, fonk):
         # house.elect_types = [(house.seats(), fonk, circoseats)]

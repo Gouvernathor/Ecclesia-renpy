@@ -183,7 +183,7 @@ init python:
 #                     proportionnelle_Hondt : _(""),
 #                     proportionnelle_Hare : _("")}
 define electypes = [majoritaire,
-                    majoritaire_random,
+                    # majoritaire_random,
                     tirage_au_sort_population,
                     tirage_au_sort_partis,
                     proportionnelle_Hondt,
