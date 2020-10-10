@@ -69,8 +69,9 @@ define gui.name_text_font = 'humanist-521-bt.ttf'
 # define gui.name_text_font = 'marianne-regular-webfont.otf'
 
 ## The font used for out-of-game text.
-define gui.interface_text_font = "DejaVuSans.ttf"
+# define gui.interface_text_font = "DejaVuSans.ttf"
 # define gui.interface_text_font = 'humanist-521-bt.ttf'
+define gui.interface_text_font = "marianne-regular-webfont.otf"
 
 ## The size of normal dialogue text.
 define gui.text_size = 33
