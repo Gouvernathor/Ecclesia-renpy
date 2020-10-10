@@ -113,7 +113,7 @@ screen constit(npage, pagename=''):
                         #             textbutton "-1" action SetDict(housestaggering, khouse, housestaggering[khouse]-1) sensitive (housestaggering[khouse]-1>=2)
                         #             text str(housestaggering[khouse])
                         #             textbutton "+1" action SetDict(housestaggering, khouse, housestaggering[khouse]+1) sensitive (housestaggering[khouse]+1<=houseseats[khouse])
-                        # ajouter le choix de la fonction de répartition des votes
+                        #TODO ajouter le nombre de counties par electoral districts
                         null height gui.choice_spacing
                     null height gui.pref_spacing
                     textbutton _("Continue"):
@@ -181,6 +181,7 @@ screen constit(npage, pagename=''):
                                 else:
                                     text str(int(thresh*100))+"%"
                                 textbutton "+5%" action SetScreenVariable("thresh", thresh+.05) sensitive (thresh+.05 <= .3)
+                    null height gui.pref_spacing
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive electionfunc in validfuncs(distindex)
@@ -310,6 +311,7 @@ screen constit(npage, pagename=''):
                                         textbutton "Less" action SetScreenVariable("superindex", superindex-1) sensitive (superindex-1 >= 0)
                                         text str(superlist[superindex][0])
                                         textbutton "More" action SetScreenVariable("superindex", superindex+1) sensitive (superindex+1 < len(superlist))# and superindex
+                    null height gui.pref_spacing
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive (exenamea if nseats==1 else exenameb if nseats in {2, 3} else exenamec)
@@ -377,6 +379,7 @@ screen constit(npage, pagename=''):
                                 textbutton _(fonk.__name__):
                                     action SetScreenVariable("electionfunc", fonk)
                                     sensitive (fonk in validfuncs((distindex if executive.seats>1 else 1)))
+                    null height gui.pref_spacing
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive electionfunc in validfuncs((distindex if executive.seats>1 else 1))
@@ -386,23 +389,76 @@ screen constit(npage, pagename=''):
                 elif pagename=='population':
                     hbox:
                         xfill True
-                        text _("Annex 1 : Population & Opinions") xalign .5 color gui.hover_color size 50
+                        text _("Annex 2 : Population") xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
+                    default citizens = 10
                     # afficher le nombre de subdivisions administratives (PPCM de tous les nombres de circos)
+                    hbox:
+                        xfill True
+                        style_prefix "constform_radio"
+                        text _("Total number of counties") yalign .5
+                        textbutton str(ncounties()):
+                            selected True
+                            text_color '#000'
+                    null height gui.choice_spacing
                     # demander le nombre de citoyen représentatif par subdivision
                         # mettre un truc RP, genre enlightened minds
                         # le nombre de citoyens par circo dans les chambres sera un multiple de ce nombre
+                    hbox:
+                        xfill True
+                        text _("Enlightened minds per county")
+                        hbox:
+                            xalign 1.0
+                            yalign .5
+                            style_prefix "constform_selector"
+                            textbutton "-1" action SetScreenVariable("citizens", citizens-1) sensitive (citizens-1 > 0)
+                            text str(citizens)
+                            textbutton "+1" action SetScreenVariable("citizens", citizens+1) sensitive (citizens+1 < 50)
+                    # null height gui.choice_spacing
                     # demander l'échelle de représentation
                         # pour avoir le nombre RP d'habitants dans les subdivisions et dans le pays
                         # sans incidence sur la simulation
+                    hbox:
+                        xfill True
+                        text _("Enlightened minds per inhabitant")
+                        hbox:
+                            xalign 1.0
+                            yalign .5
+                            style_prefix "constform_selector"
+                            textbutton "÷10" action SetVariable("popscale", popscale*10) sensitive (popscale*10 < 1000000000)
+                            if popscale==1:
+                                text "Everyone"
+                            else:
+                                text _("1 per {} inhabitants").format(str(popscale))
+                            textbutton "x10" action SetVariable("popscale", popscale/10) sensitive (popscale/10 >= 1)
+                    null height gui.choice_spacing
                     # afficher le nombre total d'habitants (calculé, non-stocké)
+                    hbox:
+                        xfill True
+                        style_prefix "constform_radio"
+                        text _("Total population") yalign .5
+                        textbutton str(ncounties()*citizens*popscale):
+                            selected True
+                            text_color '#000'
                     # afficher le nombre d'habitant par parlementaire (calculé, non-stocké)
-                    # TODO
+                    hbox:
+                        xfill True
+                        style_prefix "constform_radio"
+                        text _("Electeds per inhabitant") yalign .5
+                        textbutton "1/"+str((ncounties()*citizens*popscale)/(sum([house.seats for house in houses+[executive]]))):
+                            selected True
+                            text_color '#000'
+                    null height gui.pref_spacing
+                    textbutton _("Continue"):
+                        style "big_blue_button"
+                        sensitive True
+                        action [Function(populate, citizens), Return('partis')]
+                    null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='partis':
                     hbox:
                         xfill True
-                        text _("Annex 2 : Political Organizations") xalign .5 color gui.hover_color size 50
+                        text _("Annex 3 : Political Organizations") xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
                     # TODO
                     # dernière page, bouton rouge pour enact la constitution
@@ -508,7 +564,7 @@ init python:
             newfonk.thresh=thresh
         else:
             newfonk = fonk
-        house.circos = [(circoseats, newfonk) for k in range(house.seats/circoseats)]
+        house.circos = [[circoseats, newfonk, []] for k in range(house.seats/circoseats)]
         if house == executive:
             house.election_period = period
         return
@@ -517,4 +573,51 @@ init python:
         if origin:
             global executive
             executive = Executive(name=name, nseats=nseats, origin=origin, vetopower=vetopower, vetoverride=vetoverride, supermajority=supermajority)
+        return
+
+    def ppcm(lis):
+        if len(lis)>2:
+            return ppcm([ppcm(lis[0:2])]+lis[2:])
+        if 0 in lis:
+            return 0
+        a, b = lis
+        p = a*b
+        while a!= b:
+            if a<b:
+                b -= a
+            else:
+                a -= b
+        return p/a
+
+    def ncounties():
+        # pour chaque house et pour l'exécutif si il est élu par le peuple
+        # diviser les circo en classes
+        # faire une liste des nombres de circo dans chaque classe dans chaque chambre
+        # et renvoyer le ppcm de tous ces nombres
+        numbers = []
+        for house in houses+([executive] if executive.origin=='people' else []):
+            classes = house.classes()
+            numbers += [classes[classe] for classe in classes]
+        return ppcm(numbers)
+
+    def populate(ncitizens):
+        global citizenpool
+        randomobj = renpy.random.Random(citikey)
+        citizenpool = [Citizen(randomobj=randomobj) for k in range(ncitizens*ncounties())]
+        for house in houses+([executive] if executive.origin=='people' else []):
+            ramobj = renpy.random.Random(citikey)
+            print("Populating "+house.name+"'s electoral district(s)")
+            clss = house.classes()
+            for cla in clss:
+                citpool = [cit for cit in citizenpool] # on vide celle-là mais pas la globale
+                ramobj.shuffle(citpool)
+                ncirco = clss[cla]
+                # print(cla, ncirco)
+                for circo in house.circos:
+                    if tuple(circo[0:2]) == cla:
+                        # print(len(circo))
+                        # print(len(citpool))
+                        # print(ncitizens*ncounties()/ncirco)
+                        circo[2] = [citpool.pop() for k in range(ncitizens*ncounties()/ncirco)]
+            assert not len(citpool)
         return

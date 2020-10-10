@@ -10,17 +10,21 @@ define gvt = Character("GOUVERNEMENT", boldChar)
 define maxnhouses = 2 # adapter aussi la création de constitution
 default houses = []
 default executive = None
+default popscale = 10000
+default citizenpool = []
+default citikey = None
+default electkey = None
+default partis = []
 
 define audio.anthems = ["/music/china-national-anthem-instrumental.mp3",
 "/music/canada-national-anthem-instrumental.mp3",
 "/music/finland-national-anthem-instrumental.mp3",
-"/music/france-national-anthem-la-marseillaise-instrumental.mp3",
 "/music/Jesse_Stiles_L'internationale.mp3",
 "/music/new-zealand-national-anthem-instrumental.mp3",
 "/music/north-korea-national-anthem-instrumental.mp3",
 "/music/russia-national-anthem-instrumental.mp3",
 "/music/united-kingdom-national-anthem-instrumental.mp3",
-"/music/united-states-of-america-national-anthem-instrumental.mp3"]
+"/music/united-states-of-america-national-anthem-instrumental.mp3"] + ([] if config.developer else ["/music/france-national-anthem-la-marseillaise-instrumental.mp3"])
 
 
 # The game starts here.
