@@ -133,6 +133,7 @@ screen constit(npage, pagename=''):
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
                     default validhd = [0]+validnpdistricts(houses[npage-2].seats) # nombres de circonscriptions valides
                     default electionfunc = False # fonction d'attribution des sièges à partir des résultats du vote
+                    default thresh = 0 # seuil électoral pour les scrutins proportionnels
                     # $ print(validhd)
                     hbox:
                         xfill True
@@ -166,10 +167,24 @@ screen constit(npage, pagename=''):
                                 textbutton _(fonk.__name__):
                                     action SetScreenVariable("electionfunc", fonk)
                                     sensitive (fonk in validfuncs(distindex))
+                    if electionfunc in proportionals:
+                        hbox:
+                            xfill True
+                            text _("Electoral threshold") yalign .5
+                            hbox:
+                                xalign 1.0
+                                yalign .5
+                                style_prefix "constform_selector"
+                                textbutton "-5%" action SetScreenVariable("thresh", thresh-.05) sensitive (thresh-.05 >= 0)
+                                if thresh == 0:
+                                    text _("None")
+                                else:
+                                    text str(int(thresh*100))+"%"
+                                textbutton "+5%" action SetScreenVariable("thresh", thresh+.05) sensitive (thresh+.05 <= .3)
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive electionfunc in validfuncs(distindex)
-                        action [Function(applyelec, houses[npage-2], (validhd[distindex] if distindex else houses[npage-2].seats), electionfunc), Return('elections' if (npage<=len(houses)) else 'executif')]
+                        action [Function(applyelec, houses[npage-2], (validhd[distindex] if distindex else houses[npage-2].seats), electionfunc, thresh), Return('elections' if (npage<=len(houses)) else 'executif')]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='executif':
@@ -365,7 +380,7 @@ screen constit(npage, pagename=''):
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive electionfunc in validfuncs((distindex if executive.seats>1 else 1))
-                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), electionfunc, execperiod), Return('population')]
+                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), electionfunc, 0, execperiod), Return('population')]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='population':
@@ -374,16 +389,21 @@ screen constit(npage, pagename=''):
                         text _("Annex 1 : Population & Opinions") xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
                     # afficher le nombre de subdivisions administratives (PPCM de tous les nombres de circos)
-                    # demander le nombre d'habitant représentatif par circo
+                    # demander le nombre de citoyen représentatif par subdivision
                         # mettre un truc RP, genre enlightened minds
-                    # afficher le nombre total d'habitants
-                    # afficher le nombre d'habitant par parlementaire
+                        # le nombre de citoyens par circo dans les chambres sera un multiple de ce nombre
+                    # demander l'échelle de représentation
+                        # pour avoir le nombre RP d'habitants dans les subdivisions et dans le pays
+                        # sans incidence sur la simulation
+                    # afficher le nombre total d'habitants (calculé, non-stocké)
+                    # afficher le nombre d'habitant par parlementaire (calculé, non-stocké)
                     # TODO
 
                 elif pagename=='partis':
                     hbox:
                         xfill True
-                        text _("Annex 2 : Political Organizations")
+                        text _("Annex 2 : Political Organizations") xalign .5 color gui.hover_color size 50
+                    null height gui.choice_spacing+gui.pref_spacing
                     # TODO
                     # dernière page, bouton rouge pour enact la constitution
                 # add "prison03"# maxsize (.8, 5.0)
@@ -473,13 +493,22 @@ init python:
         Renvoie les modes d'élection valides pour désigner circoseats dans une seule circonscription
         '''
         if circoseats == 1: # si un seul district
-            return [f for f in electypes if f not in {proportionnelle_Hondt, proportionnelle_Hare}]
+            return [f for f in electypes if f not in proportionals]
         else:
             return [f for f in electypes]
 
-    def applyelec(house, circoseats, fonk, period=60):
+    def applyelec(house, circoseats, fonk, thresh, period=60):
         # house.elect_types = [(house.seats(), fonk, circoseats)]
-        house.circos = [(circoseats, fonk) for k in range(house.seats/circoseats)]
+        if fonk in proportionals and thresh:
+            def newfonk(*args, **kwargs):
+                # print(newfonk.thresh)
+                return fonk(*args, thresh=newfonk.thresh, **kwargs)
+                # return fonk(*args, **kwargs)
+            # fonk = newfonk
+            newfonk.thresh=thresh
+        else:
+            newfonk = fonk
+        house.circos = [(circoseats, newfonk) for k in range(house.seats/circoseats)]
         if house == executive:
             house.election_period = period
         return

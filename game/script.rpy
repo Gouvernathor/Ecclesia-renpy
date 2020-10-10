@@ -22,13 +22,6 @@ define audio.anthems = ["/music/china-national-anthem-instrumental.mp3",
 "/music/united-kingdom-national-anthem-instrumental.mp3",
 "/music/united-states-of-america-national-anthem-instrumental.mp3"]
 
-init python:
-    def playnoreplace(song):
-        pla = renpy.music.get_playing()
-        if pla == song or pla in song:
-            return
-        renpy.music.play(song)
-
 
 # The game starts here.
 

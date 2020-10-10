@@ -39,11 +39,11 @@ calculer l'exécutif en cours de partie uniquement si il a un rôle dans le proc
 #     genre le veto typiquement
 #     rentrer aussi la supermajority qu'il faut pour l'override
 #     rentrer aussi qui l'élit, et comment se passe l'élection quand elle est directe
-rentrer la liste des subdivisions électorales du pays
-    si entré in-game, doit être un multiple commun du nombre de circos pour chaque chambre et pour l'exécutif
+gérer la liste des subdivisions électorales du pays
+    si généré in-game, doit être le plus petit multiple commun du nombre de circos de chaque chambre et de l'exécutif
+        automatiser, et uniformiser la taille de population par circo
     nombre d'habitants-représentatifs par subdivision (au moins 10 à 25 pour avoir une vraie simulation)
     long et chiant, ajouter des presets, par pays par exemple
-    ou alors automatiser, et uniformiser la taille de population par circo
 faire un user-defined displayable pour les graphes (de fin de partie et autres)
 
 graphe :

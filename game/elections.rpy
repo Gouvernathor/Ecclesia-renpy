@@ -14,9 +14,8 @@ init python:
             pass
         return
 
-    # définir une fonction vote qui prend en entrée la répartition d'idées dans la population
-    # et renvoie un score en pourcentage, ou en nombre de voix, par parti
-    # ce score par parti est ensite donné à une fonction de répartition des votes
+    # obtenir un score en pourcentage, ou en nombre de voix, par parti
+    # ce score par parti est ensuite donné à une fonction de répartition des votes
     # qui donne le nombre de sièges par parti par circonscription
 
     # types d'élection :
@@ -24,9 +23,17 @@ init python:
     # renvoie la liste dans l'ordre où les partis ont été fournis
     # ne renvoie pas une liste complète
     # majoritaire uninominale 1 tour
-    # majoritaire uninominale 2 tours # suspendue ?
+    # majoritaire uninominale 2 tours #TODO
     # proportionnelle à plus forte moyenne (Hondt/Jefferson), avec seuil potentiellement nul
     # proportionnelle à plus fort reste (Hare), avec seuil potentiellement nul
+
+    # ces fonctions prennent en argument :
+    # the_list, une liste de (parti, part)
+        # avec part étant un nombre (int ou float) proportionnel au nombre de voix
+    # nseats (optionnel), indiquant le nombre de sièges à remplir
+    # randomobj (optionnel), utilisé quand on besoin de random
+    # thresh (optionnel), utilisé pour les proportionnelles
+        # mais doit être curryifié pour être utilisable dans la suite de la simulation
 
     def majoritaire(the_list, nseats=1, **kwargs):
         '''
@@ -119,6 +126,7 @@ init python:
         '''
         Implémente la proportionnelle de Hare, à plus fort reste, avec seuil possible
         Attention : si aucun parti ne dépasse le seuil, renvoie None
+        Unstable, needs testings and fixings #TODO
         '''
         sum = 0
         for tup in the_list:
@@ -176,6 +184,9 @@ init python:
         # à classer par teinte
         # col.hsv[0]
 
+define proportionals = [proportionnelle_Hare,
+                        proportionnelle_Hondt]
+
 # define electypes = {majoritaire : _(""),
 #                     majoritaire_random : _(""),
 #                     tirage_au_sort_population : _(""),
@@ -185,6 +196,4 @@ init python:
 define electypes = [majoritaire,
                     # majoritaire_random,
                     tirage_au_sort_population,
-                    tirage_au_sort_partis,
-                    proportionnelle_Hondt,
-                    proportionnelle_Hare]
+                    tirage_au_sort_partis]+proportionals
