@@ -59,6 +59,10 @@ init python:
                     clss[tuple(circo[0:2])] = 1
             return clss
 
+        def displayable(self, *args, **kwargs):
+            liste = [(self.members[parti], ('#000' if parti is None else parti.color)) for parti in self.members if self.members[parti]]
+            return eval(self.display)(liste, *args, **kwargs)
+
     class Executive(House):
         '''
         The head of the Executive branch,
