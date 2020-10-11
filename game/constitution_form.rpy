@@ -591,6 +591,8 @@ init python:
             return ppcm([ppcm(lis[0:2])]+lis[2:])
         if 0 in lis:
             return 0
+        if len(lis)==1:
+            return lis[0]
         a, b = lis
         p = a*b
         while a!= b:
