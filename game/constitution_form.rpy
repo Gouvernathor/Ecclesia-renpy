@@ -40,7 +40,6 @@ screen constit(npage, pagename=''):
                     default housenames_edit = [DictInputValue(housenames, k, default=False) for k in range(maxnhouses)]
                     default houseperiods = [48 for k in range(maxnhouses)]
                     default houseseats = [100 for k in range(maxnhouses)]
-                    # default housestaggering = [False for k in range(maxnhouses)]
                     hbox:
                         xfill True
                         text _("Number of Houses of Congress/Parliament") yalign .5
@@ -91,24 +90,6 @@ screen constit(npage, pagename=''):
                                 textbutton "+1" action SetDict(houseseats, khouse, houseseats[khouse]+1)
                                 textbutton "+10" action SetDict(houseseats, khouse, houseseats[khouse]+10)
                                 textbutton "+100" action SetDict(houseseats, khouse, houseseats[khouse]+100)
-                        # if houseseats[khouse]>1:
-                        #     hbox:
-                        #         xfill True
-                        #         style_prefix "constform_radio"
-                        #         text _("Staggering") yalign .5
-                        #         textbutton (_('Yes') if housestaggering[khouse] else _('No')):
-                        #             action If(housestaggering[khouse], SetDict(housestaggering, khouse, False), SetDict(housestaggering, khouse, 2))
-                        #             selected housestaggering[khouse]
-                        # if housestaggering[khouse]:
-                        #     hbox:
-                        #         xfill True
-                        #         text _("Number of staggering classes") yalign .5
-                        #         hbox:
-                        #             xalign 1.0
-                        #             style_prefix "constform_selector"
-                        #             textbutton "-1" action SetDict(housestaggering, khouse, housestaggering[khouse]-1) sensitive (housestaggering[khouse]-1>=2)
-                        #             text str(housestaggering[khouse])
-                        #             textbutton "+1" action SetDict(housestaggering, khouse, housestaggering[khouse]+1) sensitive (housestaggering[khouse]+1<=houseseats[khouse])
                         null height gui.choice_spacing
                     null height gui.pref_spacing
                     textbutton _("Continue"):
@@ -577,28 +558,7 @@ init python:
         '''
         for khouse in range(nhouses):
             houses.append(House(housenames[khouse], nseats=houseseats[khouse], election_period=houseperiods[khouse]))
-            # childlist = []
-            # if not housestaggering[khouse]:
-            #     housestaggering[khouse] = 1
-            # for kclass in range(housestaggering[khouse]):
-            #     if housestaggering[khouse] == 1:
-            #         sts = houseseats[khouse]
-            #         off = 0
-            #     else:
-            #         if kclass != housestaggering[khouse]-1:
-            #             sts = int(houseseats[khouse]/float(housestaggering[khouse]))
-            #         else:
-            #             sts = houseseats[khouse] - (housestaggering[khouse]-1)*int(houseseats[khouse]/float(housestaggering[khouse]))
-            #         off = kclass*houseperiods[khouse]/housestaggering[khouse]
-            #     childlist.append(UnderHouse(seats=sts, election_offset=off))
-            # houses.append(House(housenames[khouse].strip(), children=childlist, election_period=houseperiods[khouse]))
         return
-
-    def old_validnpdistricts(house):
-        liz = [x for x in range(1, house.seats+1) if (float(house.seats)/x) == float(int(house.seats/x)) and x != house.seats]
-        for uhouse in house.children:
-            liz = [x for x in range(1, uhouse.seats+1) if (float(uhouse.seats)/x) == float(int(uhouse.seats/x)) and x in liz]
-        return liz
 
     def validnpdistricts(nseats):
         '''

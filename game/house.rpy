@@ -23,8 +23,6 @@ init python:
         '''
         A whole House, in which people all vote with the same power
         '''
-        # Must be supplied one or more UnderHouse instances as children
-        # '''
         def __init__(self, name,
                      nseats,
                      election_period=48, # durée en mois
@@ -41,36 +39,17 @@ init python:
             self.election_period = election_period
             self.display = display
             self.majority = majority
-            # self.children = []
-            # if not len(children):
-            #     raise IndexError(_("There must be at least one UnderHouse as child."))
-            # for uhouse in children:
-            #     if uhouse.election_offset not in range(election_period):
-            #         # si l'offset n'est pas entre 0 inclus et la période exclue
-            #         uhouse.election_offset %= election_period
-            #     self.children.append(uhouse)
-            # self.impero = impero
-            # self.elect_types = elect_types
-            # elect_types :
-            # liste de tuples (nombre de sièges concernés, fonction de répartition, nombre de sièges par circo)
-            # chaque tuple doit avoir une combinaison (fonction de répartition, sièges par circo) unique
-            # la somme des nombres de sièges concernés doit être le nombre total de sièges dans la chambre
-            # le nombre de sièges par circo doit être un diviseur du nombre de sièges concernés
-            # ou 0, et c'est comme si il était égal au nombre de sièges concernés
 
         @property
         def seats(self):
-            # seat=0
-            # for uhouse in self.children:
-            #     seat+=uhouse.seats
-            # return seat
             return sum([circo[0] for circo in self.circos])
 
         def classes(self):
             '''
             Divides the electoral districts in classes,
             where in a class every district elects the same number of people
-            The idea is that to elect each class avary citizen needs to vote
+            The idea is that to elect each class every citizen needs to vote
+            Returns a dict of {(nseatspercirco, funk) : ncircos}
             '''
             clss = dict()
             for circo in self.circos:
