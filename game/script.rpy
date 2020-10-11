@@ -30,7 +30,6 @@ define audio.anthems = ["/music/china-national-anthem-instrumental.mp3",
 # The game starts here.
 
 label start:
-    call after_load
     scene expression '#fff'
 
     # These display lines of dialogue.

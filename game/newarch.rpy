@@ -1,8 +1,18 @@
-default maxrows = 75
-default aafactor = 1
+define maxrows = 75
+define aafactor = 1
 
 init python:
     import math
+
+    totals = []
+    for rows in range(1, maxrows):
+        tot = 0
+        rad = 1/float(4*rows-2)
+        for r in range(1, rows+1):
+            R = .5 + 2*(r-1)*rad
+            tot += int(math.pi*R/(2*rad))
+        totals.append(tot)
+    # totals[i] : nombre max de sièges quand on a i+1 rangs
 
     class Newarch(renpy.Displayable):
         '''
@@ -101,15 +111,3 @@ init python:
 
     def newarch(the_list, *args, **kwargs):
         return At(Newarch(the_list, *args, **kwargs), Transform(zoom=1.0/aafactor))
-
-label after_load:
-    python:
-        totals = []
-        for rows in range(1, maxrows):
-            tot = 0
-            rad = 1/float(4*rows-2)
-            for r in range(1, rows+1):
-                R = .5 + 2*(r-1)*rad
-                tot += int(math.pi*R/(2*rad))
-            totals.append(tot)
-        # totals[i] : nombre max de sièges quand on a i+1 rangs
