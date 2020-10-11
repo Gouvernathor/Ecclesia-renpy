@@ -55,10 +55,7 @@ screen constit(npage, pagename=''):
                     null height gui.choice_spacing
                     for khouse index khouse in range(nHouses):
                         button:
-                            xmargin 30
-                            style_prefix None
-                            xalign 0.5
-                            key_events True
+                            style_prefix "constform_name"
                             action [If(housenames[khouse].strip(), None, SetDict(housenames, khouse, _("House n°")+str(khouse+1))), housenames_edit[khouse].Toggle()]
                             # action housenames_edit[khouse].Toggle()
                             input:
@@ -225,10 +222,7 @@ screen constit(npage, pagename=''):
                     if execorigin:
                         if nseats==1:
                             button:
-                                xmargin 30
-                                style_prefix None
-                                xalign 0.5
-                                key_events True
+                                style_prefix "constform_name"
                                 action [If(exenamea.strip(), None, SetScreenVariable('exenamea', _("Chancellor"))), exenamea_edit.Toggle()]
                                 input:
                                     value exenamea_edit
@@ -237,10 +231,7 @@ screen constit(npage, pagename=''):
                                     pixel_width 1000
                         elif nseats in {2, 3}:
                             button:
-                                xmargin 30
-                                style_prefix None
-                                xalign 0.5
-                                key_events True
+                                style_prefix "constform_name"
                                 action [If(exenameb.strip(), None, SetScreenVariable('exenameb', _("President"))), exenameb_edit.Toggle()]
                                 input:
                                     prefix _('Co-')
@@ -251,10 +242,7 @@ screen constit(npage, pagename=''):
                                     pixel_width 1000
                         else:
                             button:
-                                xmargin 30
-                                style_prefix None
-                                xalign 0.5
-                                key_events True
+                                style_prefix "constform_name"
                                 action [If(exenamec.strip(), None, SetScreenVariable('exenamec', _("National"))), exenamec_edit.Toggle()]
                                 input:
                                     suffix _(' Council')
@@ -490,22 +478,45 @@ style constform_text:
     color '#000'
 style constform_radio_text is constform_text
 style constform_selector_text is constform_text
+style constform_selector_text:
+    ypadding 6
+
+style constform_name_button:
+    xmargin 30
+    xpadding 15
+    xalign .5
+    key_events True
+style constform_keys_button is constform_name_button
+style constform_keys_button:
+    xmargin 0
+    # xpadding 100
+    xminimum 200
+    xalign 1.0
+    background '#00000006'
+style constform_keys_input is constform_text
+style constform_keys_input:
+    xalign .5
 
 style big_blue_button:
     background '#009'
     hover_background '#03f'
     insensitive_background '#005'
     xalign .5
+    xpadding 20
 style big_blue_button_text:
     color '#fff'
     insensitive_color '#aaa'
     size 50
+style big_red_button is big_blue_button
 style big_red_button:
-    background '#900'
-    hover_background '#f00'
-    insensitive_background '#500'
-    xalign .5
+    background '#f00'
+    hover_background '#f30'
+    insensitive_background '#f88'
+    xpadding 25
 style big_red_button_text is big_blue_button_text
+style big_red_button_text:
+    size 80
+    bold True
 
 init python:
     def create_houses(nhouses, housenames, houseperiods, houseseats):
