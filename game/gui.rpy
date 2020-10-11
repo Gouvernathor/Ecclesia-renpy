@@ -60,7 +60,7 @@ define gui.text_font = 'humanist-521-bt.ttf'
 # define gui.text_font = 'marianne-regular-webfont.otf'
 init python:
     config.font_replacement_map['humanist-521-bt.ttf', True, False] = ('humanist-521-bold-bt.ttf', False, False)
-    # config.font_replacement_map['marianne-regular-webfont.otf', True, False] = ('marianne-bold-webfont.otf', False, False)
+    config.font_replacement_map['marianne-regular-webfont.otf', True, False] = ('marianne-bold-webfont.otf', False, False)
 
 ## The font used for character names.
 # define gui.name_text_font = "DejaVuSans.ttf"

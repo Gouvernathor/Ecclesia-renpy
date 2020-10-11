@@ -13,8 +13,7 @@ label constitution_form:
     stop music fadeout 1.0
     e "hey"
     pause
-    # hide screen constit
-    jump start
+    return
 
 screen constit(npage, pagename=''):
     add Null() # pour empécher l'utilisateur de cliquer et de quitter la création de constitution
@@ -110,7 +109,6 @@ screen constit(npage, pagename=''):
                         #             textbutton "-1" action SetDict(housestaggering, khouse, housestaggering[khouse]-1) sensitive (housestaggering[khouse]-1>=2)
                         #             text str(housestaggering[khouse])
                         #             textbutton "+1" action SetDict(housestaggering, khouse, housestaggering[khouse]+1) sensitive (housestaggering[khouse]+1<=houseseats[khouse])
-                        #TODO ajouter le nombre de counties par electoral districts
                         null height gui.choice_spacing
                     null height gui.pref_spacing
                     textbutton _("Continue"):
@@ -371,13 +369,51 @@ screen constit(npage, pagename=''):
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive electionfunc in validfuncs((distindex if executive.seats>1 else 1))
-                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), electionfunc, 0, execperiod), Return('population')]
+                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), electionfunc, 0, execperiod), Return('trivia')]
                     null height gui.choice_spacing+gui.pref_spacing
+
+                elif pagename=='trivia':
+                    hbox:
+                        xfill True
+                        text _("Article {} : National symbols").format(npage) xalign .5 color gui.hover_color size 50
+                    null height gui.choice_spacing+gui.pref_spacing
+                    default key1 = ""
+                    default key1_edit = ScreenVariableInputValue('key1', default=False)
+                    default key2 = ""
+                    default key2_edit = ScreenVariableInputValue('key2', default=False)
+                    # ajouter un input de clés de génération pour les opinions et pour les élections
+                    hbox:
+                        xfill True
+                        style_prefix "constform_keys"
+                        text _("National Motto") yalign .5
+                        button:
+                            action key1_edit.Toggle()
+                            input:
+                                italic True
+                                value key1_edit
+                                pixel_width 1000
+                                copypaste True
+                    null height gui.choice_spacing
+                    hbox:
+                        xfill True
+                        style_prefix "constform_keys"
+                        text _("National Anthem") yalign .5
+                        button:
+                            action key2_edit.Toggle()
+                            input:
+                                italic True
+                                value key2_edit
+                                pixel_width 1000
+                                copypaste True
+                    null height gui.pref_spacing
+                    textbutton _("Continue"):
+                        style "big_blue_button"
+                        action [If(key1, SetVariable("citikey", key1), None), If(key2, SetVariable("electkey", key2), None), Return('population')]
 
                 elif pagename=='population':
                     hbox:
                         xfill True
-                        text _("Annex 2 : Population") xalign .5 color gui.hover_color size 50
+                        text _("Annex 1 : Population") xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
                     default citizens = 10
                     # afficher le nombre de subdivisions administratives (PPCM de tous les nombres de circos)
@@ -394,21 +430,21 @@ screen constit(npage, pagename=''):
                         # le nombre de citoyens par circo dans les chambres sera un multiple de ce nombre
                     hbox:
                         xfill True
-                        text _("Enlightened minds per county")
+                        text _("Enfranchised citizens per county")
                         hbox:
                             xalign 1.0
                             yalign .5
                             style_prefix "constform_selector"
                             textbutton "-1" action SetScreenVariable("citizens", citizens-1) sensitive (citizens-1 > 0)
                             text str(citizens)
-                            textbutton "+1" action SetScreenVariable("citizens", citizens+1) sensitive (citizens+1 < 50)
+                            textbutton "+1" action SetScreenVariable("citizens", citizens+1) sensitive (citizens+1 <= 50)
                     # null height gui.choice_spacing
                     # demander l'échelle de représentation
                         # pour avoir le nombre RP d'habitants dans les subdivisions et dans le pays
                         # sans incidence sur la simulation
                     hbox:
                         xfill True
-                        text _("Enlightened minds per inhabitant")
+                        text _("Portion of enfranchised inhabitants")
                         hbox:
                             xalign 1.0
                             yalign .5
@@ -428,6 +464,14 @@ screen constit(npage, pagename=''):
                         textbutton str(ncounties()*citizens*popscale):
                             selected True
                             text_color '#000'
+                    # afficher le nombre total de citoyens (calculé pour l'instant)
+                    hbox:
+                        xfill True
+                        style_prefix "constform_radio"
+                        text _("Total enfranchized population") yalign .5
+                        textbutton str(ncounties()*citizens):
+                            selected True
+                            text_color '#000'
                     # afficher le nombre d'habitant par parlementaire (calculé, non-stocké)
                     hbox:
                         xfill True
@@ -437,19 +481,26 @@ screen constit(npage, pagename=''):
                             selected True
                             text_color '#000'
                     null height gui.pref_spacing
-                    textbutton _("Continue"):
-                        style "big_blue_button"
+                    # textbutton _("Continue"):
+                    #     style "big_blue_button"
+                    #     sensitive True
+                    #     action [Function(populate, citizens), Return('partis')]
+                    # null height gui.choice_spacing+gui.pref_spacing
+                    textbutton _("ENACT"):
+                        style "big_red_button"
                         sensitive True
-                        action [Function(populate, citizens), Return('partis')]
+                        action [Function(populate, citizens), Return('finish')]
                     null height gui.choice_spacing+gui.pref_spacing
+                    # dernière page, bouton rouge pour enact la constitution
 
                 elif pagename=='partis':
+                    # page suspendue
+                    # les partis n'ont rien à faire dans la constitution
+                    # et grosse flemme de faire un menu pour les customiser
                     hbox:
                         xfill True
-                        text _("Annex 3 : Political Organizations") xalign .5 color gui.hover_color size 50
+                        text _("Annex 2 : Political Organizations") xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
-                    # TODO
-                    # dernière page, bouton rouge pour enact la constitution
                 # add "prison03"# maxsize (.8, 5.0)
                 # add "prison03"# maxsize (.8, 5.0)
                 # add "prison03"# maxsize (.8, 5.0)
