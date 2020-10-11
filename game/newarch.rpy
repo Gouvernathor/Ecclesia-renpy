@@ -27,6 +27,8 @@ init python:
             self.totals = totals
 
         def render(self, width, height, st, at):
+            width = max(self.style.xminimum, width)
+            height = max(self.style.yminimum, height)
             width*=aafactor
             height*=aafactor
             if width>2*height:
