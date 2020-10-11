@@ -396,7 +396,7 @@ screen constit(npage, pagename=''):
                         xfill True
                         text _("Annex 1 : Population") xalign .5 color gui.hover_color size 50
                     null height gui.choice_spacing+gui.pref_spacing
-                    default citizens = 10
+                    default citizens = max(10, minncitizen())
                     # afficher le nombre de subdivisions administratives (PPCM de tous les nombres de circos)
                     hbox:
                         xfill True
@@ -416,7 +416,7 @@ screen constit(npage, pagename=''):
                             xalign 1.0
                             yalign .5
                             style_prefix "constform_selector"
-                            textbutton "-1" action SetScreenVariable("citizens", citizens-1) sensitive (citizens-1 > 0)
+                            textbutton "-1" action SetScreenVariable("citizens", citizens-1) sensitive (citizens-1 > max(0, minncitizen()))
                             text str(citizens)
                             textbutton "+1" action SetScreenVariable("citizens", citizens+1) sensitive (citizens+1 <= 50)
                     # null height gui.choice_spacing
@@ -542,7 +542,7 @@ style big_blue_button_text:
 style big_red_button is big_blue_button
 style big_red_button:
     background '#f00'
-    hover_background '#f30'
+    hover_background '#f32'
     insensitive_background '#f88'
     xpadding 25
 style big_red_button_text is big_blue_button_text
@@ -623,6 +623,17 @@ init python:
             classes = house.classes()
             numbers += [classes[classe] for classe in classes]
         return ppcm(numbers)
+
+    def minncitizen():
+        mins = set()
+        ncou = ncounties()
+        for house in houses+([executive] if executive.origin=='people' else []):
+            clss = house.classes()
+            for classe in clss:
+                mins.add(classe[0]/(ncou/clss[classe]))
+                # nombre d'élus par circo divisé par le nombre de comtés dans la circo
+        # prendre le max
+        return max(mins)
 
     def populate(ncitizens):
         global citizenpool
