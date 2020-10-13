@@ -578,15 +578,8 @@ init python:
     def applyelec(house, circoseats, fonk, thresh, period=60):
         # house.elect_types = [(house.seats(), fonk, circoseats)]
         if fonk in proportionals and thresh:
-            def newfonk(*args, **kwargs):
-                # print(newfonk.thresh)
-                return fonk(*args, thresh=newfonk.thresh, **kwargs)
-                # return fonk(*args, **kwargs)
-            # fonk = newfonk
-            newfonk.thresh=thresh
-        else:
-            newfonk = fonk
-        house.circos = [[circoseats, newfonk, []] for k in range(house.seats/circoseats)]
+            fonk = renpy.curry(fonk)(thresh=thresh)
+        house.circos = [[circoseats, fonk, []] for k in range(house.seats/circoseats)]
         if house == executive:
             house.election_period = period
         return
