@@ -107,16 +107,21 @@ init python:
     class Party(Citizen):
         '''
         A political party, defending a set of opinions
+        If a color is given, the alignment parameter is ignored
         '''
         def __init__(self,
                      name,
                      alignment=renpy.random.random(),
+                     color=None,
                      *args,
                      **kwargs
                      ):
             super(Party, self).__init__(*args, **kwargs)
             self.name = name
-            self.alignment = alignment # alignement gauche/droite, implique sa couleur et son classement dans l'hémicycle
+            if color:
+                self.color = color # utilise le setter
+            else:
+                self.alignment = alignment # alignement gauche/droite, implique sa couleur et son classement dans l'hémicycle
 
         @property
         def color(self):
@@ -125,6 +130,11 @@ init python:
             teinte (premier composant) pris entre .0 (rouge) et .66 (bleu) ou .75 (bleu-violet)
             '''
             return Color(hsv=(self.alignment*.75, 1.0, 1.0))
+
+        @color.setter
+        def color(self, value):
+            value = Color(value)
+            self.alignment = (value.hsv[0]/.75)
 
     def pollopinions(pool):
         gathered = [[0 for k in range(2*opinrange+1)] for k in range(nopinions)]
