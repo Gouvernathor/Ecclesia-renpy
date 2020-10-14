@@ -125,3 +125,10 @@ init python:
             teinte (premier composant) pris entre .0 (rouge) et .66 (bleu) ou .75 (bleu-violet)
             '''
             return Color(hsv=(self.alignment*.75, 1.0, 1.0))
+
+    def pollopinions(pool):
+        gathered = [[0 for k in range(2*opinrange+1)] for k in range(nopinions)]
+        for cit in pool:
+            for k in range(nopinions):
+                gathered[k][cit.opinions[k]+opinrange] += 1
+        return gathered
