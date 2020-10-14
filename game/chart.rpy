@@ -34,6 +34,8 @@ init python:
             #     raise ValueError("The amount of labels does not match the amount of values")
             if bars_colors and len(bars_colors) != len(values):
                 raise ValueError("The amount of bar colors does not match the amount of values")
+            if rows_every and rows_every<0:
+                raise ValueError("The rows_every parameter should not be negative")
             self.values = values
             self.labels = labels
             self.bars_colors = bars_colors
@@ -68,7 +70,13 @@ init python:
                                   )
                     print(zip([1.0*k*width/(len(self.values)-1) for k in range(len(self.values))], [(1-1.0*val/max(self.values))*height for val in self.values]))
                 if self.rows_every:
-                    pass
+                    sum = 1.0*self.rows_every*height/max(self.values)
+                    while sum <= height:
+                        canvas.line('#000',
+                                    (0, height-sum),
+                                    (width, height-sum)
+                                    )
+                        sum += 1.0*self.rows_every*height/max(self.values)
                 if self.draw_spokes:
                     for k in range(1, len(self.values)):
                         canvas.line('#000',
