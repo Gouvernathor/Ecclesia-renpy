@@ -11,8 +11,6 @@ label constitution_form:
         call screen constit(npage, pagename=_return) with Fade(.5, .5, .5, color='#fff')
     with Dissolve(3)
     stop music fadeout 1.0
-    e "hey"
-    pause
     return
 
 screen constit(npage, pagename=''):
@@ -563,6 +561,7 @@ init python:
     def validnpdistricts(nseats):
         '''
         Les nombres valides d'élus par circonscription, pour partager nseats sièges
+        Aka les diviseurs de nseats, 1 inclus et nseats exclus
         '''
         return [x for x in range(1, nseats+1) if (float(nseats)/x) == float(int(nseats/x)) and x != nseats]
 
