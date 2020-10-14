@@ -11,11 +11,20 @@ init python:
             renpy.random.Random(electkey).shuffle(partees)
             for parti in partees:
                 # on fait la moyenne des différences d'opinion
-                opns[parti] = sum([abs(citizen.opinions[k]-parti.opinions[k]) for k in range(nopinions)])
+                opns[parti] = disagree(citizen, parti)
             # sélectionner le parti avec lequel le désaccord est le plus petit
             # lui ajouter une voix
             scores[min(opns, key=opns.get)] += 1
         return scores
+
+    def disagree(cita, citb):
+        '''
+        Compares the opinions between two citizens,
+        or between a citizen and a parti,
+        or between two partis
+        The score is strictly positive, the higher the stronger the disagreement
+        '''
+        return sum([abs(cita.opinions[k]-citb.opinions[k]) for k in range(nopinions)])
 
     def election(house):
         '''
