@@ -1,4 +1,6 @@
 init python:
+    from collections import OrderedDict
+
     def vote((nseats, funk, citizens)):
         '''
         Fournit pour une circo donnée en argument
@@ -33,8 +35,10 @@ init python:
         randomobj = renpy.random.Random(electkey)
         scoress = []
         for circo in house.circos:
-            scoress.append(circo[1](vote(circo), nseats=circo[0], randomobj=randomobj))
-        joinn = join_results(scoress)
+            scoress.append(circo[1](vote(circo).items(), nseats=circo[0], randomobj=randomobj))
+        joinedlist = join_results(scoress).items()
+        joinedlist.sort(key=lambda p:p[0].alignment)
+        joinn = OrderedDict(joinedlist)
         house.members = joinn
         return joinn
 
@@ -94,10 +98,10 @@ init python:
         Tire au sort parmi une population,
         où chaque personne tirée au sort représente son parti préféré
         '''
-        retlist = [(tup[0], 0) for tup in scores]
+        retlist = [[tup[0], 0] for tup in scores]
         for seat in range(nseats):
             sum = 0
-            ran = randomobj.random()*sub
+            ran = randomobj.random()*sum
             for k in range(len(scores)):
                 sum += scores[k][1]
                 if ran<sum:
@@ -198,9 +202,7 @@ init python:
             for parti, nseats in scores:
                 members[parti] += nseats
         # si on veut retirer les partis sans sièges :
-        for parti in members:
-            if not members[parti]:
-                members.remoe(parti)
+        members = {parti: sieges for parti, sieges in members.items() if sieges}
         return members
 
 define proportionals = [# proportionnelle_Hare,
