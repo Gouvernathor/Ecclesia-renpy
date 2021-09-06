@@ -16,9 +16,6 @@ init python:
         # return liz
         return [house for house in houses if not elapsed%house.election_period]
 
-# _(attrib_function.__name__)
-# donne le nom (à traduire, même en lang=None) de la fonction de répartition
-
     class House():
         '''
         A whole House, in which people all vote with the same power

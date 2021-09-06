@@ -93,7 +93,6 @@ init python:
         '''
         Tire au sort parmi une population,
         où chaque personne tirée au sort représente son parti préféré
-        Avec un seul siège, équivalente à une majoritaire random
         '''
         retlist = [(tup[0], 0) for tup in scores]
         for seat in range(nseats):
@@ -110,6 +109,7 @@ init python:
         '''
         Tire au sort parmi les candidats, en donnant un poids égal à tous les partis
         indépendemment de la popularité de chacun
+        Tellement facile de spammer les candidatures et de multiplier sa probabilité de victoire qu'un peu vide de sens
         '''
         npartis = len(scores)
         scores = [list(tup)+[0] for tup in scores]
@@ -117,11 +117,13 @@ init python:
             scores[randomobj.randint(0, npartis-1)][2] += 1
         return [(tup[0], tup[2]) for tup in scores]
 
-    def proportionnelle_Hondt(scores, nseats, thresh=False, **kwargs):
+    def proportionnelle_Hondt(scores, nseats, thresh=False, contingent=None, **kwargs):
         '''
         Implémente la proportionnelle d'Hondt, à plus forte moyenne, avec seuil possible
-        Attention : si aucun parti ne dépasse le seuil, renvoie None
+        Si aucun parti ne dépasse le seuil, relance l'attribution des votes sans seuil
+        ou via la méthode fournie par `contingent`.
         '''
+        scores = list(scores)
         if thresh:
             sum = 0
             for tup in scores:
@@ -130,7 +132,7 @@ init python:
                 if float(tup[1])/sum < thresh:
                     scores.remove(tup)
         if scores == []:
-            return None
+            return (contingent or proportionnelle_Hondt)(scores, nseats, **kwargs)
         scores = [list(tup)+[0] for tup in scores]
         attrib = 0
         for k in range(nseats):
@@ -207,4 +209,5 @@ define proportionals = [proportionnelle_Hare,
 define electypes = [majoritaire,
                     # majoritaire_random,
                     tirage_au_sort_population,
-                    tirage_au_sort_partis]+proportionals
+                    # tirage_au_sort_partis
+                    ]+proportionals
