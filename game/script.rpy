@@ -4,7 +4,7 @@
 # name of the character.
 
 define e = Character("Eileen")
-define boldChar = Character(who_prefix='{b}', who_suffix='{/b}')
+define boldChar = Character(who_bold=True)
 define gvt = Character("GOUVERNEMENT", boldChar, who_font='marianne-regular-webfont.otf')
 
 define maxnhouses = 2 # adapter aussi la création de constitution
