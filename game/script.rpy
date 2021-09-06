@@ -24,7 +24,8 @@ define audio.anthems = ["/music/china-national-anthem-instrumental.mp3",
 "/music/north-korea-national-anthem-instrumental.mp3",
 "/music/russia-national-anthem-instrumental.mp3",
 "/music/united-kingdom-national-anthem-instrumental.mp3",
-"/music/united-states-of-america-national-anthem-instrumental.mp3"] + ([] if config.developer else ["/music/france-national-anthem-la-marseillaise-instrumental.mp3"])
+"/music/united-states-of-america-national-anthem-instrumental.mp3",
+] + ([] if config.developer else ["/music/france-national-anthem-la-marseillaise-instrumental.mp3"])
 
 
 # The game starts here.
@@ -45,8 +46,6 @@ label start:
     show sand6
     pause
     show bashar
-    pause
-    show expression Holo('bashar') as bashar
     pause
 
     e "Once you add a story, pictures, and music, you can release it to the world!"
