@@ -37,11 +37,10 @@ screen houses:
         mousewheel True
         draggable True
         align (.5, .5)
-        default houzes = ([executive] if executive else [])+houses
         # add Solid("#eee") xalign .5
         vbox:
             xfill True
-            for house in houzes:
+            for house in ([executive] if executive else [])+houses:
                 text house.name xalign .5 color gui.hover_color size 50
                 add house.displayable(xalign=.5, ysize=500)
                 #TODO lister les partis en présence avec les nombres de sièges
