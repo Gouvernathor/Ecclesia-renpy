@@ -108,7 +108,7 @@ init python:
         '''
         def __init__(self,
                      name,
-                     alignment=renpy.random.random(),
+                     alignment=None,
                      color=None,
                      *args,
                      **kwargs
@@ -117,8 +117,10 @@ init python:
             self.name = name
             if color:
                 self.color = color # utilise le setter
-            else:
+            elif alignment is not None:
                 self.alignment = alignment # alignement gauche/droite, implique sa couleur et son classement dans l'hémicycle
+            else:
+                self.alignment = renpy.random.random()
 
         @property
         def color(self):
