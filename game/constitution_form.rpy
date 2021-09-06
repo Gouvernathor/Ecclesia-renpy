@@ -8,7 +8,7 @@ label constitution_form:
             $ renpy.random.shuffle(audio.anthems)
             play music anthems fadein .5 fadeout 1.0
         $ npage += 1
-        call screen constit(npage, pagename=_return) with Fade(.5, .5, .5, color='#fff')
+        call screen constit(npage, pagename=_return, _with_none=False) with Fade(.5, .5, .5, color='#fff')
     with Dissolve(3)
     stop music fadeout 1.0
     return
