@@ -13,7 +13,7 @@ default executive = None
 default popscale = 10000
 default citizenpool = []
 default citikey = None
-default electkey = None
+default electrobj = renpy.random.Random(None)
 default partis = []
 
 define audio.anthems = ["/music/china-national-anthem-instrumental.mp3",

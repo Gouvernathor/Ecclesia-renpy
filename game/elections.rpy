@@ -23,7 +23,7 @@ init python:
         for citizen in citizens:
             opns = dict() # son désaccord à propos de chaque parti
             partees = partis[:] # on copie la liste pour la mélanger
-            renpy.random.Random(electkey).shuffle(partees)
+            electrobj.shuffle(partees)
             for parti in partees:
                 # on fait la moyenne des différences d'opinion
                 opns[parti] = disagree(citizen, parti)
@@ -43,7 +43,7 @@ init python:
         for citizen in citizens:
             opns = dict() # son désaccord à propos de chaque parti
             partees = partis[:] # on copie la liste pour la mélanger
-            renpy.random.Random(electkey).shuffle(partees)
+            electrobj.shuffle(partees)
             for parti in partees:
                 # on fait la moyenne des différences d'opinion
                 opns[parti] = disagree(citizen, parti)
@@ -71,10 +71,9 @@ init python:
         '''
         Renouvelle intégralement la chambre parlementaire fournie
         '''
-        randomobj = renpy.random.Random(electkey)
         scoress = []
         for circo in house.circos:
-            scoress.append(circo[1](vote(circo).items(), nseats=circo[0], randomobj=randomobj))
+            scoress.append(circo[1](vote(circo).items(), nseats=circo[0], randomobj=electrobj))
         joinedlist = join_results(scoress).items()
         joinedlist.sort(key=lambda p:p[0].alignment)
         joinn = OrderedDict(joinedlist)

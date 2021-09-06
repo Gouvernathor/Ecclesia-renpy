@@ -385,7 +385,7 @@ screen constit(npage, pagename=''):
                     null height gui.pref_spacing
                     textbutton _("Continue"):
                         style "big_blue_button"
-                        action [If(key1, SetVariable("citikey", key1), None), If(key2, SetVariable("electkey", key2), None), Return('population')]
+                        action [If(key1, SetVariable("citikey", key1)), If(key2, SetVariable("electrobj", renpy.random.Random(key2))), Return('population')]
 
                 elif pagename=='population':
                     use constit_title2(_("Annex 1 : Population"))
