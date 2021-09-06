@@ -152,11 +152,12 @@ init python:
             choices = zip(choices, probs)
         total = sum(w for c, w in choices)
         r = randomobj.uniform(0, total)
+        # print(choices)
         for c, w in choices:
-            if 0 >= r:
-                return c
             r -= w
-        assert False, "Shouldn't get here"
+            if 0 > r:
+                return c
+        raise Exception("Shouldn't get here")
 
     def generate_partis(npartis):
         '''
