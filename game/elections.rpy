@@ -1,14 +1,27 @@
 init python:
     from collections import OrderedDict
 
-    def vote((nseats, funk, citizens)):
+    class Function_Wrapper:
+        def __init__(self, func, name):
+            self.func = func
+            self.name = name
+
+        def __call__(self, *args, **kwargs):
+            return self.func(*args, **kwargs)
+
+    class VotingMethod(Function_Wrapper): pass
+    class AttribMethod(Function_Wrapper): pass
+
+    # Fournit pour une circo donnée en argument
+    # le nombre de voix reçue par chaque parti/candidat/liste
+    def vote_unique((nseats, funk, citizens)):
         '''
-        Fournit pour une circo donnée en argument
-        le nombre de voix reçue par chaque parti/candidat/liste
+        Chaque électeur vote uniquement pour son parti préféré
+        Renvoie un dictionnaire reliant chaque parti à son nombre de voix
         '''
         scores = {parti:0 for parti in partis}
         for citizen in citizens:
-            opns = dict() # la liste de son désaccord à propos de chaque parti
+            opns = dict() # son désaccord à propos de chaque parti
             partees = partis[:] # on copie la liste pour la mélanger
             renpy.random.Random(electkey).shuffle(partees)
             for parti in partees:
@@ -18,6 +31,32 @@ init python:
             # lui ajouter une voix
             scores[min(opns, key=opns.get)] += 1
         return scores
+
+    def classement((nseats, funk, citizens)):
+        '''
+        Les électeurs classent tous les candidats par ordre de préférence
+        Renvoie un dictionnaire reliant chaque parti à
+            un dictionnaire reliant la position dans le classement au nombre de votants l'ayant classé là
+            les positions sont de 0 à npartis-1 inclus, 1 étant le meilleur
+        '''
+        scores = {parti:([0]*len(partis)) for parti in partis}
+        for citizen in citizens:
+            opns = dict() # son désaccord à propos de chaque parti
+            partees = partis[:] # on copie la liste pour la mélanger
+            renpy.random.Random(electkey).shuffle(partees)
+            for parti in partees:
+                # on fait la moyenne des différences d'opinion
+                opns[parti] = disagree(citizen, parti)
+            # sélectionner le parti avec lequel le désaccord est le plus petit
+            # lui ajouter une voix
+            order = [parti for parti in opns]
+            order.sort(key=opns.get)
+            for k, parti in enumerate(order):
+                scores[parti][k] += 1
+        return scores
+
+    vote = VotingMethod(vote_unique, "Vote unique pour le parti préféré")
+    classment = VotingMethod(classement, "Classement des candidats par ordre de préférence")
 
     def disagree(cita, citb):
         '''
