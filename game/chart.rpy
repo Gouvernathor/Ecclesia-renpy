@@ -68,7 +68,7 @@ init python:
                                   False,
                                   zip([1.0*k*width/(len(self.values)-1) for k in range(len(self.values))], [(1-1.0*val/max(self.values))*height for val in self.values])
                                   )
-                    print(zip([1.0*k*width/(len(self.values)-1) for k in range(len(self.values))], [(1-1.0*val/max(self.values))*height for val in self.values]))
+                    # print(zip([1.0*k*width/(len(self.values)-1) for k in range(len(self.values))], [(1-1.0*val/max(self.values))*height for val in self.values]))
                 if self.rows_every:
                     sum = 1.0*self.rows_every*height/max(self.values)
                     while sum <= height:
