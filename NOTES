@@ -10,7 +10,8 @@ on génère là aussi une préférence pour chaque sujet par parti
     aléatoire, mais pondérer en fonction de la popularité de chaque avis sur chaque sujet
         il faut une part d'aléatoire, parce que les vrais partis ne lisent pas dans les pensées des gens
         éventuellement essayer de rassembler les électeurs en ayant le même avis sur des sujets qui vont ensemble, mais comment ?
-pour chaque élection, pour chaque votant-type, on choisit le parti qui lui correspond le mieux et pour qui il va voter
+pour chaque élection, pour chaque votant-type, on exécute la fonction qui donne son vote en fonction du système de vote
+    dans le cas d'un first-past-the-post, on choisit le parti qui lui correspond le mieux et pour qui il va voter
     le vote utile n'est pas simulé
 on désigne le résultat en fonction des votes et de la méthode de désignation des élus
 on fait tourner la simulation parlementaire pendant 1 à 3 mandats
@@ -29,11 +30,29 @@ on fait tourner la simulation parlementaire pendant 1 à 3 mandats
         les moyennes et médianes étant indiquées par des barres verticales
     on peut faire des statistiques, des pourcentages globaux de fidélité aux avis du peuple et de chaque parti
 
+méthodes de vote
+    gagnant unique, uninominal (par circonscription)
+        a vote unique (pour un candidat)
+        b classement des candidats entre eux
+        c approbation booléenne de chaque candidat
+        d note pour chaque candidat
+    gagnants multiples (par circonscription)
+        A vote unique (pour une liste)
+méthodes d'attribution
+    a c d majorité simple
+    a c d majorité absolue ou qualifiée (avec vote de secours)
+    b instant runoff
+    b Borda (somme des classements, le score le plus bas gagne)
+    b Condorcet (avec attribution/vote de secours)
+    A proportionnelle de Hare (avec ou sans seuil)
+    A proportionnelle d'Hondt (avec ou sans seuil)
+    a A tirage au sort (répété et avec remise si plurinominal)
+
 décisions d'implémentation :
 # supprimer le staggering dans les chambres
 #    on ne sait pas quoi mettre comme élus au début de la simulation
 #    problèmes de divisibilité pour coller aux US
-#    applicable que pour les US
+#    applicable que pour les US et le sénat français
 # retirer les majoritaires aléatoires
 calculer l'exécutif en cours de partie uniquement si il a un rôle dans le processus législatif
 #     genre le veto typiquement
@@ -44,7 +63,20 @@ calculer l'exécutif en cours de partie uniquement si il a un rôle dans le proc
         # automatiser, et uniformiser la taille de population par circo
     # nombre d'habitants-représentatifs par subdivision (au moins 10 à 25 par circo pour avoir une vraie simulation)
     long et chiant, ajouter des presets, par pays par exemple
-faire un user-defined displayable pour les graphes (de fin de partie et autres)
+# faire un user-defined displayable pour les graphes (de fin de partie et autres)
+
+Caveats et facteurs ignorés (volontairement ou non)
+le choix des individus élus (seul leur programme est pris en compte)
+    convient à des mandats impératifs ou semi-impératifs, moins à des mandats représentatifs
+le changement d'opinion de la population au cours du temps
+le changement de politique d'un gouvernement ou d'un parlement au cours du temps sans élection
+    par exemple le départ de la Ligue du gouvernement italien en 2019 n'aurait pas été prédit
+le bagage politique et juridique initial
+    le pays est considéré en état de vide juridique total en début de simulation
+les techniques de manipulation de vote
+    le vote utile, dans le scrutin majoritaire uninominal
+répartition des opinions dans la population
+répartition des partis par rapport aux opinions
 
 graphe :
 borders
