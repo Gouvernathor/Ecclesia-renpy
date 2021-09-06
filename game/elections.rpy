@@ -33,7 +33,7 @@ init python:
         randomobj = renpy.random.Random(electkey)
         scoress = []
         for circo in house.circos:
-            scoress.append(circo[1](vote(circo), nseats=circo[0]))
+            scoress.append(circo[1](vote(circo), nseats=circo[0], randomobj=randomobj))
         joinn = join_results(scoress)
         house.members = joinn
         return joinn
