@@ -203,7 +203,7 @@ init python:
                 members.remoe(parti)
         return members
 
-define proportionals = [proportionnelle_Hare,
+define proportionals = [# proportionnelle_Hare,
                         proportionnelle_Hondt]
 
 define electypes = [majoritaire,
