@@ -142,3 +142,62 @@ init python:
             for k in range(nopinions):
                 gathered[k][cit.opinions[k]+opinrange] += 1
         return gathered
+
+    def weighted_choice(choices, probs=None, randomobj=renpy.random.Random()):
+        '''
+        Weighted random choice between the first element of each element of `choices`
+        It's also possible to give a list of possibilities as `choices` and a list of weights as `probs`
+        In that case, any exceeding weight is ignored, and any missing weight is assumed to be 0
+        '''
+        if probs:
+            choices = zip(choices, probs)
+        total = sum(w for c, w in choices)
+        r = randomobj.uniform(0, total)
+        for c, w in choices:
+            if 0 >= r:
+                return c
+            r -= w
+        assert False, "Shouldn't get here"
+
+    def generate_partis(npartis):
+        '''
+        Adds `npartis` partis to the list of partis
+        Does not replace the existing ones
+        '''
+        poll = pollopinions(citizenpool)
+        lpartynamepool = partynamepool+(npartis-21)*[_("")]
+        renpy.random.shuffle(lpartynamepool)
+        randomobj = renpy.random.Random(citikey)
+        for k in range(npartis): # choix random pondéré pour chaque sujet
+            ops = []
+            for nop in range(nopinions):
+                ops.append(weighted_choice(range(2*opinrange+1), poll[nop], randomobj))
+            partis.append(Party(lpartynamepool.pop(), opinions=ops, alignment=randomobj.random()))
+        # sinon choix pondéré avec les opinions déjà prises par les autres partis ?
+
+define partynamepool = [_("Liberal-Democrat Party"),
+                 _("Liberal-Conservative Party"),
+                 _("Socialist Party"),
+                 _("Democratic Party"),
+                 _("People's Party"),
+                 _("Republican Party"),
+                 _("Freedom Party"),
+                 _("Green Party"),
+                 _("Good Old Party"),
+                 _("Democratic Movement"),
+                 _("Union for the New Republic"),
+                 _("Gathering For the Republic"),
+                 _("Union of the Independant Right"),
+                 _("National Front"),
+                 _("National Gathering"),
+                 _("Pirate Party"),
+                 _("Communist Party"),
+                 _("Socialist Worker's Party"),
+                 _("New Anti-capitalist Party"),
+                 _("Independant Worker's Party"),
+                 _("Workers' Struggle"),
+                 _("Constitution Party"),
+                 _("Libertarian Party"),
+                 _("Northern League"),
+                 _("Five-Stars Movement"),
+                 ]
