@@ -16,7 +16,7 @@ screen displayer:
         xalign 1.0
         yalign 0.0
         padding (0, 0, 0, 0)
-        action [Show("stats", CropMove(.5, "custom", (0.0, 0.0, 0.0, 0.0), (1.0, 0.0), (0.0, 0.0, 1.0, 1.0), (0.0, 0.0)))]
+        action [Show("stats", CropMove(.5, "custom", (1.0, 0.0, 0.0, 0.0), (1.0, 0.0), (0.0, 0.0, 1.0, 1.0), (0.0, 0.0)))]
         add At(Solid('#08f', xsize=100, ysize=100, align=(1.0, 0.0)), Transform(rotate=45), Transform(crop=(.0, .5, .5, .5), crop_relative=True))
     text "S":
         # align (1.0, 0.0)
