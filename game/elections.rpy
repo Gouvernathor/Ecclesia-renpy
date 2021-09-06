@@ -7,7 +7,7 @@ init python:
         scores = {parti:0 for parti in partis}
         for citizen in citizens:
             opns = dict() # la liste de son désaccord à propos de chaque parti
-            partees = [parti for parti in partis] # on copie la liste pour la mélanger
+            partees = partis[:] # on copie la liste pour la mélanger
             renpy.random.Random(electkey).shuffle(partees)
             for parti in partees:
                 # on fait la moyenne des différences d'opinion
