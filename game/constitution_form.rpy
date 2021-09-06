@@ -13,6 +13,14 @@ label constitution_form:
     stop music fadeout 1.0
     return
 
+screen constit_title2(value):
+    hbox:
+        xfill True
+        text value:
+            xalign .5
+            color gui.hover_color
+            size 50
+
 screen constit(npage, pagename=''):
     add Null() # pour empécher l'utilisateur de cliquer et de quitter la création de constitution
     style_prefix "constform"
@@ -29,9 +37,7 @@ screen constit(npage, pagename=''):
             draggable True
             vbox:
                 if npage==1:
-                    hbox:
-                        xfill True
-                        text _("Article 1 : Legislature") xalign .5 color gui.hover_color size 50
+                    use constit_title2(_("Article 1 : Legislature"))
                     null height gui.choice_spacing+gui.pref_spacing
                     default nHouses = 1
                     default housenames = [_("House n°")+str(k+1) for k in range(maxnhouses)]
@@ -100,9 +106,7 @@ screen constit(npage, pagename=''):
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='elections':
-                    hbox:
-                        xfill True
-                        text _("Article {} : Elections for the {}").format(npage, houses[npage-2].name) xalign .5 color gui.hover_color size 50
+                    use constit_title2(_("Article {} : Elections for the {}").format(npage, houses[npage-2].name))
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
                     default validhd = [0]+validnpdistricts(houses[npage-2].seats) # nombres de circonscriptions valides
@@ -163,9 +167,7 @@ screen constit(npage, pagename=''):
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='executif':
-                    hbox:
-                        xfill True
-                        text _("Article {} : Executive").format(npage) xalign .5 color gui.hover_color size 50
+                    use constit_title2(_("Article {} : Executive").format(npage))
                     null height gui.choice_spacing+gui.pref_spacing
                     default execorigin = 'people'
                     default nseats = 1
@@ -288,9 +290,7 @@ screen constit(npage, pagename=''):
                     # constituer le pouvoir exécutif
 
                 elif pagename=='execelect':
-                    hbox:
-                        xfill True
-                        text _("Article {} : Elections for the {}").format(npage, executive.name) xalign .5 color gui.hover_color size 50
+                    use constit_title2(_("Article {} : Elections for the {}").format(npage, executive.name))
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
                     default validhd = [0]+validnpdistricts(executive.seats) # nombres de circonscriptions valides
@@ -352,9 +352,7 @@ screen constit(npage, pagename=''):
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename=='trivia':
-                    hbox:
-                        xfill True
-                        text _("Article {} : National symbols").format(npage) xalign .5 color gui.hover_color size 50
+                    use constit_title2(_("Article {} : National symbols").format(npage))
                     null height gui.choice_spacing+gui.pref_spacing
                     default key1 = ""
                     default key1_edit = ScreenVariableInputValue('key1', default=False)
@@ -390,9 +388,7 @@ screen constit(npage, pagename=''):
                         action [If(key1, SetVariable("citikey", key1), None), If(key2, SetVariable("electkey", key2), None), Return('population')]
 
                 elif pagename=='population':
-                    hbox:
-                        xfill True
-                        text _("Annex 1 : Population") xalign .5 color gui.hover_color size 50
+                    use constit_title2(_("Annex 1 : Population"))
                     null height gui.choice_spacing+gui.pref_spacing
                     default citizens = max(10, minncitizen())
                     # afficher le nombre de subdivisions administratives (PPCM de tous les nombres de circos)
@@ -476,9 +472,7 @@ screen constit(npage, pagename=''):
                     # page suspendue
                     # les partis n'ont rien à faire dans la constitution
                     # et grosse flemme de faire un menu pour les customiser
-                    hbox:
-                        xfill True
-                        text _("Annex 2 : Political Organizations") xalign .5 color gui.hover_color size 50
+                    use constit_title2(_("Annex 2 : Political Organizations"))
                     null height gui.choice_spacing+gui.pref_spacing
                 # add "prison03"# maxsize (.8, 5.0)
                 # add "prison03"# maxsize (.8, 5.0)
