@@ -640,5 +640,6 @@ init python:
                         # print(len(citpool))
                         # print(ncitizens*ncounties()/ncirco)
                         circo[2] = [citpool.pop() for k in range(ncitizens*ncounties()/ncirco)]
-            assert not len(citpool)
+            if len(citpool):
+                raise Exception
         return
