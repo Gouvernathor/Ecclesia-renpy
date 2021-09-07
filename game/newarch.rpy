@@ -1,5 +1,5 @@
 define maxrows = 75
-define aafactor = 1
+define aafactor = 2
 
 init python:
     import math
