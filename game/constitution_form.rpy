@@ -626,7 +626,7 @@ init python:
         randomobj = renpy.random.Random(citikey)
         citizenpool = [Citizen(randomobj=randomobj) for k in range(ncitizens*ncounties())]
         for house in houses+([executive] if executive.origin=='people' else []):
-            ramobj = renpy.random.Random(citikey)
+            ramobj = renpy.random.Random(house.name)
             print("Populating "+house.name+"'s electoral district(s)")
             clss = house.classes()
             for cla in clss:
