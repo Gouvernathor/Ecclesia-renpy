@@ -165,7 +165,8 @@ init python:
         Si aucun parti ne dépasse le seuil, relance l'attribution des votes sans seuil
         ou via la méthode fournie par `contingent`.
         '''
-        scores = list(scores)
+        oldscores = scores[:]
+        # if there's a threshold, each score below it is thrown out
         if thresh:
             sum = 0
             for tup in scores:
@@ -173,58 +174,70 @@ init python:
             for tup in scores:
                 if float(tup[1])/sum < thresh:
                     scores.remove(tup)
+        # if no party exceeded the threshold, a contingent election is triggered
         if scores == []:
-            return (contingent or proportionnelle_Hondt)(scores, nseats, **kwargs)
+            # the default contingent behavior is to remove the threshold and start again
+            return (contingent or proportionnelle_Hondt)(oldscores, nseats, **kwargs)
+        # creating a [party, qvotes, nseats] list
         scores = [list(tup)+[0] for tup in scores]
-        attrib = 0
+        attrib = 0 # seats already alotted
         for k in range(nseats):
-            maj = 0
+            maj = 0 # greatest mean (qvotes/(nseats+1)) value among the partis
             for tup in scores:
                 moy = float(tup[1])/(tup[2]+1)
                 if moy>maj:
                     maj = moy
                     win = tup[0]
+            # for each party, the one with the greatest mean value earns a seat
             for tup in scores:
-                if tup[0]==win:
-                    tup[2]+=1
+                if tup[0] == win:
+                    tup[2] += 1
                     attrib += 1
                     break
         if attrib != nseats:
             raise ValueError("Le nombre de sièges alloués ne correspond pas au nombre total")
         return [(tup[0], tup[2]) for tup in scores]
 
-    def proportionnelle_Hare(scores, nseats, thresh=False, **kwargs):
+    def proportionnelle_Hare(scores, nseats, thresh=False, contingent=None, **kwargs):
         '''
         Implémente la proportionnelle de Hare, à plus fort reste, avec seuil possible
-        Attention : si aucun parti ne dépasse le seuil, renvoie None
-        Unstable, needs testings and fixings #TODO
+        Si aucun parti ne dépasse le seuil, relance l'attribution des votes sans seuil
+        ou via la méthode fournie par `contingent`.
         '''
+        oldscores = scores[:]
+        # computing the sum of all vote quantities
         sum = 0
         for tup in scores:
             sum += tup[1]
+        # if there is a threshold, each score below it is thrown out
         if thresh:
             for tup in scores:
                 if float(tup[1])/sum < thresh:
                     scores.remove(tup)
+        # if no party exceeded the threshold, a contingent election is triggered
         if scores == []:
-            return None
+            # the default contingent behavior is to remove the threshold and start again
+            return (contingent or proportionnelle_Hare)(oldscores, nseats, **kwargs)
+        # creating a [party, qvotes, nseats] list
         scores = [list(tup)+[0] for tup in scores]
+        attrib = 0 # seats already alotted
+        # list of decimal parts of remainders of (qvotes/totalqvotes)*nseats
         att = []
-        attrib = 0
         for tup in scores:
             sea = float(tup[1])/sum *nseats
+            # give the whole number of seats to the party
             attrib += int(sea)
             tup[2] = int(sea)
-            # att.append((tup[0], int(sea)))
-            # tup[1] = sea-int(sea)
+            # store the decimal part in its list
             att.append((tup[0], sea-int(sea)))
+        # sort parties by decreasig order of remainders
         att.sort(key=lambda x: x[1], reverse=True)
-        # print(scores)
+        # give one more seat to the greatest parties until all seats are filled
         for k in range(nseats-attrib):
-            # scores[k][2] += 1
             for tup in scores:
                 if tup[0] == att[k][0]: # nom du gagnant
                     tup[2] += 1
+                    break
         return [(tup[0], tup[2]) for tup in scores]
 
     def join_results(scoress):
@@ -243,7 +256,7 @@ init python:
         members = {parti: sieges for parti, sieges in members.items() if sieges}
         return members
 
-define proportionals = [# proportionnelle_Hare,
+define proportionals = [proportionnelle_Hare,
                         proportionnelle_Hondt]
 
 define electypes = [majoritaire,
