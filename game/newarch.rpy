@@ -1,5 +1,3 @@
-define aafactor = 2
-
 init python:
     import math
 
@@ -23,6 +21,7 @@ init python:
         Not to use directly, use the newarch function as a handler proxy
         '''
         totals = Totals()
+        aafactor = 2
 
         def __init__(self, the_list, bg=False, **kwargs):
             super(Newarch, self).__init__(**kwargs)
@@ -32,8 +31,8 @@ init python:
         def render(self, width, height, st, at):
             width = max(self.style.xminimum, width)
             height = max(self.style.yminimum, height)
-            width *= aafactor
-            height *= aafactor
+            width *= self.aafactor
+            height *= self.aafactor
             if width > 2*height:
                 width = 2*height
             else:
@@ -105,4 +104,4 @@ init python:
             return [po[1:] for po in poslist], rad
 
     def newarch(the_list, *args, **kwargs):
-        return Transform(Newarch(the_list, *args, **kwargs), zoom=1.0/aafactor)
+        return Transform(Newarch(the_list, *args, **kwargs), zoom=1.0/Newarch.aafactor)
