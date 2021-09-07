@@ -2,19 +2,25 @@ define nopinions = 30
 define opinrange = 5
 
 init python:
-    def house_election_check(houses, elapsed):
+    def house_election_check(houzes=None, elapsed=None):
         '''
-        Prend en paramètres un itérable des Houses du pays
-        Renvoie un Set des Houses qui doivent se renouveler
+        Prend un itérable des Houses du pays et un nombre de mois écoulés
+        Renvoie un Set des Houses qui doivent se renouveler ce mois-ci
         '''
         # liz = set()
-        # for house in houses:
+        # for house in houzes:
         #     if house.election_period:
         #         for uhouse in house.children:
         #             if elapsed%house.election_period == uhouse.election_offset:
         #                 liz.add(uhouse)
         # return liz
-        return [house for house in houses if not elapsed%house.election_period]
+        if houzes is None:
+            houzes = houses[:]
+            if executive.origin == 'people':
+                houzes.append(executive)
+        if elapsed is None:
+            elapsed = 0
+        return [house for house in houzes if not elapsed%house.election_period]
 
     class House():
         '''
