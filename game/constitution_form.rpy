@@ -189,9 +189,9 @@ screen constit(npage, pagename=''):
                             # xfill True
                             xmaximum .6
                             style_prefix "constform_radio"
-                            textbutton _("No executive branch (Parliament governs directly)"):
-                                action SetScreenVariable("execorigin", False)
-                                sensitive houses
+                            # textbutton _("No executive branch (Parliament governs directly)"):
+                            #     action SetScreenVariable("execorigin", False)
+                            #     sensitive houses
                             for hous in houses:
                                 textbutton hous.name action SetScreenVariable("execorigin", hous)
                             # if not len(houses):
