@@ -265,8 +265,9 @@ screen constit(npage, pagename=''):
                                     textbutton _("No") action SetScreenVariable("vetoverride", False)
                                     for hous in houses:
                                         textbutton _("by Supermajority in the {}").format(hous.name) action SetScreenVariable("vetoverride", hous)
-                                    textbutton _("by Supermajority in every House") action SetScreenVariable("vetoverride", 'each')
-                                    textbutton _("by Supermajority in joint Congress") action SetScreenVariable("vetoverride", 'joint')
+                                    if len(houses)>1:
+                                        textbutton _("by Supermajority in every House") action SetScreenVariable("vetoverride", 'each')
+                                        textbutton _("by Supermajority in joint Congress") action SetScreenVariable("vetoverride", 'joint')
                             if vetoverride:
                                 hbox:
                                     xfill True
