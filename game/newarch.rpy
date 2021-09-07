@@ -1,18 +1,20 @@
-define maxrows = 75
 define aafactor = 2
 
 init python:
     import math
 
-    totals = []
-    for rows in range(1, maxrows):
-        tot = 0
-        rad = 1/float(4*rows-2)
-        for r in range(1, rows+1):
-            R = .5 + 2*(r-1)*rad
-            tot += int(math.pi*R/(2*rad))
-        totals.append(tot)
-    # totals[i] : nombre max de sièges quand on a i+1 rangs
+    class Totals:
+        def __getitem__(self, key):
+            if isinstance(key, int) and (key >= 0):
+                rows = key + 1
+                tot = 0
+                rad = 1/float(4*rows-2)
+                for r in range(1, rows+1):
+                    R = .5 + 2*(r-1)*rad
+                    tot += int(math.pi*R/(2*rad))
+                return tot
+            return NotImplemented
+        # totals[i] : nombre max de sièges quand on a i+1 rangs
 
     class Newarch(renpy.Displayable):
         '''
@@ -20,29 +22,29 @@ init python:
         Zoom .5 to have the real size
         Not to use directly, use the newarch function as a handler proxy
         '''
+        totals = Totals()
+
         def __init__(self, the_list, bg=False, **kwargs):
             super(Newarch, self).__init__(**kwargs)
             self.the_list = the_list
             self.bg = bg
-            self.totals = totals
 
         def render(self, width, height, st, at):
             width = max(self.style.xminimum, width)
             height = max(self.style.yminimum, height)
-            width*=aafactor
-            height*=aafactor
-            if width>2*height:
-                width=2*height
+            width *= aafactor
+            height *= aafactor
+            if width > 2*height:
+                width = 2*height
             else:
-                height=width/2
+                height = width/2
             render = renpy.Render(width, height)
-            # render.fill('#0f0') # debug, pour voir les limites du render
             if self.bg:
                 render.fill(self.bg)
             canvas = render.canvas()
             poslist, rad = self.seats(self.the_list)
             diam = 1.6*rad
-            counter=0
+            counter = 0
             for p in self.the_list:
                 for kant in range(counter, counter+p[0]):
                     canvas.circle(renpy.color.Color(p[1]), # the color
@@ -50,12 +52,6 @@ init python:
                                   height*diam/2, # the radius
                                   )
                 counter = kant+1
-            return render
-            canvas.circle(renpy.color.Color("#F00"), # the color
-                          (width/2, height/2), # the centre
-                          40, # the radius
-                          width=0 # width - 0 is filled, else linewidth of drawn circle
-                          )
             return render
 
         def seats(self, the_list, **properties):
@@ -67,18 +63,15 @@ init python:
                 if len(p)<2:
                     raise IndexError(_("The number of seats and the color must be supplied for each party."))
                     # Le nombre de siège et la couleur doivent être fournis pour chaque parti
-                if type(p[0]) is not int:
+                if not isinstance(p[0], int):
                     raise TypeError(_("The number of seats must be an integer."))
                     # Le nombre de sièges doit être un entier
                 sumdelegates += p[0]
-                if sumdelegates>self.totals[-1]:
-                    # raise ValueError(_("More than [self.totals[-1]] seats have been supplied"))
-                    raise ValueError(_("Too much seats (more than {}) have been supplied. Consider increasing the maxrows variable.").format(self.totals[-1]))
             if not sumdelegates:
                 raise ValueError(_("There are no delegate seats to be found."))
                 # Aucun siège n'a été trouvé
             # détermination du nombre de rangées
-            for i in range(len(self.totals)):
+            for i, k in enumerate(self.totals):
                 if self.totals[i] >= sumdelegates:
                     rows = i+1
                     break
@@ -91,7 +84,7 @@ init python:
                 # rayon de la rangée
                 R = .5 + 2*(r-1)*rad
                 # nombre de sièges sur cette rangée
-                if r==rows:
+                if r == rows:
                     J = sumdelegates-len(poslist)
                 elif sumdelegates in {3, 4}:
                     # place tous les sièges au dernier rang, pas indispensable mais plus joli
@@ -99,7 +92,7 @@ init python:
                 else:
                     # taux de remplissage général (par rapport au totals correspondant) fois le maximum de la rangée
                     J = int(float(sumdelegates) / self.totals[rows-1] * math.pi*R/(2*rad))
-                if J==1:
+                if J == 1:
                     poslist.append([math.pi/2.0, 1.0, R])
                 else:
                     for j in range(J):
@@ -112,4 +105,4 @@ init python:
             return [po[1:] for po in poslist], rad
 
     def newarch(the_list, *args, **kwargs):
-        return At(Newarch(the_list, *args, **kwargs), Transform(zoom=1.0/aafactor))
+        return Transform(Newarch(the_list, *args, **kwargs), zoom=1.0/aafactor)
