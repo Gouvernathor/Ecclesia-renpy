@@ -24,6 +24,13 @@ init python:
         aafactor = 2
 
         def __init__(self, the_list, bg=False, **kwargs):
+            '''
+            `the_list`
+                list of, for each party having seats in the house,
+                a tuple containing the number of seats, their color, and other ignored elements, in that order
+            `bg`
+                the color with which to fill the background behind all the circles
+            '''
             super(Newarch, self).__init__(**kwargs)
             self.the_list = the_list
             self.bg = bg
@@ -54,8 +61,6 @@ init python:
             return render
 
         def seats(self, the_list, **properties):
-            # the_list : liste de tuples
-            # tuple : nombre de sièges, couleur
             sumdelegates = 0
             # addition des sièges et vérifications défensives
             for p in the_list:
