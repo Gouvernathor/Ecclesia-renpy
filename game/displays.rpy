@@ -5,24 +5,30 @@ screen displayer():
         padding (0, 0, 0, 0)
         # action [Show("Houses", CropMove(.5, "custom", (0.0, 0.0, 0.0, 0.0), (0.0, 0.0), (0.0, 0.0, 1.0, 1.0), (0.0, 0.0)))]
         action [Show("houses"), With(CropMove(.5, "custom", (0.0, 0.0, 0.0, 0.0), (0.0, 0.0), (0.0, 0.0, 1.0, 1.0), (0.0, 0.0)))]
-        add At(Solid('#f00', xsize=100, ysize=100), Transform(rotate=45), Transform(crop=(.5, .5, .5, .5), crop_relative=True))
-    text "H":
-        # align (0.0, 0.0)
-        anchor (0.0, 0.0)
-        pos (12, 4)
-        bold True
+        fixed:
+            fit_first True
+            add At(Solid('#f00', xsize=100, ysize=100), Transform(rotate=45), Transform(crop=(.5, .5, .5, .5), crop_relative=True))
+            text "H":
+                # anchor (0.0, 0.0)
+                # pos (12, 4)
+                bold True
+                anchor (1., .8)
+                pos (.5, .5)
 
     button: # stats
         xalign 1.0
         yalign 0.0
         padding (0, 0, 0, 0)
         action [Show("stats", CropMove(.5, "custom", (1.0, 0.0, 0.0, 0.0), (1.0, 0.0), (0.0, 0.0, 1.0, 1.0), (0.0, 0.0)))]
-        add At(Solid('#08f', xsize=100, ysize=100, align=(1.0, 0.0)), Transform(rotate=45), Transform(crop=(.0, .5, .5, .5), crop_relative=True))
-    text "S":
-        # align (1.0, 0.0)
-        anchor (1.0, 0.0)
-        pos (1908, 4)
-        bold True
+        fixed:
+            fit_first True
+            add At(Solid('#08f', xsize=100, ysize=100, align=(1.0, 0.0)), Transform(rotate=45), Transform(crop=(.0, .5, .5, .5), crop_relative=True))
+            text "S":
+                # anchor (1.0, 0.0)
+                # pos (1908, 4)
+                bold True
+                anchor (.0, .8)
+                pos (.5, .5)
 
 screen houses():
     modal True
