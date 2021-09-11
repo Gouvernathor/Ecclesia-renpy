@@ -33,6 +33,30 @@ screen constit_election_type(distindex):
                     action SetScreenVariable("electionfunc", fonk)
                     sensitive (fonk in validfuncs(distindex))
 
+screen constit_elect_districts(house, distindex, validhd):
+    hbox:
+        xfill True
+        style_prefix "constform_radio"
+        text _("Electoral Districts") yalign .5
+        textbutton (_('Yes') if distindex else _('No')):
+            action ToggleScreenVariable('distindex', 0, 1)
+            selected distindex
+    null height gui.choice_spacing
+    hbox:
+        xfill True
+        text _("Number of seats per electoral district")+(_(" (Districts : {})").format(house.seats/validhd[distindex]) if distindex else "") yalign .5
+        hbox:
+            xalign 1.0
+            yalign .5
+            style_prefix "constform_selector"
+            textbutton "-1" action SetScreenVariable("distindex", distindex-1) sensitive (distindex-1 > 0)
+            if distindex == 0:
+                text _("{} (nationwide district)").format(house.seats)
+            else:
+                text str(validhd[distindex])
+            textbutton "+1" action SetScreenVariable("distindex", distindex+1) sensitive (distindex+1 < len(validhd)) and distindex
+    null height gui.choice_spacing
+
 screen constit(npage, pagename=''):
     style_prefix "constform"
     vbox:
@@ -123,29 +147,7 @@ screen constit(npage, pagename=''):
                     default validhd = [0]+validnpdistricts(houses[npage-2].seats) # nombres de circonscriptions valides
                     default electionfunc = False # fonction d'attribution des sièges à partir des résultats du vote
                     default thresh = 0 # seuil électoral pour les scrutins proportionnels
-                    # $ print(validhd)
-                    hbox:
-                        xfill True
-                        style_prefix "constform_radio"
-                        text _("Electoral Districts") yalign .5
-                        textbutton (_('Yes') if distindex else _('No')):
-                            action ToggleScreenVariable('distindex', 0, 1)
-                            selected distindex
-                    null height gui.choice_spacing
-                    hbox:
-                        xfill True
-                        text _("Number of seats per electoral district")+(_(" (Districts : {})").format(houses[npage-2].seats/validhd[distindex]) if distindex else "") yalign .5
-                        hbox:
-                            xalign 1.0
-                            yalign .5
-                            style_prefix "constform_selector"
-                            textbutton "-1" action SetScreenVariable("distindex", distindex-1) sensitive (distindex-1 > 0)
-                            if distindex == 0:
-                                text _("{} (nationwide district)").format(houses[npage-2].seats)
-                            else:
-                                text str(validhd[distindex])
-                            textbutton "+1" action SetScreenVariable("distindex", distindex+1) sensitive (distindex+1 < len(validhd)) and distindex
-                    null height gui.choice_spacing
+                    use constit_elect_districts(houses[npage-2], distindex, validhd)
                     use constit_election_type(distindex)
                     if electionfunc in proportionals:
                         hbox:
@@ -315,28 +317,7 @@ screen constit(npage, pagename=''):
                             textbutton "+1" action SetScreenVariable("execperiod", execperiod+1)
                             textbutton "+12" action SetScreenVariable("execperiod", execperiod+12)
                     if executive.seats>1:
-                        hbox:
-                            xfill True
-                            style_prefix "constform_radio"
-                            text _("Electoral Districts") yalign .5
-                            textbutton (_('Yes') if distindex else _('No')):
-                                action ToggleScreenVariable('distindex', 0, 1)
-                                selected distindex
-                        null height gui.choice_spacing
-                        hbox:
-                            xfill True
-                            text _("Number of seats per electoral district")+(_(" (Districts : {})").format(executive.seats/validhd[distindex]) if distindex else "") yalign .5
-                            hbox:
-                                xalign 1.0
-                                yalign .5
-                                style_prefix "constform_selector"
-                                textbutton "-1" action SetScreenVariable("distindex", distindex-1) sensitive (distindex-1 > 0)
-                                if distindex == 0:
-                                    text _("{} (nationwide district)").format(executive.seats)
-                                else:
-                                    text str(validhd[distindex])
-                                textbutton "+1" action SetScreenVariable("distindex", distindex+1) sensitive (distindex+1 < len(validhd)) and distindex
-                        null height gui.choice_spacing
+                        use constit_elect_districts(executive, distindex, validhd)
                     use constit_election_type(distindex if executive.seats>1 else 1)
                     null height gui.pref_spacing
                     textbutton _("Continue"):
