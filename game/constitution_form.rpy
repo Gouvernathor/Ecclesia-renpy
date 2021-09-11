@@ -21,8 +21,19 @@ screen constit_title2(value):
             color gui.hover_color
             size 50
 
+screen constit_election_type(distindex):
+    hbox:
+        xfill True
+        text _("Election type") yalign .5
+        vbox:
+            xalign 1.0
+            style_prefix "constform_radio"
+            for fonk in [f for f in electypes]:
+                textbutton __(getattr(fonk, "name", fonk.__name__)):
+                    action SetScreenVariable("electionfunc", fonk)
+                    sensitive (fonk in validfuncs(distindex))
+
 screen constit(npage, pagename=''):
-    add Null() # pour empécher l'utilisateur de cliquer et de quitter la création de constitution
     style_prefix "constform"
     vbox:
         null height gui.choice_spacing+gui.pref_spacing
@@ -135,16 +146,7 @@ screen constit(npage, pagename=''):
                                 text str(validhd[distindex])
                             textbutton "+1" action SetScreenVariable("distindex", distindex+1) sensitive (distindex+1 < len(validhd)) and distindex
                     null height gui.choice_spacing
-                    hbox:
-                        xfill True
-                        text _("Election type") yalign .5
-                        vbox:
-                            xalign 1.0
-                            style_prefix "constform_radio"
-                            for fonk in [f for f in electypes]:
-                                textbutton _(fonk.__name__):
-                                    action SetScreenVariable("electionfunc", fonk)
-                                    sensitive (fonk in validfuncs(distindex))
+                    use constit_election_type(distindex)
                     if electionfunc in proportionals:
                         hbox:
                             xfill True
@@ -335,16 +337,7 @@ screen constit(npage, pagename=''):
                                     text str(validhd[distindex])
                                 textbutton "+1" action SetScreenVariable("distindex", distindex+1) sensitive (distindex+1 < len(validhd)) and distindex
                         null height gui.choice_spacing
-                    hbox:
-                        xfill True
-                        text _("Election type") yalign .5
-                        vbox:
-                            xalign 1.0
-                            style_prefix "constform_radio"
-                            for fonk in [f for f in electypes]:
-                                textbutton _(fonk.__name__):
-                                    action SetScreenVariable("electionfunc", fonk)
-                                    sensitive (fonk in validfuncs((distindex if executive.seats>1 else 1)))
+                    use constit_election_type(distindex if executive.seats>1 else 1)
                     null height gui.pref_spacing
                     textbutton _("Continue"):
                         style "big_blue_button"
