@@ -36,7 +36,7 @@ screen constit(npage, pagename=''):
             mousewheel True
             draggable True
             vbox:
-                if npage==1:
+                if npage == 1:
                     use constit_title2(_("Article 1 : Legislature"))
                     null height gui.choice_spacing+gui.pref_spacing
                     default nHouses = 1
@@ -105,7 +105,7 @@ screen constit(npage, pagename=''):
                         action [Function(create_houses, nHouses, housenames, houseperiods, houseseats), Return(('elections' if (nHouses and (True in [bool(houseperiods[k]) for k in range(nHouses)])) else 'executif'))]
                     null height gui.choice_spacing+gui.pref_spacing
 
-                elif pagename=='elections':
+                elif pagename == 'elections':
                     use constit_title2(_("Article {} : Elections for the {}").format(npage, houses[npage-2].name))
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
@@ -166,7 +166,7 @@ screen constit(npage, pagename=''):
                         action [Function(applyelec, houses[npage-2], (validhd[distindex] if distindex else houses[npage-2].seats), electionfunc, thresh), Return('elections' if (npage<=len(houses)) else 'executif')]
                     null height gui.choice_spacing+gui.pref_spacing
 
-                elif pagename=='executif':
+                elif pagename == 'executif':
                     use constit_title2(_("Article {} : Executive").format(npage))
                     null height gui.choice_spacing+gui.pref_spacing
                     default execorigin = 'people'
@@ -199,7 +199,7 @@ screen constit(npage, pagename=''):
                             textbutton _("Direct Popular Vote") action SetScreenVariable("execorigin", 'people')
                     null height gui.choice_spacing
                     if execorigin:
-                        if nseats==1:
+                        if nseats == 1:
                             button:
                                 style_prefix "constform_name"
                                 action [If(exenamea.strip(), None, SetScreenVariable('exenamea', _("Chancellor"))), exenamea_edit.Toggle()]
@@ -290,7 +290,7 @@ screen constit(npage, pagename=''):
                     # si il n'y a pas de parlement, obliger que l'exécutif soit élu au suffrage direct
                     # constituer le pouvoir exécutif
 
-                elif pagename=='execelect':
+                elif pagename == 'execelect':
                     use constit_title2(_("Article {} : Elections for the {}").format(npage, executive.name))
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
@@ -352,7 +352,7 @@ screen constit(npage, pagename=''):
                         action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), electionfunc, 0, execperiod), Return('trivia')]
                     null height gui.choice_spacing+gui.pref_spacing
 
-                elif pagename=='trivia':
+                elif pagename == 'trivia':
                     use constit_title2(_("Article {} : National symbols").format(npage))
                     null height gui.choice_spacing+gui.pref_spacing
                     default key1 = ""
@@ -388,7 +388,7 @@ screen constit(npage, pagename=''):
                         style "big_blue_button"
                         action [If(key1, SetVariable("citikey", key1)), If(key2, SetVariable("electrobj", renpy.random.Random(key2))), Return('population')]
 
-                elif pagename=='population':
+                elif pagename == 'population':
                     use constit_title2(_("Annex 1 : Population"))
                     null height gui.choice_spacing+gui.pref_spacing
                     default citizens = max(10, minncitizen())
@@ -426,7 +426,7 @@ screen constit(npage, pagename=''):
                             yalign .5
                             style_prefix "constform_selector"
                             textbutton "÷10" action SetVariable("popscale", popscale*10) sensitive (popscale*10 < 1000000000)
-                            if popscale==1:
+                            if popscale == 1:
                                 text "Everyone"
                             else:
                                 text _("1 per {} inhabitants").format(str(popscale))
@@ -469,7 +469,7 @@ screen constit(npage, pagename=''):
                     null height gui.choice_spacing+gui.pref_spacing
                     # dernière page, bouton rouge pour enact la constitution
 
-                elif pagename=='partis':
+                elif pagename == 'partis':
                     # page suspendue
                     # les partis n'ont rien à faire dans la constitution
                     # et grosse flemme de faire un menu pour les customiser
@@ -589,7 +589,7 @@ init python:
             return ppcm([ppcm(lis[0:2])]+lis[2:])
         if 0 in lis:
             return 0
-        if len(lis)==1:
+        if len(lis) == 1:
             return lis[0]
         a, b = lis
         p = a*b

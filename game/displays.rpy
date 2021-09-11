@@ -1,4 +1,4 @@
-screen displayer:
+screen displayer():
     button: # Houses, afficher les chambres
         xalign 0.0
         yalign 0.0
@@ -24,7 +24,7 @@ screen displayer:
         pos (1908, 4)
         bold True
 
-screen houses:
+screen houses():
     modal True
     imagebutton:
         idle Solid('#0000')
@@ -45,7 +45,7 @@ screen houses:
                 add house.displayable(xalign=.5, ysize=500)
                 #TODO lister les partis en présence avec les nombres de sièges
 
-screen stats:
+screen stats():
     modal True
     imagebutton:
         idle Solid('#0000')
