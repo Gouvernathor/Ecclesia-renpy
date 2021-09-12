@@ -21,17 +21,26 @@ screen constit_title2(value):
             color gui.hover_color
             size 50
 
-screen constit_election_type(distindex):
+screen constit_election_type(distindex, votingfunc):
+    text _("Election type") xalign .5
     hbox:
         xfill True
-        text _("Election type") yalign .5
         vbox:
+            # voting kinds
+            xalign .0
+            style_prefix "constform_radio"
+            for fonk in [f for f in votingkinds]:
+                textbutton __(fonk.name):
+                    xalign .0
+                    action SetScreenVariable("votingfunc", fonk)
+        vbox:
+            # attribution kinds
             xalign 1.0
             style_prefix "constform_radio"
-            for fonk in [f for f in electypes]:
-                textbutton __(getattr(fonk, "name", fonk.__name__)):
-                    action SetScreenVariable("electionfunc", fonk)
-                    sensitive (fonk in validfuncs(distindex))
+            for fonk in [f for f in attribkinds]:
+                textbutton __(fonk.name):
+                    action SetScreenVariable("attribfunc", fonk)
+                    sensitive (fonk in validattribfuncs(distindex, votingfunc))
 
 screen constit_elect_districts(house, distindex, validhd):
     hbox:
@@ -145,11 +154,12 @@ screen constit(npage, pagename=''):
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
                     default validhd = [0]+validnpdistricts(houses[npage-2].seats) # nombres de circonscriptions valides
-                    default electionfunc = False # fonction d'attribution des sièges à partir des résultats du vote
+                    default votingfunc = False # fonction de modalité de vote
+                    default attribfunc = False # fonction d'attribution des sièges à partir des résultats du vote
                     default thresh = 0 # seuil électoral pour les scrutins proportionnels
                     use constit_elect_districts(houses[npage-2], distindex, validhd)
-                    use constit_election_type(distindex)
-                    if electionfunc in proportionals:
+                    use constit_election_type(distindex, votingfunc)
+                    if isinstance(attribfunc, Proportional):
                         hbox:
                             xfill True
                             text _("Electoral threshold") yalign .5
@@ -166,8 +176,8 @@ screen constit(npage, pagename=''):
                     null height gui.pref_spacing
                     textbutton _("Continue"):
                         style "big_blue_button"
-                        sensitive electionfunc in validfuncs(distindex)
-                        action [Function(applyelec, houses[npage-2], (validhd[distindex] if distindex else houses[npage-2].seats), electionfunc, thresh), Return('elections' if (npage<=len(houses)) else 'executif')]
+                        sensitive attribfunc in validattribfuncs(distindex, votingfunc)
+                        action [Function(applyelec, houses[npage-2], (validhd[distindex] if distindex else houses[npage-2].seats), (votingfunc, attribfunc), thresh), Return('elections' if (npage<=len(houses)) else 'executif')]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename == 'executif':
@@ -299,7 +309,8 @@ screen constit(npage, pagename=''):
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
                     default validhd = [0]+validnpdistricts(executive.seats) # nombres de circonscriptions valides
-                    default electionfunc = False # fonction d'attribution des sièges à partir des résultats du vote
+                    default votingfunc = False # fonction de modalité de vote
+                    default attribfunc = False # fonction d'attribution des sièges à partir des résultats du vote
                     default execperiod = 60
                     hbox:
                         xfill True
@@ -318,12 +329,12 @@ screen constit(npage, pagename=''):
                             textbutton "+12" action SetScreenVariable("execperiod", execperiod+12)
                     if executive.seats>1:
                         use constit_elect_districts(executive, distindex, validhd)
-                    use constit_election_type(distindex if executive.seats>1 else 1)
+                    use constit_election_type((distindex if executive.seats>1 else 1), votingfunc)
                     null height gui.pref_spacing
                     textbutton _("Continue"):
                         style "big_blue_button"
-                        sensitive electionfunc in validfuncs((distindex if executive.seats>1 else 1))
-                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), electionfunc, 0, execperiod), Return('trivia')]
+                        sensitive attribfunc in validattribfuncs((distindex if executive.seats>1 else 1), votingfunc)
+                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), (votingfunc, attribfunc), 0, execperiod), Return('trivia')]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename == 'trivia':
@@ -537,20 +548,26 @@ init python:
         '''
         return [x for x in range(1, nseats+1) if (float(nseats)/x) == float(int(nseats/x)) and x != nseats]
 
-    def validfuncs(circoseats):
+    def validattribfuncs(circoseats, votingfunc):
         '''
         Renvoie les modes d'élection valides pour désigner circoseats dans une seule circonscription
         '''
-        if circoseats == 1: # si un seul district
-            return [f for f in electypes if f not in proportionals]
+        if not isinstance(votingfunc, VotingMethod):
+            return ()
+        if isinstance(votingfunc, RanDraw):
+            attribk = [f for f in attribkinds if isinstance(f, RanDraw)]
         else:
-            return [f for f in electypes]
+            attribk = [f for f in attribkinds if not isinstance(f, RanDraw)]
+        # si un seul district ou vote non-proportionnel
+        if (circoseats == 1) or not isinstance(votingfunc, Proportional):
+            attribk = [f for f in attribk if not isinstance(f, Proportional)]
+        return attribk
 
-    def applyelec(house, circoseats, fonk, thresh, period=60):
+    def applyelec(house, circoseats, (votingfonk, attribfonk), thresh, period=60):
         # house.elect_types = [(house.seats(), fonk, circoseats)]
-        if fonk in proportionals and thresh:
-            fonk = renpy.curry(fonk)(thresh=thresh)
-        house.circos = [[circoseats, fonk, []] for k in range(house.seats/circoseats)]
+        if isinstance(attribfonk, Proportional) and thresh:
+            attribfonk = renpy.curry(attribfonk)(thresh=thresh)
+        house.circos = [[circoseats, (votingfonk, attribfonk), []] for k in range(house.seats/circoseats)]
         if house == executive:
             house.election_period = period
         return

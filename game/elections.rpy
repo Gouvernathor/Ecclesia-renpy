@@ -2,61 +2,91 @@ init python:
     from collections import OrderedDict
 
     class Function_Wrapper:
-        def __init__(self, func, name):
-            self.func = func
-            self.name = name
+        def __init__(self, name=None, ttip=None):
+            if name is not None:
+                self.name = name
+            if ttip is not None:
+                self.ttip = ttip
 
         def __call__(self, *args, **kwargs):
             return self.func(*args, **kwargs)
 
+        def __eq__(self, other):
+            if type(self) == type(other):
+                if self.__call__ == other.__call__:
+                    if self.name == other.name:
+                        return True
+            return False
+
     class VotingMethod(Function_Wrapper): pass
-    class AttribMethod(Function_Wrapper): pass
+    class Proportional: pass
+    class RanDraw: pass
 
     # Fournit pour une circo donnée en argument
     # le nombre de voix reçue par chaque parti/candidat/liste
-    def vote_unique((nseats, funk, citizens)):
-        '''
-        Chaque électeur vote uniquement pour son parti préféré
-        Renvoie un dictionnaire reliant chaque parti à son nombre de voix
-        '''
-        scores = {parti:0 for parti in partis}
-        for citizen in citizens:
-            opns = dict() # son désaccord à propos de chaque parti
-            partees = partis[:] # on copie la liste pour la mélanger
-            electrobj.shuffle(partees)
-            for parti in partees:
-                # on fait la moyenne des différences d'opinion
-                opns[parti] = disagree(citizen, parti)
-            # sélectionner le parti avec lequel le désaccord est le plus petit
-            # lui ajouter une voix
-            scores[min(opns, key=opns.get)] += 1
-        return scores
+    class Vote_Unique(VotingMethod):
+        def __call__(self, (nseats, funk, citizens)):
+            '''
+            Chaque électeur vote uniquement pour son parti préféré
+            Renvoie un dictionnaire reliant chaque parti à son nombre de voix
+            '''
+            scores = {parti:0 for parti in partis}
+            for citizen in citizens:
+                opns = dict() # son désaccord à propos de chaque parti
+                partees = partis[:] # on copie la liste pour la mélanger
+                electrobj.shuffle(partees)
+                for parti in partees:
+                    # on fait la moyenne des différences d'opinion
+                    opns[parti] = disagree(citizen, parti)
+                    # change the way the opinions are compared between a citizen and a party
+                    # consider the value for each subject as how much the citizen's opinion is fervent on the subject
+                    # so if the citizen doesn't care and the party cares very much,
+                    # it's less of a disagreement than if the citizen cares very much and the party doesn't !
+                    # maybe multiply the difference between the two by the absolute magnitude of the opinion ?
+                    # *abs(citizen.opinion[k]-.5*opinrange)
+                # sélectionner le parti avec lequel le désaccord est le plus petit
+                # lui ajouter une voix
+                scores[min(opns, key=opns.get)] += 1
+            return scores
 
-    def classement((nseats, funk, citizens)):
-        '''
-        Les électeurs classent tous les candidats par ordre de préférence
-        Renvoie un dictionnaire reliant chaque parti à
-            un dictionnaire reliant la position dans le classement au nombre de votants l'ayant classé là
-            les positions sont de 0 à npartis-1 inclus, 1 étant le meilleur
-        '''
-        scores = {parti:([0]*len(partis)) for parti in partis}
-        for citizen in citizens:
-            opns = dict() # son désaccord à propos de chaque parti
-            partees = partis[:] # on copie la liste pour la mélanger
-            electrobj.shuffle(partees)
-            for parti in partees:
-                # on fait la moyenne des différences d'opinion
-                opns[parti] = disagree(citizen, parti)
-            # sélectionner le parti avec lequel le désaccord est le plus petit
-            # lui ajouter une voix
-            order = [parti for parti in opns]
-            order.sort(key=opns.get)
-            for k, parti in enumerate(order):
-                scores[parti][k] += 1
-        return scores
+    class Vote(Vote_Unique, Proportional):
+        name = "Vote unique pour le parti préféré"
 
-    vote = VotingMethod(vote_unique, "Vote unique pour le parti préféré")
-    classment = VotingMethod(classement, "Classement des candidats par ordre de préférence")
+    class No_Vote(Vote_Unique, RanDraw):
+        name = "Aucun vote"
+
+    class Classement(VotingMethod):
+        name = "Classement des candidats par ordre de préférence"
+        def __call__(self, (nseats, funk, citizens)):
+            '''
+            Les électeurs classent tous les candidats par ordre de préférence
+            Renvoie un dictionnaire reliant chaque parti à
+                un dictionnaire reliant la position dans le classement au nombre de votants l'ayant classé là
+                les positions sont de 0 à npartis-1 inclus, 1 étant le meilleur
+            '''
+            scores = {parti:([0]*len(partis)) for parti in partis}
+            for citizen in citizens:
+                opns = dict() # son désaccord à propos de chaque parti
+                partees = partis[:] # on copie la liste pour la mélanger
+                electrobj.shuffle(partees)
+                for parti in partees:
+                    # on fait la moyenne des différences d'opinion
+                    opns[parti] = disagree(citizen, parti)
+                # sélectionner le parti avec lequel le désaccord est le plus petit
+                # lui ajouter une voix
+                order = [parti for parti in opns]
+                order.sort(key=opns.get)
+                for k, parti in enumerate(order):
+                    scores[parti][k] += 1
+            return scores
+
+    class Validation(VotingMethod, Proportional):
+        name = "Validation ou non de chacun des candidats"
+        def __call__(self, (nseats, funk, citizens)):
+            '''
+            Les électeurs valident entre 1 et n-1 candidats
+            '''
+            raise NotImplementedError
 
     def disagree(cita, citb):
         '''
@@ -73,7 +103,13 @@ init python:
         '''
         scoress = []
         for circo in house.circos:
-            scoress.append(circo[1](vote(circo).items(), nseats=circo[0], randomobj=electrobj))
+            attribkind = circo[1]
+            try:
+                votingkind, attribkind = attribkind
+            except TypeError:
+                print("TypeError")
+                votingkind = Vote()
+            scoress.append(attribkind(votingkind(circo).items(), nseats=circo[0], randomobj=electrobj))
         joinedlist = join_results(scoress).items()
         joinedlist.sort(key=lambda p:p[0].alignment)
         joinn = OrderedDict(joinedlist)
@@ -104,16 +140,20 @@ init python:
     # thresh (optionnel), utilisé pour les proportionnelles
         # mais doit être curryifié pour être utilisable dans la suite de la simulation
 
-    def majoritaire(scores, nseats=1, **kwargs):
-        '''
-        Renvoie le seul parti ayant le plus de voix
-        A utiliser dans les élections uninominales à un tour avec une seule circonscription
-        '''
-        win, maj = scores[0]
-        for tup in scores:
-            if tup[1]>maj:
-                win, maj = tup
-        return [(win, nseats)]
+    class AttribMethod(Function_Wrapper): pass
+
+    class Majoritaire(AttribMethod):
+        name = "Majoritaire"
+        def __call__(self, scores, nseats=1, **kwargs):
+            '''
+            Renvoie le seul parti ayant le plus de voix
+            A utiliser dans les élections uninominales à un tour avec une seule circonscription
+            '''
+            win, maj = scores[0]
+            for tup in scores:
+                if tup[1]>maj:
+                    win, maj = tup
+            return [(win, nseats)]
 
     def majoritaire_random(scores, nseats=1, randomobj=renpy.random, **kwargs):
         '''
@@ -131,21 +171,23 @@ init python:
                 return [(tup[0], nseats)]
         # on est censé ne jamais arriver ici
 
-    def tirage_au_sort_population(scores, nseats, randomobj=renpy.random, **kwargs):
-        '''
-        Tire au sort parmi une population,
-        où chaque personne tirée au sort représente son parti préféré
-        '''
-        retlist = [[tup[0], 0] for tup in scores]
-        for seat in range(nseats):
-            sum = 0
-            ran = randomobj.random()*sum
-            for k in range(len(scores)):
-                sum += scores[k][1]
-                if ran<sum:
-                    retlist[k][1] += 1
-                    break
-        return retlist
+    class TirageAuSort(AttribMethod, RanDraw):
+        name = "Tirage au sort"
+        def __call__(self, scores, nseats, randomobj=renpy.random, **kwargs):
+            '''
+            Tire au sort parmi une population,
+            où chaque personne tirée au sort représente son parti préféré
+            '''
+            retlist = [[tup[0], 0] for tup in scores]
+            for seat in range(nseats):
+                sum = 0
+                ran = randomobj.random()*sum
+                for k in range(len(scores)):
+                    sum += scores[k][1]
+                    if ran<sum:
+                        retlist[k][1] += 1
+                        break
+            return retlist
 
     def tirage_au_sort_partis(scores, nseats, randomobj=renpy.random, **kwargs):
         '''
@@ -159,86 +201,90 @@ init python:
             scores[randomobj.randint(0, npartis-1)][2] += 1
         return [(tup[0], tup[2]) for tup in scores]
 
-    def proportionnelle_Hondt(scores, nseats, thresh=False, contingent=None, **kwargs):
-        '''
-        Implémente la proportionnelle d'Hondt, à plus forte moyenne, avec seuil possible
-        Si aucun parti ne dépasse le seuil, relance l'attribution des votes sans seuil
-        ou via la méthode fournie par `contingent`.
-        '''
-        oldscores = scores[:]
-        # if there's a threshold, each score below it is thrown out
-        if thresh:
+    class ProportionnelleHondt(AttribMethod, Proportional):
+        name = "Proportionnelle d'Hondt"
+        def __call__(self, scores, nseats, thresh=False, contingent=None, **kwargs):
+            '''
+            Implémente la proportionnelle d'Hondt, à plus forte moyenne, avec seuil possible
+            Si aucun parti ne dépasse le seuil, relance l'attribution des votes sans seuil
+            ou via la méthode fournie par `contingent`.
+            '''
+            oldscores = scores[:]
+            # if there's a threshold, each score below it is thrown out
+            if thresh:
+                sum = 0
+                for tup in scores:
+                    sum += tup[1]
+                for tup in scores:
+                    if float(tup[1])/sum < thresh:
+                        scores.remove(tup)
+            # if no party exceeded the threshold, a contingent election is triggered
+            if scores == []:
+                # the default contingent behavior is to remove the threshold and start again
+                return (contingent or proportionnelle_Hondt)(oldscores, nseats, **kwargs)
+            # creating a [party, qvotes, nseats] list
+            scores = [list(tup)+[0] for tup in scores]
+            attrib = 0 # seats already alotted
+            for k in range(nseats):
+                maj = 0 # greatest mean (qvotes/(nseats+1)) value among the partis
+                for tup in scores:
+                    moy = float(tup[1])/(tup[2]+1)
+                    if moy>maj:
+                        maj = moy
+                        win = tup[0]
+                # for each party, the one with the greatest mean value earns a seat
+                for tup in scores:
+                    if tup[0] == win:
+                        tup[2] += 1
+                        attrib += 1
+                        break
+            if attrib != nseats:
+                raise ValueError("Le nombre de sièges alloués ne correspond pas au nombre total")
+            return [(tup[0], tup[2]) for tup in scores]
+
+    class ProportionnelleHare(AttribMethod, Proportional):
+        name = "Proportionnelle de Hare"
+        def __call__(self, scores, nseats, thresh=False, contingent=None, **kwargs):
+            '''
+            Implémente la proportionnelle de Hare, à plus fort reste, avec seuil possible
+            Si aucun parti ne dépasse le seuil, relance l'attribution des votes sans seuil
+            ou via la méthode fournie par `contingent`.
+            '''
+            oldscores = scores[:]
+            # computing the sum of all vote quantities
             sum = 0
             for tup in scores:
                 sum += tup[1]
+            # if there is a threshold, each score below it is thrown out
+            if thresh:
+                for tup in scores:
+                    if float(tup[1])/sum < thresh:
+                        scores.remove(tup)
+            # if no party exceeded the threshold, a contingent election is triggered
+            if scores == []:
+                # the default contingent behavior is to remove the threshold and start again
+                return (contingent or proportionnelle_Hare)(oldscores, nseats, **kwargs)
+            # creating a [party, qvotes, nseats] list
+            scores = [list(tup)+[0] for tup in scores]
+            attrib = 0 # seats already alotted
+            # list of decimal parts of remainders of (qvotes/totalqvotes)*nseats
+            att = []
             for tup in scores:
-                if float(tup[1])/sum < thresh:
-                    scores.remove(tup)
-        # if no party exceeded the threshold, a contingent election is triggered
-        if scores == []:
-            # the default contingent behavior is to remove the threshold and start again
-            return (contingent or proportionnelle_Hondt)(oldscores, nseats, **kwargs)
-        # creating a [party, qvotes, nseats] list
-        scores = [list(tup)+[0] for tup in scores]
-        attrib = 0 # seats already alotted
-        for k in range(nseats):
-            maj = 0 # greatest mean (qvotes/(nseats+1)) value among the partis
-            for tup in scores:
-                moy = float(tup[1])/(tup[2]+1)
-                if moy>maj:
-                    maj = moy
-                    win = tup[0]
-            # for each party, the one with the greatest mean value earns a seat
-            for tup in scores:
-                if tup[0] == win:
-                    tup[2] += 1
-                    attrib += 1
-                    break
-        if attrib != nseats:
-            raise ValueError("Le nombre de sièges alloués ne correspond pas au nombre total")
-        return [(tup[0], tup[2]) for tup in scores]
-
-    def proportionnelle_Hare(scores, nseats, thresh=False, contingent=None, **kwargs):
-        '''
-        Implémente la proportionnelle de Hare, à plus fort reste, avec seuil possible
-        Si aucun parti ne dépasse le seuil, relance l'attribution des votes sans seuil
-        ou via la méthode fournie par `contingent`.
-        '''
-        oldscores = scores[:]
-        # computing the sum of all vote quantities
-        sum = 0
-        for tup in scores:
-            sum += tup[1]
-        # if there is a threshold, each score below it is thrown out
-        if thresh:
-            for tup in scores:
-                if float(tup[1])/sum < thresh:
-                    scores.remove(tup)
-        # if no party exceeded the threshold, a contingent election is triggered
-        if scores == []:
-            # the default contingent behavior is to remove the threshold and start again
-            return (contingent or proportionnelle_Hare)(oldscores, nseats, **kwargs)
-        # creating a [party, qvotes, nseats] list
-        scores = [list(tup)+[0] for tup in scores]
-        attrib = 0 # seats already alotted
-        # list of decimal parts of remainders of (qvotes/totalqvotes)*nseats
-        att = []
-        for tup in scores:
-            sea = float(tup[1])/sum *nseats
-            # give the whole number of seats to the party
-            attrib += int(sea)
-            tup[2] = int(sea)
-            # store the decimal part in its list
-            att.append((tup[0], sea-int(sea)))
-        # sort parties by decreasig order of remainders
-        att.sort(key=lambda x: x[1], reverse=True)
-        # give one more seat to the greatest parties until all seats are filled
-        for k in range(nseats-attrib):
-            for tup in scores:
-                if tup[0] == att[k][0]: # nom du gagnant
-                    tup[2] += 1
-                    break
-        return [(tup[0], tup[2]) for tup in scores]
+                sea = float(tup[1])/sum *nseats
+                # give the whole number of seats to the party
+                attrib += int(sea)
+                tup[2] = int(sea)
+                # store the decimal part in its list
+                att.append((tup[0], sea-int(sea)))
+            # sort parties by decreasig order of remainders
+            att.sort(key=lambda x: x[1], reverse=True)
+            # give one more seat to the greatest parties until all seats are filled
+            for k in range(nseats-attrib):
+                for tup in scores:
+                    if tup[0] == att[k][0]: # nom du gagnant
+                        tup[2] += 1
+                        break
+            return [(tup[0], tup[2]) for tup in scores]
 
     def join_results(scoress):
         '''
@@ -256,11 +302,5 @@ init python:
         members = {parti: sieges for parti, sieges in members.items() if sieges}
         return members
 
-define proportionals = [proportionnelle_Hare,
-                        proportionnelle_Hondt]
-
-define electypes = [majoritaire,
-                    # majoritaire_random,
-                    tirage_au_sort_population,
-                    # tirage_au_sort_partis
-                    ]+proportionals
+define votingkinds = (Vote(), Classement(), Validation(), No_Vote())
+define attribkinds = (Majoritaire(), TirageAuSort(), ProportionnelleHondt(), ProportionnelleHare())

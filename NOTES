@@ -31,22 +31,19 @@ on fait tourner la simulation parlementaire pendant 1 à 3 mandats
     on peut faire des statistiques, des pourcentages globaux de fidélité aux avis du peuple et de chaque parti
 
 méthodes de vote
-    gagnant unique, uninominal (par circonscription)
-        a vote unique (pour un candidat)
-        b classement des candidats entre eux
-        c approbation booléenne de chaque candidat
-        d note pour chaque candidat
-    gagnants multiples (par circonscription)
-        A vote unique (pour une liste)
+    a vote unique (pour un candidat)
+    b classement des candidats entre eux
+    c approbation booléenne de chaque candidat
+    d note pour chaque candidat
 méthodes d'attribution
     a c d majorité simple
     a c d majorité absolue ou qualifiée (avec vote de secours)
     b instant runoff
     b Borda (somme des classements, le score le plus bas gagne)
     b Condorcet (avec attribution/vote de secours)
-    A proportionnelle de Hare (avec ou sans seuil)
-    A proportionnelle d'Hondt (avec ou sans seuil)
-    a A tirage au sort (répété et avec remise si plurinominal)
+    a c proportionnelle de Hare (avec ou sans seuil)
+    a c proportionnelle d'Hondt (avec ou sans seuil)
+    a* tirage au sort (répété et avec remise si plurinominal)
 
 décisions d'implémentation :
 # supprimer le staggering dans les chambres
