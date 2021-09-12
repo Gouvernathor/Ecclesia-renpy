@@ -196,6 +196,21 @@ init python:
             blacklisted += (min(first_places, key=first_places.get),)
             return self(scores, nseats, blacklisted=blacklisted)
 
+    class Borda(AttribMethod):
+        name = "Méthode de Borda"
+        valid = (Classement,)
+        def __call__(self, scores, nseats, **kwargs):
+            '''
+            Implémente la méthode de Borda, où on fait la somme des classements et la plus faible moyenne gagne
+            '''
+            # somme des rangs pour chaque parti
+            sums = {}
+            for tup in scores:
+                for k, parti in enumerate(tup):
+                    sums[parti] = sums.get(parti, 0) + k
+            win = min(sums, key=sums.get)
+            return [(win, nseats)]
+
     class ProportionnelleHondt(AttribMethod, Proportional):
         name = "Proportionnelle d'Hondt"
         valid = (Vote_Unique, Validation)
@@ -334,4 +349,4 @@ init python:
         return members
 
 define votingkinds = (Vote_Unique(), Classement(), Validation(), No_Vote())
-define attribkinds = (Majoritaire(), InstantRunoff(), TirageAuSort(), ProportionnelleHondt(), ProportionnelleHare())
+define attribkinds = (Majoritaire(), InstantRunoff(), Borda(), TirageAuSort(), ProportionnelleHondt(), ProportionnelleHare())
