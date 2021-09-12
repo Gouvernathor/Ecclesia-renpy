@@ -2,7 +2,7 @@ label constitution_form:
     $ npage = 0
     while _return != "finish":
         if _return in {'executif', 'execelect'}:
-            if not "Hail to the Chief" in renpy.music.get_playing():
+            if "/music/Hail to the Chief instrumental.mp3" != renpy.music.get_playing():
                 play music "/music/Hail to the Chief instrumental.mp3" fadeout 3.0
         elif not renpy.music.get_playing() in audio.anthems:
             $ renpy.random.shuffle(audio.anthems)
@@ -248,7 +248,7 @@ screen constit(npage, pagename=''):
                                 else:
                                     text _("{} members of the {} Council").format(nseats, exenamec)
                                 textbutton "+1" action SetScreenVariable("nseats", nseats+1) sensitive (nseats+1 <= (.1*min([house.seats for house in houses]) if houses else 25))
-                                # on ne peut pas avoir plus de sièges que 1 ou 10% de la chambre moins peuplée si on a des chambres, ou 25 si on n'en a pas
+                                # on ne peut pas avoir plus de sièges que 10% de la chambre moins peuplée si on a des chambres, ou 25 si on n'en a pas
                         if houses:
                             hbox:
                                 xfill True
@@ -471,6 +471,9 @@ style constform_button_text:
     selected_idle_color '#000'
 style constform_radio_button_text is constform_button_text
 style constform_selector_button_text is constform_button_text
+
+style constform_radio_vbox:
+    xsize None
 
 style constform_text:
     size 35
