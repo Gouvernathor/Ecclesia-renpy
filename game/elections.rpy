@@ -19,12 +19,10 @@ init python:
             return False
 
     class VotingMethod(Function_Wrapper): pass
-    class Proportional: pass
-    class RanDraw: pass
 
     # Fournit pour une circo donnée en argument
     # le nombre de voix reçue par chaque parti/candidat/liste
-    class Vote_Unique(VotingMethod):
+    class Vote_Simple(VotingMethod):
         def __call__(self, (nseats, funk, citizens)):
             '''
             Chaque électeur vote uniquement pour son parti préféré
@@ -49,10 +47,10 @@ init python:
                 scores[min(opns, key=opns.get)] += 1
             return scores
 
-    class Vote(Vote_Unique, Proportional):
+    class Vote_Unique(Vote_Simple):
         name = "Vote unique pour le parti préféré"
 
-    class No_Vote(Vote_Unique, RanDraw):
+    class No_Vote(Vote_Simple):
         name = "Aucun vote"
 
     class Classement(VotingMethod):
@@ -80,7 +78,7 @@ init python:
                     scores[parti][k] += 1
             return scores
 
-    class Validation(VotingMethod, Proportional):
+    class Validation(VotingMethod):
         name = "Validation ou non de chacun des candidats"
         def __call__(self, (nseats, funk, citizens)):
             '''
@@ -141,9 +139,11 @@ init python:
         # mais doit être curryifié pour être utilisable dans la suite de la simulation
 
     class AttribMethod(Function_Wrapper): pass
+    class Proportional: pass
 
     class Majoritaire(AttribMethod):
         name = "Majoritaire"
+        valid = (Vote_Unique, Validation) # TODO notation des candidats
         def __call__(self, scores, nseats=1, **kwargs):
             '''
             Renvoie le seul parti ayant le plus de voix
@@ -171,8 +171,9 @@ init python:
                 return [(tup[0], nseats)]
         # on est censé ne jamais arriver ici
 
-    class TirageAuSort(AttribMethod, RanDraw):
+    class TirageAuSort(AttribMethod):
         name = "Tirage au sort"
+        valid = (No_Vote,)
         def __call__(self, scores, nseats, randomobj=renpy.random, **kwargs):
             '''
             Tire au sort parmi une population,
@@ -203,6 +204,7 @@ init python:
 
     class ProportionnelleHondt(AttribMethod, Proportional):
         name = "Proportionnelle d'Hondt"
+        valid = (Vote_Unique, Validation)
         def __call__(self, scores, nseats, thresh=False, contingent=None, **kwargs):
             '''
             Implémente la proportionnelle d'Hondt, à plus forte moyenne, avec seuil possible
@@ -244,6 +246,7 @@ init python:
 
     class ProportionnelleHare(AttribMethod, Proportional):
         name = "Proportionnelle de Hare"
+        valid = (Vote_Unique, Validation)
         def __call__(self, scores, nseats, thresh=False, contingent=None, **kwargs):
             '''
             Implémente la proportionnelle de Hare, à plus fort reste, avec seuil possible
@@ -302,5 +305,5 @@ init python:
         members = {parti: sieges for parti, sieges in members.items() if sieges}
         return members
 
-define votingkinds = (Vote(), Classement(), Validation(), No_Vote())
+define votingkinds = (Vote_Unique(), Classement(), Validation(), No_Vote())
 define attribkinds = (Majoritaire(), TirageAuSort(), ProportionnelleHondt(), ProportionnelleHare())

@@ -554,14 +554,11 @@ init python:
         '''
         if not isinstance(votingfunc, VotingMethod):
             return ()
-        if isinstance(votingfunc, RanDraw):
-            attribk = [f for f in attribkinds if isinstance(f, RanDraw)]
-        else:
-            attribk = [f for f in attribkinds if not isinstance(f, RanDraw)]
-        # si un seul district ou vote non-proportionnel
-        if (circoseats == 1) or not isinstance(votingfunc, Proportional):
-            attribk = [f for f in attribk if not isinstance(f, Proportional)]
-        return attribk
+        # si un seul siège à pourvoir, non-proportionnels
+        attribk = attribkinds
+        if (circoseats == 1):
+            attribk = (f for f in attribk if not isinstance(f, Proportional))
+        return (f for f in attribk if isinstance(votingfunc, f.valid))
 
     def applyelec(house, circoseats, (votingfonk, attribfonk), thresh, period=60):
         # house.elect_types = [(house.seats(), fonk, circoseats)]
