@@ -86,6 +86,11 @@ init python:
             '''
             raise NotImplementedError
 
+    class Scoring(VotingMethod):
+        name = "Notation de chaque candidat sur une échelle fixe"
+        def __call__(self, (nseats, funk, citizens)):
+            raise NotImplementedError
+
     def disagree(cita, citb):
         '''
         Compares the opinions between two citizens,
@@ -107,7 +112,7 @@ init python:
             except TypeError:
                 print("TypeError")
                 votingkind = Vote()
-            scoress.append(attribkind(votingkind(circo).items(), nseats=circo[0], randomobj=electrobj))
+            scoress.append(attribkind(votingkind(circo), nseats=circo[0], randomobj=electrobj))
         joinedlist = join_results(scoress).items()
         joinedlist.sort(key=lambda p:p[0].alignment)
         joinn = OrderedDict(joinedlist)
@@ -118,7 +123,7 @@ init python:
     # ce score par parti est ensuite donné à une fonction de répartition des votes
     # qui donne le nombre de sièges par parti par circonscription
 
-    # types d'élection :
+    # types d'attributions :
     # renvoie une liste d'éléments (parti, nombre de sièges)
     # renvoie la liste dans l'ordre où les partis ont été fournis
     # ne renvoie pas une liste complète
@@ -131,8 +136,9 @@ init python:
     # proportionnelle à plus fort reste (Hare), avec seuil potentiellement nul
 
     # ces fonctions prennent en argument :
-    # scores, une liste de (parti, part)
+    # scores, une liste de (parti, part), pour vote unique et validation
         # avec part étant un nombre (int ou float) proportionnel au nombre de voix
+    # scores, une liste de tuples de partis, pour classement
     # nseats (optionnel), indiquant le nombre de sièges à remplir
     # randomobj (optionnel), utilisé quand on besoin de random
     # thresh (optionnel), utilisé pour les proportionnelles
@@ -143,12 +149,13 @@ init python:
 
     class Majoritaire(AttribMethod):
         name = "Majoritaire"
-        valid = (Vote_Unique, Validation) # TODO notation des candidats
+        valid = (Vote_Unique, Validation, Scoring)
         def __call__(self, scores, nseats=1, **kwargs):
             '''
             Renvoie le seul parti ayant le plus de voix
             A utiliser dans les élections uninominales à un tour avec une seule circonscription
             '''
+            scores = scores.items()
             win, maj = scores[0]
             for tup in scores:
                 if tup[1]>maj:
@@ -180,6 +187,7 @@ init python:
             Si aucun parti ne dépasse le seuil, relance l'attribution des votes sans seuil
             ou via la méthode fournie par `contingent`.
             '''
+            scores = scores.items()
             oldscores = scores[:]
             # if there's a threshold, each score below it is thrown out
             if thresh:
@@ -222,6 +230,7 @@ init python:
             Si aucun parti ne dépasse le seuil, relance l'attribution des votes sans seuil
             ou via la méthode fournie par `contingent`.
             '''
+            scores = scores.items()
             oldscores = scores[:]
             # computing the sum of all vote quantities
             sum = 0
@@ -266,6 +275,7 @@ init python:
             Tire au sort parmi une population,
             où chaque personne tirée au sort représente son parti préféré
             '''
+            scores = scores.items()
             retlist = [[tup[0], 0] for tup in scores]
             for seat in range(nseats):
                 sum = 0
