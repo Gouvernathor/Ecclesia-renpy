@@ -48,7 +48,7 @@ init python:
             return scores
 
     class Vote_Unique(Vote_Simple):
-        name = "Vote unique pour le parti préféré"
+        name = "Vote unique pour le candidat préféré"
 
     class No_Vote(Vote_Simple):
         name = "Aucun vote"
@@ -79,7 +79,7 @@ init python:
             return scores
 
     class Validation(VotingMethod):
-        name = "Validation ou non de chacun des candidats"
+        name = "Validation ou non de chaque candidat"
         def __call__(self, (nseats, funk, citizens)):
             '''
             Les électeurs valident entre 1 et n-1 candidats
@@ -171,37 +171,6 @@ init python:
                 return [(tup[0], nseats)]
         # on est censé ne jamais arriver ici
 
-    class TirageAuSort(AttribMethod):
-        name = "Tirage au sort"
-        valid = (No_Vote,)
-        def __call__(self, scores, nseats, randomobj=renpy.random, **kwargs):
-            '''
-            Tire au sort parmi une population,
-            où chaque personne tirée au sort représente son parti préféré
-            '''
-            retlist = [[tup[0], 0] for tup in scores]
-            for seat in range(nseats):
-                sum = 0
-                ran = randomobj.random()*sum
-                for k in range(len(scores)):
-                    sum += scores[k][1]
-                    if ran<sum:
-                        retlist[k][1] += 1
-                        break
-            return retlist
-
-    def tirage_au_sort_partis(scores, nseats, randomobj=renpy.random, **kwargs):
-        '''
-        Tire au sort parmi les candidats, en donnant un poids égal à tous les partis
-        indépendemment de la popularité de chacun
-        Tellement facile de spammer les candidatures et de multiplier sa probabilité de victoire qu'un peu vide de sens
-        '''
-        npartis = len(scores)
-        scores = [list(tup)+[0] for tup in scores]
-        for k in range(nseats):
-            scores[randomobj.randint(0, npartis-1)][2] += 1
-        return [(tup[0], tup[2]) for tup in scores]
-
     class ProportionnelleHondt(AttribMethod, Proportional):
         name = "Proportionnelle d'Hondt"
         valid = (Vote_Unique, Validation)
@@ -288,6 +257,37 @@ init python:
                         tup[2] += 1
                         break
             return [(tup[0], tup[2]) for tup in scores]
+
+    class TirageAuSort(AttribMethod):
+        name = "Tirage au sort"
+        valid = (No_Vote,)
+        def __call__(self, scores, nseats, randomobj=renpy.random, **kwargs):
+            '''
+            Tire au sort parmi une population,
+            où chaque personne tirée au sort représente son parti préféré
+            '''
+            retlist = [[tup[0], 0] for tup in scores]
+            for seat in range(nseats):
+                sum = 0
+                ran = randomobj.random()*sum
+                for k in range(len(scores)):
+                    sum += scores[k][1]
+                    if ran<sum:
+                        retlist[k][1] += 1
+                        break
+            return retlist
+
+    def tirage_au_sort_partis(scores, nseats, randomobj=renpy.random, **kwargs):
+        '''
+        Tire au sort parmi les candidats, en donnant un poids égal à tous les partis
+        indépendemment de la popularité de chacun
+        Tellement facile de spammer les candidatures et de multiplier sa probabilité de victoire qu'un peu vide de sens
+        '''
+        npartis = len(scores)
+        scores = [list(tup)+[0] for tup in scores]
+        for k in range(nseats):
+            scores[randomobj.randint(0, npartis-1)][2] += 1
+        return [(tup[0], tup[2]) for tup in scores]
 
     def join_results(scoress):
         '''
