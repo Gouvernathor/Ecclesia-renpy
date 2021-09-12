@@ -58,25 +58,19 @@ init python:
         def __call__(self, (nseats, funk, citizens)):
             '''
             Les électeurs classent tous les candidats par ordre de préférence
-            Renvoie un dictionnaire reliant chaque parti à
-                un dictionnaire reliant la position dans le classement au nombre de votants l'ayant classé là
-                les positions sont de 0 à npartis-1 inclus, 1 étant le meilleur
+            Renvoie une liste de tuples ordonnés de partis, les mieux en premier
+            Tous les partis ne sont pas obligés d'être dans chacun des tuples
             '''
-            scores = {parti:([0]*len(partis)) for parti in partis}
+            bigliz = []
             for citizen in citizens:
-                opns = dict() # son désaccord à propos de chaque parti
-                partees = partis[:] # on copie la liste pour la mélanger
+                opns = {}
+                partees = partis[:]
                 electrobj.shuffle(partees)
                 for parti in partees:
-                    # on fait la moyenne des différences d'opinion
                     opns[parti] = disagree(citizen, parti)
-                # sélectionner le parti avec lequel le désaccord est le plus petit
-                # lui ajouter une voix
-                order = [parti for parti in opns]
-                order.sort(key=opns.get)
-                for k, parti in enumerate(order):
-                    scores[parti][k] += 1
-            return scores
+                partees.sort(key=opns.get)
+                bigliz.append(tuple(partees))
+            return bigliz
 
     class Validation(VotingMethod):
         name = "Validation ou non de chaque candidat"
@@ -177,6 +171,30 @@ init python:
             if ran<sum:
                 return [(tup[0], nseats)]
         # on est censé ne jamais arriver ici
+
+    class InstantRunoff(AttribMethod):
+        name = "Vote Alternatif"
+        valid = (Classement,)
+        def __call__(self, scores, nseats, blacklisted=(), **kwargs):
+            '''
+            Implémente l'Instant Runoff Voting, où on vire le moins bien classé en moyenne
+            jusqu'à arriver à une majorité absolue pour un des candidats restants.
+            '''
+            # déterminer le nombre de premières places pour chaque parti non-blacklisté
+            first_places = {}
+            for tup in scores:
+                for parti in tup:
+                    if parti not in blacklisted:
+                        break
+                else:
+                    continue
+                first_places[parti] = first_places.get(parti, 0)+1
+                # si il y a une majorité absolue dans les premiers choix, il est choisi
+                if first_places[parti] > len(scores)/2:
+                    return [(parti, nseats)]
+            # blacklister le dernier
+            blacklisted += (min(first_places, key=first_places.get),)
+            return self(scores, nseats, blacklisted=blacklisted)
 
     class ProportionnelleHondt(AttribMethod, Proportional):
         name = "Proportionnelle d'Hondt"
@@ -316,4 +334,4 @@ init python:
         return members
 
 define votingkinds = (Vote_Unique(), Classement(), Validation(), No_Vote())
-define attribkinds = (Majoritaire(), TirageAuSort(), ProportionnelleHondt(), ProportionnelleHare())
+define attribkinds = (Majoritaire(), InstantRunoff(), TirageAuSort(), ProportionnelleHondt(), ProportionnelleHare())

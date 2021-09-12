@@ -38,11 +38,11 @@ méthodes de vote
 méthodes d'attribution
     a c d majorité simple
     a c d majorité absolue ou qualifiée (avec vote de secours)
-    b instant runoff
+    b instant runoff (virer le dernier)
     b Borda (somme des classements, le score le plus bas gagne)
     b Condorcet (avec attribution/vote de secours)
-    a c proportionnelle de Hare (avec ou sans seuil)
     a c proportionnelle d'Hondt (avec ou sans seuil)
+    a c proportionnelle de Hare (avec ou sans seuil)
     a* tirage au sort (répété et avec remise si plurinominal)
 
 décisions d'implémentation :
