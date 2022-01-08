@@ -211,6 +211,35 @@ init python:
             win = min(sums, key=sums.get)
             return [(win, nseats)]
 
+    class Condorcet(AttribMethod):
+        name = "Méthode de Condorcet"
+        valid = (Classement,)
+        def __call__(self, scores, nseats, contingent=None, **kwargs):
+            '''
+            Implémente la méthode de Condorcet, où des duels sont simulés entre tous les candidats
+            '''
+            if not reduce((lambda x, y:x==y), map(set, scores)):
+                raise ValueError("For the Condorcet method all ballots must rank each candidate")
+            # construire toutes les paires de partis sous forme de tuples
+            count = defaultdict(int)
+            # parcourir chaque vote
+            for tup in scores:
+                for k in tup[:-1]:
+                    parti1 = tup[k]
+                    for parti2 in tup[k+1:]:
+                        # création de chaque paire en double pour faciliter le décompte
+                        count[(parti1, parti2)] += 1
+                        count[(parti2, parti1)] -= 1
+            win = {}
+            for parti, autre in count:
+                win[parti] = win.get(parti, True) and (count[(parti, autre)]>0)
+            for parti in win:
+                if win[parti]:
+                    return [(parti, nseats)]
+            if contingent is None:
+                raise Exception("Condorcet standoff")
+            return contingent(scores, nseats, **kwargs)
+
     class ProportionnelleHondt(AttribMethod, Proportional):
         name = "Proportionnelle d'Hondt"
         valid = (Vote_Unique, Validation)
