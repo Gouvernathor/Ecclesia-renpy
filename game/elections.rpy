@@ -1,5 +1,5 @@
 init python:
-    from collections import OrderedDict
+    from collections import OrderedDict, defaultdict
 
     class Function_Wrapper:
         def __init__(self, name=None, ttip=None):
@@ -332,7 +332,7 @@ init python:
             scores[randomobj.randint(0, npartis-1)][2] += 1
         return [(tup[0], tup[2]) for tup in scores]
 
-    def join_results(scoress):
+    def join_results(scores):
         '''
         Assemble les attributions de sièges par circo
         pour donner le score de chaque parti à l'échelle de la Chambre
@@ -340,12 +340,10 @@ init python:
         renvoie un dict {parti:nsièges}
         prêt à être rangé dans house.members
         '''
-        members = {parti:0 for parti in partis}
-        for scores in scoress:
-            for parti, nseats in scores:
+        members = defaultdict(int)
+        for score in scores:
+            for parti, nseats in score:
                 members[parti] += nseats
-        # si on veut retirer les partis sans sièges :
-        members = {parti: sieges for parti, sieges in members.items() if sieges}
         return members
 
 define votingkinds = (Vote_Unique(), Classement(), Validation(), No_Vote())
