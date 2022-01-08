@@ -179,6 +179,7 @@ init python:
             for nop in range(nopinions):
                 ops.append(weighted_choice(range(2*opinrange+1), poll[nop], randomobj))
             partis.append(Party(lpartynamepool.pop(), opinions=ops, alignment=randomobj.random()))
+        partis.sort(key=lambda p:p.alignment)
         # sinon choix pondéré avec les opinions déjà prises par les autres partis ?
 
 define partynamepool = [_("Liberal-Democrat Party"),
