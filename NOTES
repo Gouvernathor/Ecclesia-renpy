@@ -33,7 +33,7 @@ on fait tourner la simulation parlementaire pendant 1 à 3 mandats
 méthodes de vote
     a vote unique (pour un candidat)
     b classement des candidats entre eux
-    c approbation booléenne de chaque candidat
+    c approbation/validation booléenne de chaque candidat
     d note pour chaque candidat
 méthodes d'attribution
     a c d majorité simple
@@ -74,6 +74,12 @@ les techniques de manipulation de vote
     le vote utile, dans le scrutin majoritaire uninominal
 répartition des opinions dans la population
 répartition des partis par rapport aux opinions
+ascendance d'une Chambre sur une autre (en-dehors des veto override)
+    la dernière lecture et la motion de censure à l'assnat
+    l'initiative budgétaire de la Chambre des Représentants
+    la chambre des lords...
+majorité qualifiée requise dans une chambre, en-dehors d'un veto override
+    implémentable sans trop de problème
 
 graphe :
 borders
