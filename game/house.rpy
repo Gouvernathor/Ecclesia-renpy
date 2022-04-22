@@ -127,9 +127,10 @@ init python:
             super(Party, self).__init__(*args, **kwargs)
             self.name = name
             if color:
-                self.color = color # utilise le setter
+                self.color = Color(color)
             elif alignment is not None:
-                self.alignment = alignment # alignement gauche/droite, implique sa couleur et son classement dans l'hémicycle
+                self.alignment = alignment # utilise le setter
+                # alignement gauche/droite, implique sa couleur et son classement dans l'hémicycle
             else:
                 self.alignment = renpy.random.random()
 
@@ -146,17 +147,17 @@ init python:
             return super().disagree(other)
 
         @property
-        def color(self):
+        def alignment(self):
             '''
-            couleur TSV/HSV saturée
-            teinte (premier composant) pris entre .0 (rouge) et .66 (bleu) ou .75 (bleu-violet)
+            Accepte un flottant entre 0 et 1
+            Transformation en une couleur TSV/HSV saturée
+            Teinte (premier composant) pris entre .0 (rouge) et .66 (bleu) ou .75 (bleu-violet)
             '''
-            return Color(hsv=(self.alignment*.75, 1.0, 1.0))
+            return self.color.hsv[0]/.75
 
-        @color.setter
-        def color(self, value):
-            value = Color(value)
-            self.alignment = (value.hsv[0]/.75)
+        @alignment.setter
+        def alignment(self, value):
+            self.color = Color(hsv=(value*.75, 1.0, 1.0))
 
     def pollopinions(pool):
         gathered = [[0 for k in range(2*opinmax+1)] for k in range(nopinions)]
