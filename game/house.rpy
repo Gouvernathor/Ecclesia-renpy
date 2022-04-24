@@ -75,7 +75,7 @@ init python:
                      ):
             if election_period is None:
                 election_period = origin.election_period if (origin in houses) else 60
-            super(Executive, self).__init__(election_period=election_period, *args, **kwargs)
+            super().__init__(election_period=election_period, *args, **kwargs)
             self.origin = origin
             self.vetopower = vetopower
             self.vetoverride = vetoverride
@@ -96,7 +96,7 @@ init python:
                      randomobj=renpy.random.Random(),
                      opinions=None,
                      ):
-            super(Citizen, self).__init__()
+            super().__init__()
             self.opinions = opinions or [randomobj.choice(range(-opinmax, opinmax+1)) for k in range(nopinions)]
 
         def disagree(self, other):
@@ -124,7 +124,7 @@ init python:
                      *args,
                      **kwargs
                      ):
-            super(Party, self).__init__(*args, **kwargs)
+            super().__init__(*args, **kwargs)
             self.name = name
             if color:
                 self.color = Color(color)
@@ -167,23 +167,6 @@ init python:
                 # c'est décalé de -mx à +max à 0 à 2*max
         return gathered
 
-    def weighted_choice(choices, probs=None, randomobj=renpy.random.Random()):
-        '''
-        Weighted random choice between the first element of each element of `choices`
-        It's also possible to give a list of possibilities as `choices` and a list of weights as `probs`
-        In that case, any exceeding weight is ignored, and any missing weight is assumed to be 0
-        '''
-        if probs:
-            choices = zip(choices, probs)
-        total = sum(w for c, w in choices)
-        r = randomobj.uniform(0, total)
-        # print(choices)
-        for c, w in choices:
-            r -= w
-            if 0 > r:
-                return c
-        raise Exception("Shouldn't get here")
-
     def generate_partis(npartis):
         '''
         Adds `npartis` partis to the list of partis
@@ -196,7 +179,7 @@ init python:
         for k in range(npartis): # choix random pondéré pour chaque sujet
             ops = []
             for nop in range(nopinions):
-                ops.append(weighted_choice(range(2*opinmax+1), poll[nop], randomobj))
+                ops.append(randomobj.choices(range(2*opinmax+1), poll[nop])[0])
             partis.append(Party(lpartynamepool.pop(), opinions=ops, alignment=randomobj.random()))
         partis.sort(key=lambda p:p.alignment)
         # sinon choix pondéré avec les opinions déjà prises par les autres partis ?

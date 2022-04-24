@@ -53,7 +53,7 @@ screen constit_elect_districts(house, distindex, validhd):
     null height gui.choice_spacing
     hbox:
         xfill True
-        text _("Number of seats per electoral district")+(_(" (Districts : {})").format(house.seats/validhd[distindex]) if distindex else "") yalign .5
+        text _("Number of seats per electoral district")+(_(" (Districts : {})").format(house.seats//validhd[distindex]) if distindex else "") yalign .5
         hbox:
             xalign 1.0
             yalign .5
@@ -415,7 +415,7 @@ screen constit(npage, pagename=''):
                                 text "Everyone"
                             else:
                                 text _("1 per {} inhabitants").format(str(popscale))
-                            textbutton "x10" action SetVariable("popscale", popscale/10) sensitive (popscale/10 >= 1)
+                            textbutton "x10" action SetVariable("popscale", popscale//10) sensitive (popscale//10 >= 1)
                     null height gui.choice_spacing
                     # afficher le nombre total d'habitants (calculé, non-stocké)
                     hbox:
@@ -546,7 +546,7 @@ init python:
         Les nombres valides d'élus par circonscription, pour partager nseats sièges
         Aka les diviseurs de nseats, 1 inclus et nseats exclus
         '''
-        return [x for x in range(1, nseats+1) if (float(nseats)/x) == float(int(nseats/x)) and x != nseats]
+        return [x for x in range(1, nseats+1) if ((nseats/x) == int(nseats/x)) and x != nseats]
 
     def validattribfuncs(circoseats, votingfunc):
         '''
@@ -589,7 +589,7 @@ init python:
                 b -= a
             else:
                 a -= b
-        return p/a
+        return p//a
 
     def ncounties():
         # pour chaque house et pour l'exécutif si il est élu par le peuple
@@ -631,7 +631,7 @@ init python:
                         # print(len(circo))
                         # print(len(citpool))
                         # print(ncitizens*ncounties()/ncirco)
-                        circo[2] = [citpool.pop() for k in range(ncitizens*ncounties()/ncirco)]
+                        circo[2] = [citpool.pop() for k in range(ncitizens*ncounties()//ncirco)]
             if len(citpool):
                 raise Exception
         return

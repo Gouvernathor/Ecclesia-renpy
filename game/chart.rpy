@@ -61,12 +61,12 @@ init python:
             else:
                 if self.data_area_color:
                     canvas.polygon(self.data_area_color,
-                                   zip([1.0*k*width/(len(self.values)-1) for k in range(len(self.values))], [(1-1.0*val/max(self.values))*height for val in self.values])+[[width, height], [0, height]]
+                                   [((k*width/(len(self.values)-1)), (1-val/max(self.values))) for k, val in enumerate(self.values)]+ [[width, height], [0, height]]
                                    )
                 if self.data_border_color:
                     canvas.aalines(self.data_border_color,
                                   False,
-                                  zip([1.0*k*width/(len(self.values)-1) for k in range(len(self.values))], [(1-1.0*val/max(self.values))*height for val in self.values])
+                                  [(k*width/(len(self.values)-1), (1-val/max(self.values))*height) for k, val in enumerate(self.values)]
                                   )
                     # print(zip([1.0*k*width/(len(self.values)-1) for k in range(len(self.values))], [(1-1.0*val/max(self.values))*height for val in self.values]))
                 if self.rows_every:
