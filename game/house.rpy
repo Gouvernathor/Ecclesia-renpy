@@ -22,7 +22,7 @@ init python:
         def __init__(self, name,
                      nseats,
                      election_period=48, # durée en mois
-                     display='newarch',
+                     display=None,
                      majority=.5,
                      ):
             self.name = name
@@ -33,6 +33,8 @@ init python:
             #           liste de citoyens-représentatifs)
             self.members = {None : self.seats}
             self.election_period = election_period
+            if display is None:
+                display = newarch
             self.display = display
             self.majority = majority
 
@@ -57,7 +59,7 @@ init python:
 
         def displayable(self, *args, **kwargs):
             liste = [(self.members[parti], ('#000' if parti is None else parti.color)) for parti in self.members if self.members[parti]]
-            return eval(self.display)(liste, *args, **kwargs)
+            return self.display(liste, *args, **kwargs)
 
     class Executive(House):
         '''
