@@ -1,5 +1,5 @@
-define nopinions = 30
-define opinmax = 100 # valeur max pour chaque opinion (min = -max)
+define nopinions = 5
+define opinmax = 10 # valeur max pour chaque opinion (min = -max)
 
 init python:
     from collections import OrderedDict
@@ -203,6 +203,8 @@ init python:
         Adds `npartis` partis to the list of partis
         Does not replace the existing ones
         '''
+        global partis
+        partis = []
         poll = pollopinions(citizenpool)
         lpartynamepool = partynamepool+(npartis-21)*[_("")]
         renpy.random.shuffle(lpartynamepool)
