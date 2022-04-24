@@ -2,6 +2,8 @@ define nopinions = 30
 define opinmax = 100 # valeur max pour chaque opinion (min = -max)
 
 init python:
+    from collections import OrderedDict
+
     def house_election_check(houzes=None, elapsed=None):
         '''
         Prend un itérable des Houses du pays et un nombre de mois écoulés
@@ -60,6 +62,33 @@ init python:
         def displayable(self, *args, **kwargs):
             liste = [(self.members[parti], ('#000' if parti is None else parti.color)) for parti in self.members if self.members[parti]]
             return self.display(liste, *args, **kwargs)
+
+        def election(self):
+            """
+            Renouvelle chaque circonscription de la chambre, et assemble les résultat dans l'attribut members
+            """
+
+            def join_results(scores):
+                '''
+                Assemble les attributions de sièges par circo
+                pour donner le score de chaque parti à l'échelle de la Chambre
+                Prend en entrée une liste de listes scores
+                renvoie un dict {parti:nsièges}
+                prêt à être rangé dans house.members
+                '''
+                members = defaultdict(int)
+                for score in scores:
+                    for parti, nseats in score:
+                        members[parti] += nseats
+                return members
+
+            scoress = []
+            for circo in self.circos:
+                elect_method = circo[1]
+                scoress.append(elect_method.election(circo[2]))
+            joinedlist = sorted(join_results(scoress).items(), key=(lambda p:p[0].alignment))
+            self.members = OrderedDict(joinedlist)
+            return self.members
 
     class Executive(House):
         '''

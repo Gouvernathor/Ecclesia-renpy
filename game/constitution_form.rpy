@@ -29,7 +29,7 @@ screen constit_election_type(distindex, votingfunc):
             # voting kinds
             xalign .0
             style_prefix "constform_radio"
-            for fonk in [f for f in votingkinds]:
+            for fonk in (f for f in voting_methods):
                 textbutton __(fonk.name):
                     xalign .0
                     action SetScreenVariable("votingfunc", fonk)
@@ -37,7 +37,7 @@ screen constit_election_type(distindex, votingfunc):
             # attribution kinds
             xalign 1.0
             style_prefix "constform_radio"
-            for fonk in [f for f in attribkinds]:
+            for fonk in (f for f in attribution_methods):
                 textbutton __(fonk.name):
                     action SetScreenVariable("attribfunc", fonk)
                     sensitive (fonk in validattribfuncs(distindex, votingfunc))
@@ -156,10 +156,10 @@ screen constit(npage, pagename=''):
                     default validhd = [0]+validnpdistricts(houses[npage-2].seats) # nombres de circonscriptions valides
                     default votingfunc = False # fonction de modalité de vote
                     default attribfunc = False # fonction d'attribution des sièges à partir des résultats du vote
-                    default thresh = 0 # seuil électoral pour les scrutins proportionnels
+                    default thresh = 0
                     use constit_elect_districts(houses[npage-2], distindex, validhd)
                     use constit_election_type(distindex, votingfunc)
-                    if isinstance(attribfunc, Proportional):
+                    if is_subclass(attribfunc, Proportional):
                         hbox:
                             xfill True
                             text _("Electoral threshold") yalign .5
@@ -177,7 +177,7 @@ screen constit(npage, pagename=''):
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive attribfunc in validattribfuncs(distindex, votingfunc)
-                        action [Function(applyelec, houses[npage-2], (validhd[distindex] if distindex else houses[npage-2].seats), (votingfunc, attribfunc), thresh), Return('elections' if (npage<=len(houses)) else 'executif')]
+                        action [Function(applyelec, houses[npage-2], (validhd[distindex] if distindex else houses[npage-2].seats), votingfunc, attribfunc, thresh), Return('elections' if (npage<=len(houses)) else 'executif')]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename == 'executif':
@@ -297,7 +297,7 @@ screen constit(npage, pagename=''):
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive (exenamea if nseats==1 else exenameb if nseats in {2, 3} else exenamec)
-                        action [Function(create_exec, (exenamea if nseats==1 else 'Co-'+exenameb+'s' if nseats in {2, 3} else exenamec+' Council'), execorigin, nseats, vetopower, vetoverride, superlist[superindex][1]), Return('execelect' if execorigin=='people' else "population")]
+                        action [Function(create_exec, (exenamea if nseats==1 else 'Co-'+exenameb+'s' if nseats in {2, 3} else exenamec+' Council'), execorigin, nseats, vetopower, vetoverride, superlist[superindex][1]), Return('execelect' if execorigin=='people' else "trivia")]
                     null height gui.choice_spacing+gui.pref_spacing
                     # TODO
                     # page exécutif
@@ -334,7 +334,7 @@ screen constit(npage, pagename=''):
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive attribfunc in validattribfuncs((distindex if executive.seats>1 else 1), votingfunc)
-                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), (votingfunc, attribfunc), 0, execperiod), Return('trivia')]
+                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), votingfunc, attribfunc, 0, execperiod), Return('trivia')]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename == 'trivia':
@@ -552,19 +552,25 @@ init python:
         '''
         Renvoie les modes d'élection valides pour désigner circoseats dans une seule circonscription
         '''
-        if not isinstance(votingfunc, VotingMethod):
+        if not is_subclass(votingfunc, VotingMethod):
             return ()
         # si un seul siège à pourvoir, non-proportionnels
-        attribk = attribkinds
+        attribk = attribution_methods
         if (circoseats == 1):
-            attribk = (f for f in attribk if not isinstance(f, Proportional))
-        return (f for f in attribk if isinstance(votingfunc, f.valid))
+            attribk = (f for f in attribk if not issubclass(f, Proportional))
+        return (f for f in attribk if f.taken_format == votingfunc.return_format)
 
-    def applyelec(house, circoseats, (votingfonk, attribfonk), thresh, period=60):
-        # house.elect_types = [(house.seats(), fonk, circoseats)]
-        if isinstance(attribfonk, Proportional) and thresh:
-            attribfonk = renpy.curry(attribfonk)(thresh=thresh)
-        house.circos = [[circoseats, (votingfonk, attribfonk), []] for k in range(house.seats/circoseats)]
+    def applyelec(house, circoseats, votingtype, attribtype, thresh=None, period=60):
+        if issubclass(attribtype, SuperMajority):
+            thresh = .5
+
+        kwargs = {}
+        if thresh:
+            kwargs = dict(threshold=thresh)
+
+        votingfonk = votingtype()
+        attribfonk = attribtype(circoseats, **kwargs)
+        house.circos = [[circoseats, ElectionMethod(votingfonk, attribfonk), []] for k in range(house.seats//circoseats)]
         if house == executive:
             house.election_period = period
         return
