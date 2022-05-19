@@ -185,10 +185,34 @@ init python:
         taken_format = results_format.ORDER
         name = _("Instant-Runoff Voting")
 
+        def attrib(self, results):
+            blacklisted = set()
+            for _i in range(len(results[0])):
+                first_places = defaultdict(int)
+                for ballot in results:
+                    for parti in ballot:
+                        if parti not in blacklisted:
+                            first_places[parti] += 1
+                            break
+
+                total = sum(first_places.values())
+                for parti, score in first_places.items():
+                    if score > total/2:
+                        return [(parti, self.nseats)]
+                blacklisted.add(min(first_places, key=first_places.get))
+            raise Exception("We should never end up here")
+
     class Borda(Attribution):
         __slots__ = ()
         taken_format = results_format.ORDER
         name = _("Borda Count")
+
+        def attrib(self, results):
+            scores = defaultdict(int)
+            for ballot in results:
+                for k, parti in enumerate(ballot):
+                    scores[parti] += k
+            return [(min(scores, key=scores.get), self.nseats)]
 
     class Condorcet(Attribution):
         """
