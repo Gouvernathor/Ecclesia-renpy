@@ -80,6 +80,9 @@ ascendance d'une Chambre sur une autre (en-dehors des veto override)
     la chambre des lords...
 majorité qualifiée requise dans une chambre, en-dehors d'un veto override
     implémentable sans trop de problème
+autre version de la majoritaire plurinominale, sans liste
+    où on prend les n candidats ayant reçu le plus de voix
+    pas adapté à notre modèle parce que la stratégie de présentation de candidats devient différente
 
 graphe :
 borders

@@ -119,7 +119,7 @@ init python:
         """
         __slots__ = ("nseats", "randomobj")
         contingency = None
-        # getattr(attribution, "contingency", "") -> "" if it can take one, None if not
+        # getattr(attribution, "contingency", b) -> b if it can take one, None if not
         # hasattr(attribution, "contingency") -> if False, it needs to be given one
         # hasattr(attribution, "contingency") and attribution.contingency is not None -> it has one as it should
         # the contingency is given a default (or not) by classes using it in the constructor
@@ -157,16 +157,20 @@ init python:
         __slots__ = ("threshold")
         taken_format = results_format.SIMPLE
 
-        # the attrib method is coded here
+        def attrib(self, results):
+            win = max(results, key=results.get)
+            if (results[win] / sum(results.values())) > self.threshold:
+                return [(win, self.nseats)]
+            return self.contingency(results)
 
     class Plurality(Majority):
         __slots__ = ()
         name = _("Plurality")
-        # threshold = 0
+        threshold = 0
 
     class SuperMajority(Majority):
         __slots__ = ("contingency")
-        name = _("Majority or Super Majority")
+        name = _("(Super) Majority")
 
     class InstantRunoff(Attribution):
         __slots__ = ()
