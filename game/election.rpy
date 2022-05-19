@@ -105,7 +105,9 @@ init python:
         __slots__ = ()
         return_format = results_format.SIMPLE
         name = _("Approval Vote")
-        # grades = 2
+
+        def __init__(self, *args):
+            self.grades = 2
 
 init python:
     from collections import defaultdict
@@ -166,11 +168,17 @@ init python:
     class Plurality(Majority):
         __slots__ = ()
         name = _("Plurality")
-        threshold = 0
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.threshold = 0
 
     class SuperMajority(Majority):
         __slots__ = ("contingency")
         name = _("(Super) Majority")
+
+        def __init__(self, *args, threshold, **kwargs):
+            self.threshold = threshold
 
     class InstantRunoff(Attribution):
         __slots__ = ()
