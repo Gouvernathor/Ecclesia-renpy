@@ -319,6 +319,9 @@ init python:
                 return HondtWithThreshold.__new__(HondtWithThreshold, threshold=threshold, *args, **kwargs)
             return HondtNoThreshold.__new__(HondtNoThreshold, *args, **kwargs)
 
+        def __init_subclass__(cls, **kwargs):
+            return
+
         # the attribution method is coded here
 
     class HondtNoThreshold(HondtProportional):
@@ -327,8 +330,6 @@ init python:
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.threshold = 0
-    attribution_methods.remove(HondtNoThreshold)
-    # attribution_methods.pop()
 
     class HondtWithThreshold(HondtProportional):
         __slots__ = ("contingency")
@@ -336,8 +337,6 @@ init python:
         def __init__(self, *args, contingency=HondtNoThreshold, **kwargs):
             super().__init__(*args, **kwargs)
             self.contingency = contingency(*args, **kwargs)
-    attribution_methods.remove(HondtWithThreshold)
-    # attribution_methods.pop()
 
     class HareProportional(Proportional):
         __slots__ = ("threshold")
@@ -348,6 +347,9 @@ init python:
                 return HareWithThreshold.__new__(HareWithThreshold, threshold=threshold, *args, **kwargs)
             return HareNoThreshold.__new__(HareNoThreshold, *args, **kwargs)
 
+        def __init_subclass__(cls, **kwargs):
+            return
+
         # the attribution method is coded here
 
     class HareNoThreshold(HareProportional):
@@ -356,8 +358,6 @@ init python:
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.threshold = 0
-    attribution_methods.remove(HareNoThreshold)
-    # attribution_methods.pop()
 
     class HareWithThreshold(HareProportional):
         __slots__ = ("contingency")
@@ -365,8 +365,6 @@ init python:
         def __init__(self, *args, contingency=HareNoThreshold, **kwargs):
             super().__init__(*args, **kwargs)
             self.contingency = contingency(*args, **kwargs)
-    attribution_methods.remove(HareWithThreshold)
-    # attribution_methods.pop()
 
     class Randomize(Attribution):
         """
