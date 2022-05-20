@@ -111,6 +111,7 @@ init python:
 
 init python:
     from collections import defaultdict
+    import types
 
     attribution_methods = []
 
@@ -156,7 +157,7 @@ init python:
         """
         Superset of SuperMajority and Plurality.
         """
-        __slots__ = ("threshold")
+        __slots__ = ()
         taken_format = results_format.SIMPLE
 
         def attrib(self, results):
@@ -167,14 +168,11 @@ init python:
 
     class Plurality(Majority):
         __slots__ = ()
+        threshold = 0
         name = _("Plurality")
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.threshold = 0
-
     class SuperMajority(Majority):
-        __slots__ = ("contingency")
+        __slots__ = ("threshold", "contingency")
         name = _("(Super) Majority")
 
         def __init__(self, *args, threshold, **kwargs):

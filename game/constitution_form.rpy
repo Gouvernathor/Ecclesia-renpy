@@ -159,7 +159,7 @@ screen constit(npage, pagename=''):
                     default thresh = 0
                     use constit_elect_districts(houses[npage-2], distindex, validhd)
                     use constit_election_type(distindex, votingfunc)
-                    if is_subclass(attribfunc, Proportional):
+                    if isinstance(getattr(attribfunc, "threshold", None), types.MemberDescriptorType):
                         hbox:
                             xfill True
                             text _("Electoral threshold") yalign .5
