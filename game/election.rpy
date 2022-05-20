@@ -369,7 +369,19 @@ init python:
         def __init_subclass__(cls, **kwargs):
             return
 
-        # the attribution method is coded here
+        def attrib(self, results):
+            if self.threshold:
+                results_ = results
+                thresh = self.threshold * sum(results.values())
+                results = {p:s for p, s in results.items() if s >= thresh}
+                if not results:
+                    return self.contingency.attrib(results_)
+
+            rv = {parti : int(self.nseats*score/sum(results.values())) for parti, score in results.items()}
+            winners = sorted(results, key=(lambda p:self.nseats*results[p]/sum(results.values())%1), reverse=True)
+            for win in winners[:self.nseats-sum(rv.values())]:
+                rv[win] += 1
+            return [(p, s) for p, s in rv.items() if s]
 
     class HareNoThreshold(HareProportional):
         __slots__ = ()
