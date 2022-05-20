@@ -314,10 +314,12 @@ init python:
         __slots__ = ("threshold")
         name = _("Proportional (largest averages)")
 
-        def __new__(cls, threshold=0, *args, **kwargs):
-            if threshold:
-                return HondtWithThreshold.__new__(HondtWithThreshold, threshold=threshold, *args, **kwargs)
-            return HondtNoThreshold.__new__(HondtNoThreshold, *args, **kwargs)
+        def __new__(cls, *args, threshold=0, **kwargs):
+            if cls is HondtProportional:
+                if threshold:
+                    return HondtWithThreshold.__new__(HondtWithThreshold, threshold=threshold, *args, **kwargs)
+                return HondtNoThreshold.__new__(HondtNoThreshold, *args, **kwargs)
+            return super().__new__(cls) # annoying hack, relies on no ascending __new__ taking args nor kwargs
 
         def __init_subclass__(cls, **kwargs):
             return
@@ -334,18 +336,21 @@ init python:
     class HondtWithThreshold(HondtProportional):
         __slots__ = ("contingency")
 
-        def __init__(self, *args, contingency=HondtNoThreshold, **kwargs):
+        def __init__(self, *args, threshold, contingency=HondtNoThreshold, **kwargs):
             super().__init__(*args, **kwargs)
+            self.threshold = threshold
             self.contingency = contingency(*args, **kwargs)
 
     class HareProportional(Proportional):
         __slots__ = ("threshold")
         name = _("Proportional (largest remainder)")
 
-        def __new__(cls, threshold=0, *args, **kwargs):
-            if threshold:
-                return HareWithThreshold.__new__(HareWithThreshold, threshold=threshold, *args, **kwargs)
-            return HareNoThreshold.__new__(HareNoThreshold, *args, **kwargs)
+        def __new__(cls, *args, threshold=0, **kwargs):
+            if cls is HareProportional:
+                if threshold:
+                    return HareWithThreshold.__new__(HareWithThreshold, threshold=threshold, *args, **kwargs)
+                return HareNoThreshold.__new__(HareNoThreshold, *args, **kwargs)
+            return super().__new__(cls) # annoying hack, relies on no ascending __new__ taking args nor kwargs
 
         def __init_subclass__(cls, **kwargs):
             return
@@ -362,8 +367,9 @@ init python:
     class HareWithThreshold(HareProportional):
         __slots__ = ("contingency")
 
-        def __init__(self, *args, contingency=HareNoThreshold, **kwargs):
+        def __init__(self, *args, threshold, contingency=HareNoThreshold, **kwargs):
             super().__init__(*args, **kwargs)
+            self.threshold = threshold
             self.contingency = contingency(*args, **kwargs)
 
     class Randomize(Attribution):
