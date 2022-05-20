@@ -614,7 +614,7 @@ init python:
         for house in houses+([executive] if executive.origin=='people' else []):
             clss = house.classes()
             for classe in clss:
-                mins.add(classe[0]/(ncou/clss[classe]))
+                mins.add(int(classe[0]/(ncou/clss[classe])))
                 # nombre d'élus par circo divisé par le nombre de comtés dans la circo
         # prendre le max
         return max(mins)
