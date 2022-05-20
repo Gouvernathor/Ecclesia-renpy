@@ -324,7 +324,21 @@ init python:
         def __init_subclass__(cls, **kwargs):
             return
 
-        # the attribution method is coded here
+        def attrib(self, results):
+            if self.threshold:
+                results_ = results
+                thresh = self.threshold * sum(results.values())
+                results = {p:s for p, s in results.items() if s >= thresh}
+                if not results:
+                    return self.contingency.attrib(results_)
+
+            rv = defaultdict(int)
+            for k in range(self.nseats):
+                # compute the ratio each party would get with one more seat
+                # take the paty with the best ratio
+                win = max(results, key=(lambda p:results[p]/(rv[p]+1)))
+                rv[win] += 1
+            return [(p, s) for p, s in rv.items() if s]
 
     class HondtNoThreshold(HondtProportional):
         __slots__ = ()
