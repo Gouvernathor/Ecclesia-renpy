@@ -569,7 +569,7 @@ init python:
             kwargs = dict(threshold=thresh)
 
         votingfonk = votingtype()
-        attribfonk = attribtype(circoseats, **kwargs)
+        attribfonk = attribtype(nseats=circoseats, **kwargs)
         house.circos = [[circoseats, ElectionMethod(votingfonk, attribfonk), []] for k in range(house.seats//circoseats)]
         if house == executive:
             house.election_period = period
