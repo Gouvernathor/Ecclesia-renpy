@@ -60,7 +60,7 @@ screen constit_elect_districts(house, distindex, validhd):
             style_prefix "constform_selector"
             textbutton "-1" action SetScreenVariable("distindex", distindex-1) sensitive (distindex-1 > 0)
             if distindex == 0:
-                text _("{} (nationwide district)").format(house.seats)
+                text _("[house.seats] (nationwide district)")
             else:
                 text str(validhd[distindex])
             textbutton "+1" action SetScreenVariable("distindex", distindex+1) sensitive (distindex+1 < len(validhd)) and distindex
@@ -150,7 +150,7 @@ screen constit(npage, pagename=''):
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename == 'elections':
-                    use constit_title2(_("Article {} : Elections for the {}").format(npage, houses[npage-2].name))
+                    use constit_title2(_("Article [npage] : Elections for the {}").format(houses[npage-2].name))
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
                     default validhd = [0]+validnpdistricts(houses[npage-2].seats) # nombres de circonscriptions valides
@@ -181,7 +181,7 @@ screen constit(npage, pagename=''):
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename == 'executif':
-                    use constit_title2(_("Article {} : Executive").format(npage))
+                    use constit_title2(_("Article [npage] : Executive"))
                     null height gui.choice_spacing+gui.pref_spacing
                     default execorigin = 'people'
                     default nseats = 1
@@ -213,18 +213,16 @@ screen constit(npage, pagename=''):
                             textbutton _("Direct Popular Vote") action SetScreenVariable("execorigin", 'people')
                     null height gui.choice_spacing
                     if execorigin:
-                        if nseats == 1:
-                            button:
-                                style_prefix "constform_name"
+                        button:
+                            style_prefix "constform_name"
+                            if nseats == 1:
                                 action [If(exenamea.strip(), None, SetScreenVariable('exenamea', _("Chancellor"))), exenamea_edit.Toggle()]
                                 input:
                                     value exenamea_edit
                                     color gui.hover_color
                                     size 50
                                     pixel_width 1000
-                        elif nseats in {2, 3}:
-                            button:
-                                style_prefix "constform_name"
+                            elif nseats in (2, 3):
                                 action [If(exenameb.strip(), None, SetScreenVariable('exenameb', _("President"))), exenameb_edit.Toggle()]
                                 input:
                                     prefix _('Co-')
@@ -233,9 +231,7 @@ screen constit(npage, pagename=''):
                                     color gui.hover_color
                                     size 50
                                     pixel_width 1000
-                        else:
-                            button:
-                                style_prefix "constform_name"
+                            else:
                                 action [If(exenamec.strip(), None, SetScreenVariable('exenamec', _("National"))), exenamec_edit.Toggle()]
                                 input:
                                     suffix _(' Council')
@@ -252,11 +248,11 @@ screen constit(npage, pagename=''):
                                 style_prefix "constform_selector"
                                 textbutton "-1" action SetScreenVariable("nseats", nseats-1) sensitive (nseats-1 > 0)
                                 if nseats == 1:
-                                    text _("{} {}").format(nseats, exenamea)
-                                elif nseats in {2, 3}:
-                                    text _("{} {}s").format(nseats, exenameb)
+                                    text _("[nseats] [exenamea]")
+                                elif nseats in (2, 3):
+                                    text _("[nseats] [exenameb]s")
                                 else:
-                                    text _("{} members of the {} Council").format(nseats, exenamec)
+                                    text _("[nseats] members of the [exenamec] Council")
                                 textbutton "+1" action SetScreenVariable("nseats", nseats+1) sensitive (nseats+1 <= (.1*min([house.seats for house in houses]) if houses else 25))
                                 # on ne peut pas avoir plus de sièges que 10% de la chambre moins peuplée si on a des chambres, ou 25 si on n'en a pas
                         if houses:
@@ -278,7 +274,7 @@ screen constit(npage, pagename=''):
                                     style_prefix "constform_radio"
                                     textbutton _("No") action SetScreenVariable("vetoverride", False)
                                     for hous in houses:
-                                        textbutton _("by Supermajority in the {}").format(hous.name) action SetScreenVariable("vetoverride", hous)
+                                        textbutton _("by Supermajority in the [hous.name]") action SetScreenVariable("vetoverride", hous)
                                     if len(houses)>1:
                                         textbutton _("by Supermajority in every House") action SetScreenVariable("vetoverride", 'each')
                                         textbutton _("by Supermajority in joint Congress") action SetScreenVariable("vetoverride", 'joint')
@@ -305,7 +301,7 @@ screen constit(npage, pagename=''):
                     # constituer le pouvoir exécutif
 
                 elif pagename == 'execelect':
-                    use constit_title2(_("Article {} : Elections for the {}").format(npage, executive.name))
+                    use constit_title2(_("Article [npage] : Elections for the [executive.name]"))
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
                     default validhd = [0]+validnpdistricts(executive.seats) # nombres de circonscriptions valides
@@ -338,7 +334,7 @@ screen constit(npage, pagename=''):
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename == 'trivia':
-                    use constit_title2(_("Article {} : National symbols").format(npage))
+                    use constit_title2(_("Article [npage] : National symbols"))
                     null height gui.choice_spacing+gui.pref_spacing
                     default key1 = ""
                     default key1_edit = ScreenVariableInputValue('key1', default=False)
@@ -414,7 +410,7 @@ screen constit(npage, pagename=''):
                             if popscale == 1:
                                 text "Everyone"
                             else:
-                                text _("1 per {} inhabitants").format(str(popscale))
+                                text _("1 per [popscale] inhabitants")
                             textbutton "x10" action SetVariable("popscale", popscale//10) sensitive (popscale//10 >= 1)
                     null height gui.choice_spacing
                     # afficher le nombre total d'habitants (calculé, non-stocké)
