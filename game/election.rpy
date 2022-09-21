@@ -321,9 +321,9 @@ init python:
                     return self.contingency.attrib(results_)
 
             rv = defaultdict(int)
-            for k in range(self.nseats):
+            for _k in range(self.nseats):
                 # compute the ratio each party would get with one more seat
-                # take the paty with the best ratio
+                # take the party with the best ratio
                 win = max(results, key=(lambda p:results[p]/(rv[p]+1)))
                 rv[win] += 1
             return [(p, s) for p, s in rv.items() if s]
