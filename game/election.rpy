@@ -37,7 +37,7 @@ init python:
         # wrap in _() to make it translatable
 
         def __init__(self):
-            if self.name is None:
+            if None in (self.name, self.return_format):
                 raise TypeError(f"Class {type(self)} is not instantiable.")
 
         def __init_subclass__(cls, **kwargs):
@@ -46,7 +46,10 @@ init python:
                 voting_methods.append(cls)
 
         @abc.abstractmethod
-        def vote(self, pool): pass
+        def vote(self, pool):
+            """
+            Returns an instance of self.return_format.
+            """
 
     class SingleVote(VotingMethod):
         """
@@ -60,7 +63,7 @@ init python:
             """
             Tactical voting isn't simulated. Everyone votes for their favorite party.
             """
-            scores = {parti:0 for parti in partis}
+            scores = self.return_format.fromkeys(partis, 0)
             partees = list(partis)
             electrobj.shuffle(partees)
             for citizen in pool:
@@ -78,7 +81,7 @@ init python:
         name = _("Positional/Rank Vote")
 
         def vote(self, pool):
-            bigliz = []
+            bigliz = self.return_format()
             partees = list(partis)
             electrobj.shuffle(partees)
             for citizen in pool:
