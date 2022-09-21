@@ -118,6 +118,10 @@ init python:
 
     attribution_methods = []
 
+    def listed_attrib(func):
+        attribution_methods.append(func)
+        return func
+
     class Attribution(abc.ABC):
         """
         Determines how the votes determine the election.
@@ -148,11 +152,6 @@ init python:
             self.randomobj = randomobj
             super().__init__()
 
-        def __init_subclass__(cls, **kwargs):
-            super().__init_subclass__(**kwargs)
-            if cls.name is not None:
-                attribution_methods.append(cls)
-
         @abc.abstractmethod
         def attrib(self, results): pass
 
@@ -169,11 +168,13 @@ init python:
                 return [(win, self.nseats)]
             return self.contingency(results)
 
+    @listed_attrib
     class Plurality(Majority):
         __slots__ = ()
         threshold = 0
         name = _("Plurality")
 
+    @listed_attrib
     class SuperMajority(Majority):
         __slots__ = ("threshold", "contingency")
         name = _("(Super) Majority")
@@ -181,6 +182,7 @@ init python:
         def __init__(self, *args, threshold, **kwargs):
             self.threshold = threshold
 
+    @listed_attrib
     class InstantRunoff(Attribution):
         __slots__ = ()
         taken_format = results_format.ORDER
@@ -203,6 +205,7 @@ init python:
                 blacklisted.add(min(first_places, key=first_places.get))
             raise Exception("We should never end up here")
 
+    @listed_attrib
     class Borda(Attribution):
         __slots__ = ()
         taken_format = results_format.ORDER
@@ -215,6 +218,7 @@ init python:
                     scores[parti] += k
             return [(min(scores, key=scores.get), self.nseats)]
 
+    @listed_attrib
     class Condorcet(Attribution):
         """
         This code doesn't support equally-ranked candidates (because the taken format doesn't allow it).
@@ -248,6 +252,7 @@ init python:
                 raise Condorcet.Standoff
             return self.contingency.attrib(results)
 
+    @listed_attrib
     class AverageScore(Attribution):
         """
         From a score/rating vote, averages all the scores and elects the one with the best mean.
@@ -271,6 +276,7 @@ init python:
 
             return [(max(count, key=count.get), self.nseats)]
 
+    @listed_attrib
     class MedianScore(Attribution):
         __slots__ = ("contingency")
         taken_format = results_format.SCORES
@@ -302,19 +308,9 @@ init python:
         __slots__ = ()
         taken_format = results_format.SIMPLE
 
-    class HondtProportional(Proportional):
+    class HondtBase(Proportional):
         __slots__ = ("threshold")
         name = _("Proportional (largest averages)")
-
-        def __new__(cls, *args, threshold=0, **kwargs):
-            if cls is HondtProportional:
-                if threshold:
-                    return HondtWithThreshold.__new__(HondtWithThreshold, threshold=threshold, *args, **kwargs)
-                return HondtNoThreshold.__new__(HondtNoThreshold, *args, **kwargs)
-            return super().__new__(cls) # annoying hack, relies on no ascending __new__ taking args nor kwargs
-
-        def __init_subclass__(cls, **kwargs):
-            return
 
         def attrib(self, results):
             if self.threshold:
@@ -332,14 +328,14 @@ init python:
                 rv[win] += 1
             return [(p, s) for p, s in rv.items() if s]
 
-    class HondtNoThreshold(HondtProportional):
+    class HondtNoThreshold(HondtBase):
         __slots__ = ()
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.threshold = 0
 
-    class HondtWithThreshold(HondtProportional):
+    class HondtWithThreshold(HondtBase):
         __slots__ = ("contingency")
 
         def __init__(self, *args, threshold, contingency=HondtNoThreshold, **kwargs):
@@ -347,19 +343,16 @@ init python:
             self.threshold = threshold
             self.contingency = contingency(*args, **kwargs)
 
-    class HareProportional(Proportional):
+    @listed_attrib
+    class FakeHondt(HondtBase):
+        def __new__(cls, *args, threshold=0, **kwargs):
+            if threshold:
+                return HondtWithThreshold(threshold=threshold, *args, **kwargs)
+            return HondtNoThreshold(*args, **kwargs)
+
+    class HareBase(Proportional):
         __slots__ = ("threshold")
         name = _("Proportional (largest remainder)")
-
-        def __new__(cls, *args, threshold=0, **kwargs):
-            if cls is HareProportional:
-                if threshold:
-                    return HareWithThreshold.__new__(HareWithThreshold, threshold=threshold, *args, **kwargs)
-                return HareNoThreshold.__new__(HareNoThreshold, *args, **kwargs)
-            return super().__new__(cls) # annoying hack, relies on no ascending __new__ taking args nor kwargs
-
-        def __init_subclass__(cls, **kwargs):
-            return
 
         def attrib(self, results):
             if self.threshold:
@@ -375,14 +368,14 @@ init python:
                 rv[win] += 1
             return [(p, s) for p, s in rv.items() if s]
 
-    class HareNoThreshold(HareProportional):
+    class HareNoThreshold(HareBase):
         __slots__ = ()
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self.threshold = 0
 
-    class HareWithThreshold(HareProportional):
+    class HareWithThreshold(HareBase):
         __slots__ = ("contingency")
 
         def __init__(self, *args, threshold, contingency=HareNoThreshold, **kwargs):
@@ -390,6 +383,14 @@ init python:
             self.threshold = threshold
             self.contingency = contingency(*args, **kwargs)
 
+    @listed_attrib
+    class FakeHare(HareBase):
+        def __new__(cls, *args, threshold=0, **kwargs):
+            if threshold:
+                return HareWithThreshold(threshold=threshold, *args, **kwargs)
+            return HareNoThreshold(*args, **kwargs)
+
+    @listed_attrib
     class Randomize(Attribution):
         """
         Everyone votes for their favorite candidate, then one ballot (per seat to fill) is selected at random.
