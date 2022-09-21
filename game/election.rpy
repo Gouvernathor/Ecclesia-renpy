@@ -288,18 +288,9 @@ init python:
 
             counts = {parti : sorted(liz) for parti, liz in counts.items()}
 
-            if False:
-                # filling the blanks - a parti not listed is given a 0 score
-                nvotes = max(len(liz) for liz in counts.values())
-                for parti, liz in counts.items():
-                    counts[parti] = [0]*(nvotes-len(counts[parti])) + counts[parti]
-
-                winscore = max(liz[nvotes//2] for liz in counts.values())
-                winners = [parti for parti in counts if counts[parti][nvotes//2] == winscore]
-            else:
-                # ballots not voting for a candidate just do not count for that candidate
-                winscore = max(liz[len(liz)//2] for liz in counts.values())
-                winners = [parti for parti, liz in counts.items() if liz[len(liz)//2] == winscore]
+            # ballots not voting for a candidate just do not count for that candidate
+            winscore = max(liz[len(liz)//2] for liz in counts.values())
+            winners = [parti for parti, liz in counts.items() if liz[len(liz)//2] == winscore]
 
             if len(winners) <= 1:
                 return [(winners[0], self.nseats)]
