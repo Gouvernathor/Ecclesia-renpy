@@ -566,7 +566,7 @@ init python:
 
         votingfonk = votingtype()
         attribfonk = attribtype(nseats=circoseats, **kwargs)
-        house.circos = [[circoseats, ElectionMethod(votingfonk, attribfonk), []] for k in range(house.seats//circoseats)]
+        house.circos = [[circoseats, ElectionMethod(votingfonk, attribfonk), []] for _k in range(house.seats//circoseats)]
         if house == executive:
             house.election_period = period
         return
@@ -586,8 +586,8 @@ init python:
             return lis[0]
         a, b = lis
         p = a*b
-        while a!= b:
-            if a<b:
+        while a != b:
+            if a < b:
                 b -= a
             else:
                 a -= b
@@ -621,7 +621,7 @@ init python:
         citizenpool = [Citizen(randomobj=randomobj) for k in range(ncitizens*ncounties())]
         for house in houses+([executive] if executive.origin=='people' else []):
             ramobj = renpy.random.Random(house.name)
-            print("Populating "+house.name+"'s electoral district(s)")
+            print(f"Populating {house.name}'s electoral district(s)")
             clss = house.classes()
             for cla in clss:
                 citpool = [cit for cit in citizenpool] # on vide celle-là mais pas la globale
@@ -634,6 +634,6 @@ init python:
                         # print(len(citpool))
                         # print(ncitizens*ncounties()/ncirco)
                         circo[2] = [citpool.pop() for k in range(ncitizens*ncounties()//ncirco)]
-            if len(citpool):
-                raise Exception
+            if citpool:
+                raise RuntimeError("The citizens were not distributed properly.\nPerhaps the number of citizens was unaccurately set ?")
         return
