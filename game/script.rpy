@@ -25,7 +25,10 @@ define audio.anthems = ["/music/china-national-anthem-instrumental.mp3",
 "/music/russia-national-anthem-instrumental.mp3",
 "/music/united-kingdom-national-anthem-instrumental.mp3",
 "/music/united-states-of-america-national-anthem-instrumental.mp3",
-] + ([] if config.developer else ["/music/france-national-anthem-la-marseillaise-instrumental.mp3"])
+"/music/france-national-anthem-la-marseillaise-instrumental.mp3"]
+init python:
+    if config.developer:
+        audio.anthems.pop()
 
 
 # The game starts here.
