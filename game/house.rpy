@@ -2,7 +2,7 @@ define nopinions = 5
 define opinmax = 10 # valeur max pour chaque opinion (min = -max)
 
 init python:
-    from collections import OrderedDict
+    from collections import OrderedDict, defaultdict
 
     def house_election_check(houzes=None, elapsed=None):
         '''
@@ -51,13 +51,10 @@ init python:
             The idea is that to elect each class every citizen needs to vote
             Returns a dict of {(nseatspercirco, funk) : ncircos}
             '''
-            clss = dict()
+            clss = defaultdict(int)
             for circo in self.circos:
-                if tuple(circo[0:2]) in clss:
-                    clss[tuple(circo[0:2])] += 1
-                else:
-                    clss[tuple(circo[0:2])] = 1
-            return clss
+                clss[tuple(circo[0:2])] += 1
+            return dict(clss)
 
         def displayable(self, *args, **kwargs):
             liste = [(self.members[parti], ('#000' if parti is None else parti.color)) for parti in self.members if self.members[parti]]
