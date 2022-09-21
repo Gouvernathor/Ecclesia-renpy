@@ -227,20 +227,20 @@ define partynamepool = [
     _("Freedom Party"),
     _("Green Party"),
     _("Good Old Party"),
-    _("Democratic Movement"),
-    _("Union for the New Republic"),
-    _("Gathering For the Republic"),
-    _("Union of the Independant Right"),
-    _("National Front"),
-    _("National Gathering"),
+    _("Democratic Movement"), # MoDem
+    _("Union for the New Republic"), # UNR
+    _("Gathering For the Republic"), # RPR
+    _("Union of the Independant Right"), # UDI
+    _("National Front"), # FN
+    _("National Gathering"), # RN
     _("Pirate Party"),
     _("Communist Party"),
-    _("Socialist Worker's Party"),
-    _("New Anti-capitalist Party"),
-    _("Independant Worker's Party"),
-    _("Workers' Struggle"),
+    _("Socialist Worker's Party"), # PSO(E)
+    _("New Anti-capitalist Party"), # NPA
+    _("Independant Worker's Party"), # POI
+    _("Workers' Struggle"), # LO
     _("Constitution Party"),
     _("Libertarian Party"),
     _("Northern League"),
-    _("Five-Stars Movement"),
+    _("Five-Stars Movement"), # M5S
     ]
