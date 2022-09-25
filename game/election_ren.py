@@ -15,11 +15,11 @@ _constant = True
 #       {PS : (0, 2, 5, 9, 1)} -> le PS a reçu 0 fois la pire note, 1 fois la meilleure et t'as compris
 #       (len(tup) for tup in result.values()) est constant, égal à votingmethod.grades
 
-class SIMPLE(dict):
+class SIMPLE(_dict):
     __slots__ = ()
 class ORDER(tuple):
     __slots__ = ()
-class SCORES(dict):
+class SCORES(_dict):
     __slots__ = ()
 
 formats = (SIMPLE, ORDER, SCORES)
