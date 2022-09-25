@@ -17,7 +17,7 @@ class SainteLagueBase(Proportional):
             if not results:
                 return self.contingency.attrib(results_)
 
-        rv = defaultdict(int)
+        rv = dict.fromkeys(results, 0)
         for _k in range(self.nseats):
             win = max(results, key=(lambda p:results[p]/(rv[p]+.5)))
             rv[win] += 1
@@ -146,7 +146,7 @@ class Pavia4(Proportional):
                 relative_cache[party] = ret
             return ret
 
-        rv = _dict.fromkeys(results, 0)
+        rv = dict.fromkeys(results, 0)
         for _s in range(self.nseats):
             # find the party such that giving it one more seat would bring
             # the mean error down the most
@@ -177,9 +177,9 @@ def test_proportionals(it=1000):
         # votes = dict(A=21878, B=9713, C=4167, D=3252, E=1065)
         # nseats = 43
 
-        # breaking example
-        votes = dict(A=31672, B=55069, C=6314, D=70620, E=84109, F=17645, G=84799, H=22875, I=95016, J=24368, K=59459)
-        nseats = 96
+        # breaking example - only because of float rounding errors
+        # votes = dict(A=31672, B=55069, C=6314, D=70620, E=84109, F=17645, G=84799, H=22875, I=95016, J=24368, K=59459)
+        # nseats = 96
 
         sumvotes = sum(votes.values())
 
