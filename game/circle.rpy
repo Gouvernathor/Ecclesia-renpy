@@ -6,10 +6,7 @@ init python:
             self.border = border
 
         def render(self, width, height, st, at):
-            if width>height:
-                size=height
-            else:
-                size=width
+            size = min(width, height)
             render = renpy.Render(size, size)
             # render.fill('#0f0') # debug, pour voir les limites du render
             canvas = render.canvas()
@@ -17,6 +14,6 @@ init python:
             canvas.circle(self.colour, # the color
                           (size/2, size/2), # the centre
                           size/2, # the radius
-                          width=self.border # width - 0 is filled, else linewidth of drawn circle
+                          width=self.border, # width - 0 is filled, else linewidth of drawn circle
                           )
             return render
