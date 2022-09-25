@@ -17,7 +17,10 @@ class SainteLagueBase(Proportional):
             if not results:
                 return self.contingency.attrib(results_)
 
+        # from fractions import Fraction
+
         def key(p):
+            # ret = Fraction(results[p], Fraction(2*rv[p]+1, 2))
             ret = results[p]/(rv[p]+.5)
             # print(f"- For party {p}, {ret=}")
             return ret
@@ -131,6 +134,8 @@ class Pavia4(Proportional):
     name = _("Proportional (Pavia)")
 
     def attrib(self, results):
+        # from fractions import Fraction
+        # shares = {p : Fraction(votes, sum(results.values())) for p, votes in results.items()}
         shares = {p : votes/sum(results.values()) for p, votes in results.items()}
         # share, percentage of the vote received by each party
 
@@ -140,6 +145,7 @@ class Pavia4(Proportional):
             seats, of the `party`, if it had `offset` more seats.
             """
             share = shares[party]
+            # return Fraction(abs(Fraction((rv[party]+offset), self.nseats) - share), share)
             return abs((rv[party]+offset)/self.nseats - share) / share
 
         relative_cache = _dict() # party -> relative net error gain
