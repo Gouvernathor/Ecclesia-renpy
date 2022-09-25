@@ -17,9 +17,13 @@ class SainteLagueBase(Proportional):
             if not results:
                 return self.contingency.attrib(results_)
 
+        def key(p):
+            ret = results[p]/(rv[p]+.5)
+            return ret
+
         rv = dict.fromkeys(results, 0)
         for _k in range(self.nseats):
-            win = max(results, key=(lambda p:results[p]/(rv[p]+.5)))
+            win = max(results, key=key)
             rv[win] += 1
         return [(p, s) for p, s in rv.items() if s]
 
