@@ -19,12 +19,16 @@ class SainteLagueBase(Proportional):
 
         def key(p):
             ret = results[p]/(rv[p]+.5)
+            # print(f"- For party {p}, {ret=}")
             return ret
 
         rv = dict.fromkeys(results, 0)
         for _k in range(self.nseats):
+            # print(f"Seat n°{_k+1}")
             win = max(results, key=key)
+            # print(f"-Winner : {win}")
             rv[win] += 1
+            # print(f"Tally : {rv}")
         return [(p, s) for p, s in rv.items() if s]
 
 class Pavia1(Proportional):
@@ -148,15 +152,19 @@ class Pavia4(Proportional):
             if ret is None:
                 ret = relative_error(party, 1) - relative_error(party)
                 relative_cache[party] = ret
+            # print(f"- For party {party}, {ret=}")
             return ret
 
         rv = dict.fromkeys(results, 0)
         for _s in range(self.nseats):
+            # print(f"Seat n°{_s+1}")
             # find the party such that giving it one more seat would bring
             # the mean error down the most
             win = min(results, key=relative_error_net_gain)
+            # print(f"-Winner : {win}")
             del relative_cache[win]
             rv[win] += 1
+            # print(f"Tally : {rv}")
         return rv.items()
 
 Pavia = Pavia4
