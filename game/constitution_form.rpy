@@ -1,3 +1,8 @@
+init python:
+    import types
+    def is_subclass(a, b, /):
+        return isinstance(a, type) and issubclass(a, b)
+
 label constitution_form:
     $ npage = 0
     while _return != "finish":
@@ -548,16 +553,16 @@ init python:
         '''
         Renvoie les modes d'élection valides pour désigner circoseats dans une seule circonscription
         '''
-        if not is_subclass(votingfunc, VotingMethod):
+        if not is_subclass(votingfunc, voting_method.VotingMethod):
             return ()
         # si un seul siège à pourvoir, non-proportionnels
         attribk = attribution_methods
         if (circoseats == 1):
-            attribk = (f for f in attribk if not issubclass(f, Proportional))
+            attribk = (f for f in attribk if not issubclass(f, attribution_method.Proportional))
         return (f for f in attribk if f.taken_format == votingfunc.return_format)
 
     def applyelec(house, circoseats, votingtype, attribtype, thresh=None, period=60):
-        if issubclass(attribtype, SuperMajority):
+        if issubclass(attribtype, attribution_method.SuperMajority):
             thresh = .5
 
         kwargs = {}
@@ -566,7 +571,7 @@ init python:
 
         votingfonk = votingtype()
         attribfonk = attribtype(nseats=circoseats, **kwargs)
-        house.circos = [[circoseats, ElectionMethod(votingfonk, attribfonk), []] for _k in range(house.seats//circoseats)]
+        house.circos = [[circoseats, election_method.ElectionMethod(votingfonk, attribfonk), []] for _k in range(house.seats//circoseats)]
         if house == executive:
             house.election_period = period
         return
