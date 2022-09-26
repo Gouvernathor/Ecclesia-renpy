@@ -57,7 +57,7 @@ init python:
             return dict(clss)
 
         def displayable(self, *args, **kwargs):
-            liste = [(self.members[parti], ('#000' if parti is None else parti.color)) for parti in self.members if self.members[parti]]
+            liste = [(nmembers, getattr(parti, "color", '#000')) for parti, nmembers in self.members.items() if nmembers]
             return self.display(liste, *args, **kwargs)
 
         def election(self):
