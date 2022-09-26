@@ -190,11 +190,11 @@ init python:
             self.color = Color(hsv=(value*.75, 1.0, 1.0))
 
     def pollopinions(pool):
-        gathered = [[0 for k in range(2*opinmax+1)] for k in range(nopinions)]
+        gathered = [[0]*(2*opinmax+1) for _k in range(nopinions)]
         for cit in pool:
             for k in range(nopinions):
                 gathered[k][cit.opinions[k]+opinmax] += 1
-                # c'est décalé de -mx à +max à 0 à 2*max
+                # c'est décalé de -mx à +max, à de 0 à 2*max
         return gathered
 
     def generate_partis(npartis):
