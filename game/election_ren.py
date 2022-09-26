@@ -91,13 +91,13 @@ class OrderingVote(VotingMethod):
     name = _("Positional/Rank Vote")
 
     def vote(self, pool):
-        bigliz = self.return_format()
+        bigliz = []
         partees = list(store.partis)
         store.electrobj.shuffle(partees)
         for citizen in pool:
             ordered = sorted(partees, key=(lambda p:p.disagree(citizen)))
             bigliz.append(tuple(ordered))
-        return bigliz
+        return self.return_format(bigliz)
 
 class CardinalVote(VotingMethod):
     """
