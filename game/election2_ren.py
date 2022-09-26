@@ -3,6 +3,37 @@ init python in attribution_method:
 """
 from statistics import fmean
 
+class MedianScoreOld(Attribution):
+    """
+    Unoptimized, and uses the high median.
+    """
+    __slots__ = ("contingency")
+    taken_format = results_format.SCORES
+    name = _("Majority judgment (median rating)")
+
+    def __init__(self, *args, contingency=AverageScore, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.contingency = contingency(*args, **kwargs)
+
+    def attrib(self, results):
+
+        counts = defaultdict(list)
+        for parti, tup in results.items():
+            for score, qty in enumerate(tup):
+                counts[parti].extend([score]*qty)
+
+        counts = {parti : sorted(liz) for parti, liz in counts.items()}
+
+        # ballots not voting for a candidate just do not count for that candidate
+        winscore = max(liz[len(liz)//2] for liz in counts.values())
+        winners = [parti for parti, liz in counts.items() if liz[len(liz)//2] == winscore]
+
+        if len(winners) <= 1:
+            return [(winners[0], self.nseats)]
+        # remove the non-winners
+        trimmed_results = {parti:tup for parti, tup in results.items() if parti in winners}
+        return self.contingency.attrib(trimmed_results)
+
 class SainteLagueBase(Proportional):
     # __slots__ = ("threshold")
     name = _("Proportional (largest averages)")
@@ -293,3 +324,48 @@ def test_quota(Attrib, tries=1):
                     return
     if lower and upper:
         print(f"{Attrib} (probably) respects the quota rule")
+
+def test_median(it=10):
+    from statistics import median, median_low, median_high
+    from collections import defaultdict
+    from store.attribution_method import MedianScoreOld, MedianScore
+
+    random = renpy.random.Random()
+    solutions = 0
+    for _k in range(it):
+        nvotes = random.randrange(10, 1000)
+        ngrades = random.randrange(2, 20)
+        votes = {}
+        for pk in range(random.randint(3, 26)):
+            vot = [0]*ngrades
+            for _v in range(nvotes):
+                vot[random.randrange(ngrades)] += 1
+            votes[alpha[pk]] = vot
+
+        counts = defaultdict(list)
+        for parti, tup in votes.items():
+            for score, qty in enumerate(tup):
+                counts[parti].extend([score]*qty)
+
+        medians = {parti : median(liz) for parti, liz in counts.items()}
+        medians_low = {parti : median_low(liz) for parti, liz in counts.items()}
+        medians_high = {parti : median_high(liz) for parti, liz in counts.items()}
+
+        results = {}
+        for Attrib in (MedianScoreOld, MedianScore):
+            results[Attrib] = dict(Attrib(1).attrib(votes))
+
+        if results[MedianScoreOld] != results[MedianScore]:
+            solutions += 1
+            print("Found solution:")
+            print(f"{votes=}")
+            print(f"{nvotes=}, {ngrades=}")
+            print(f"{results=}")
+            print(f"{medians=}")
+            print(f"{medians_low=}")
+            print(f"{medians_high=}")
+            # print(f"{counts=}")
+
+        if solutions >= 5:
+            break
+    print(f"{solutions=}")

@@ -129,6 +129,7 @@ _constant = True
 
 from collections import defaultdict
 import abc
+from statistics import median
 from store import results_format
 
 renpy.store.attribution_methods = attribution_methods = []
@@ -307,11 +308,11 @@ class MedianScore(Attribution):
             for score, qty in enumerate(tup):
                 counts[parti].extend([score]*qty)
 
-        counts = {parti : sorted(liz) for parti, liz in counts.items()}
+        medians = {parti : median(liz) for parti, liz in counts.items()}
 
         # ballots not voting for a candidate just do not count for that candidate
-        winscore = max(liz[len(liz)//2] for liz in counts.values())
-        winners = [parti for parti, liz in counts.items() if liz[len(liz)//2] == winscore]
+        winscore = max(medians.values())
+        winners = [parti for parti, med in medians.items() if med == winscore]
 
         if len(winners) <= 1:
             return [(winners[0], self.nseats)]
