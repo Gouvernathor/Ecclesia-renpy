@@ -79,7 +79,7 @@ class SingleVote(VotingMethod):
         for citizen in pool:
             # sélectionner le parti avec lequel le désaccord est le plus petit
             # lui ajouter une voix
-            scores[min(partees, key=(lambda p:p.disagree(citizen)))] += 1
+            scores[min(partees, key=(lambda p:p^citizen))] += 1
         return scores
 
 class OrderingVote(VotingMethod):
@@ -95,7 +95,7 @@ class OrderingVote(VotingMethod):
         partees = list(store.partis)
         store.electrobj.shuffle(partees)
         for citizen in pool:
-            ordered = sorted(partees, key=(lambda p:p.disagree(citizen)))
+            ordered = sorted(partees, key=(lambda p:p^citizen))
             bigliz.append(tuple(ordered))
         return self.return_format(bigliz)
 

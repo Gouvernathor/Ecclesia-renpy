@@ -41,7 +41,7 @@ label start:
     e "You've created a new Ren'Py game."
 
     call constitution_form
-    $ generate_partis(10)
+    $ partis = actors.Party.generate(10)
     show screen displayer
     e "hey"
     pause

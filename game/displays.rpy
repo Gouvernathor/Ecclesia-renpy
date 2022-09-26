@@ -63,9 +63,9 @@ screen stats():
         mousewheel True
         draggable True
         align (.5, .5)
-        default popularopinions = pollopinions(citizenpool)
+        default popularopinions = actors.pollopinions(citizenpool)
         vbox:
             xfill True
-            for k in range(nopinions):
                 text ""
+            for k in popularopinions:
                 # ajouter un graphe de -opinrange à +opinrange qui montre les éléments de popularopinions[k]

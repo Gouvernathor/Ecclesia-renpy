@@ -539,7 +539,7 @@ init python:
         avec le bon nom, la bonne période de renouvellement et le bon nombre de sièges
         '''
         for khouse in range(nhouses):
-            houses.append(House(housenames[khouse], nseats=houseseats[khouse], election_period=houseperiods[khouse]))
+            houses.append(actors.House(housenames[khouse], nseats=houseseats[khouse], election_period=houseperiods[khouse]))
         return
 
     def validnpdistricts(nseats):
@@ -579,7 +579,7 @@ init python:
     def create_exec(name, origin, nseats, vetopower, vetoverride, supermajority):
         if origin:
             global executive
-            executive = Executive(name=name, nseats=nseats, origin=origin, vetopower=vetopower, vetoverride=vetoverride, supermajority=supermajority)
+            executive = actors.Executive(name=name, nseats=nseats, origin=origin, vetopower=vetopower, vetoverride=vetoverride, supermajority=supermajority)
         return
 
     def ppcm(lis):
@@ -623,7 +623,7 @@ init python:
     def populate(ncitizens):
         global citizenpool
         randomobj = renpy.random.Random(citikey)
-        citizenpool = [Citizen(randomobj=randomobj) for k in range(ncitizens*ncounties())]
+        citizenpool = [actors.Citizen(randomobj=randomobj) for k in range(ncitizens*ncounties())]
         for house in houses+([executive] if executive.origin=='people' else []):
             ramobj = renpy.random.Random(house.name)
             print(f"Populating {house.name}'s electoral district(s)")
