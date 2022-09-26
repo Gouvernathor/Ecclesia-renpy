@@ -325,7 +325,7 @@ class Proportional(Attribution):
 
 class HondtBase(Proportional):
     __slots__ = ("threshold")
-    name = _("Proportional (largest averages)")
+    name = _("Proportional (highest averages)")
 
     def attrib(self, results):
         if self.threshold:
@@ -364,6 +364,8 @@ class FakeHondt(HondtBase):
         if threshold:
             return HondtWithThreshold(threshold=threshold, *args, **kwargs)
         return HondtNoThreshold(*args, **kwargs)
+
+HighestAverages = FakeHondt
 
 class HareBase(Proportional):
     __slots__ = ("threshold")
@@ -404,6 +406,8 @@ class FakeHare(HareBase):
         if threshold:
             return HareWithThreshold(threshold=threshold, *args, **kwargs)
         return HareNoThreshold(*args, **kwargs)
+
+LargestRemainder = FakeHare
 
 @listed_attrib
 class Randomize(Attribution):
