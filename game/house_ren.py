@@ -15,7 +15,7 @@ init python in actors:
 from collections import defaultdict, OrderedDict
 import store
 
-def get_alignment(opinions):
+def _get_alignment(opinions):
     """
     From a list of opinion values, returns the alignment of the actor,
     as a floating-point number between 0 and 1.
@@ -96,18 +96,21 @@ class House:
         self.members = OrderedDict(sorted(joined_results.items(), key=(lambda x:x[0].alignment)))
         return self.members
 
+    def __repr__(self):
+        return f"<{type(self).__name__} {self.name!r}>"
+
 class Executive(House):
     """
     The executive branch.
     Its internal behavior (same as an ordinary House), and its legislative powers.
     """
     def __init__(self, origin, # who elects it, a House or "people"
-                        vetopower, # whether it has a veto power
-                        vetoverride, # who can override it (False or an iterable of House or "joint")
-                        supermajority=.5, # the qualified majority needed to override the veto
-                        election_period=None,
-                        *args,
-                        **kwargs):
+                       vetopower, # whether it has a veto power
+                       vetoverride, # who can override it (False or an iterable of House or "joint")
+                       supermajority=.5, # the qualified majority needed to override the veto
+                       election_period=None,
+                       *args,
+                       **kwargs):
         if election_period is None:
             if isinstance(origin, House):
                 election_period = origin.election_period
@@ -156,12 +159,12 @@ class Bill(HasOpinions):
     """
     A bill, subject to votes from Houses and vetos by the executive.
     """
-    def __init__(self, opinions, opinion_weights=None, name=""):
+    def __init__(self, name, opinions, opinion_weights=None):
+        self.name = name
         super().__init__(opinions)
         if opinion_weights is None:
             opinion_weights = [1]*nopinions
         self.opinion_weights = opinion_weights
-        self.name = name
         raise NotImplementedError
 
 class Citizen(HasOpinions):
@@ -177,6 +180,8 @@ class Citizen(HasOpinions):
         """
         if isinstance(other, Citizen):
             return sum(abs(self.opinions[i]-other.opinions[i]) for i in range(nopinions))
+        if isinstance(other, Bill):
+            raise NotImplementedError
         return NotImplemented
 
     __rxor__ = __xor__
@@ -201,7 +206,7 @@ class Party(HasOpinions):
         elif alignment is not None:
             self.alignment = alignment
         else:
-            self.alignment = get_alignment(self.opinions)
+            self.alignment = _get_alignment(self.opinions)
 
     def __xor__(self, other):
         if isinstance(other, Citizen):
