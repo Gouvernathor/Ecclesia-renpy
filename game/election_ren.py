@@ -429,9 +429,12 @@ init python in election_method:
 """
 _constant = True
 
+import abc
 from collections import namedtuple
 
-class ElectionMethod(namedtuple("ElectionMethod", ("voting_method", "attribution_method"))):
+class ElectionMethod(namedtuple("ElectionMethod", ("voting_method", "attribution_method")), abc.ABC):
+    __slots__ = ()
+
     def election(self, *args, **kwargs):
         return self.attribution_method.attrib(self.voting_method.vote(*args, **kwargs))
 
