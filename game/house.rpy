@@ -105,7 +105,7 @@ init python:
                     election_period = origin.election_period
                 else:
                     election_period = 60
-            super().__init__(election_period=election_period, *args, **kwargs)
+            super().__init__(*args, election_period=election_period, **kwargs)
             self.origin = origin
             self.vetopower = vetopower
             self.vetoverride = vetoverride
