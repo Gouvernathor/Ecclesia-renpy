@@ -341,7 +341,7 @@ class HondtBase(Proportional):
             # take the party with the best ratio
             win = max(results, key=(lambda p:results[p]/(rv[p]+1)))
             rv[win] += 1
-        return [(p, s) for p, s in rv.items() if s]
+        return rv.items()
 
 class HondtNoThreshold(HondtBase):
     __slots__ = ()
@@ -383,7 +383,7 @@ class HareBase(Proportional):
         winners = sorted(results, key=(lambda p:self.nseats*results[p]/sum(results.values())%1), reverse=True)
         for win in winners[:self.nseats-sum(rv.values())]:
             rv[win] += 1
-        return [(p, s) for p, s in rv.items() if s]
+        return rv.items()
 
 class HareNoThreshold(HareBase):
     __slots__ = ()
@@ -422,7 +422,7 @@ class Randomize(Attribution):
         rd = defaultdict(int)
         for _s in range(self.nseats):
             rd[self.randomobj.choices(tuple(results), results.values())[0]] += 1
-        return list(rd.items())
+        return rd.items()
 
 """renpy
 init python in election_method:
@@ -455,6 +455,6 @@ class Sortition(python_object):
         self.randomobj = randomobj
 
     def election(self, pool):
-        return {(c, 1) for c in self.randomobj.sample(pool, self.nseats)}
+        return [(c, 1) for c in self.randomobj.sample(pool, self.nseats)]
 
 ElectionMethod.register(Sortition)
