@@ -101,7 +101,10 @@ init python:
                      **kwargs
                      ):
             if election_period is None:
-                election_period = origin.election_period if (origin in houses) else 60
+                if isinstance(origin, House):
+                    election_period = origin.election_period
+                else:
+                    election_period = 60
             super().__init__(election_period=election_period, *args, **kwargs)
             self.origin = origin
             self.vetopower = vetopower
