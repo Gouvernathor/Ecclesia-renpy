@@ -208,7 +208,7 @@ init python:
         lpartynamepool = partynamepool+(npartis-21)*[_("")]
         renpy.random.shuffle(lpartynamepool)
         randomobj = renpy.random.Random(citikey)
-        for k in range(npartis): # choix random pondéré pour chaque sujet
+        for _k in range(npartis): # choix random pondéré pour chaque sujet
             ops = []
             for nop in range(nopinions):
                 ops.append(randomobj.choices(range(2*opinmax+1), poll[nop])[0])
