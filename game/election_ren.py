@@ -156,7 +156,7 @@ class Attribution(abc.ABC):
     name = None # class attribute, not instance attribute
     # wrap in _() to make it translatable
 
-    def __init__(self, nseats, randomobj=None, randomkey=None):
+    def __init__(self, nseats, *, randomkey=None, randomobj=None):
         if self.name is None:
             raise TypeError(f"{type(self)} is not instanciable. If it should be, it lacks a name.")
         self.nseats = nseats
@@ -420,7 +420,7 @@ class Randomize(Attribution):
 
     def attrib(self, results):
         rd = defaultdict(int)
-        for seat in range(self.nseats):
+        for _s in range(self.nseats):
             rd[self.randomobj.choices(tuple(results), results.values())[0]] += 1
         return list(rd.items())
 
