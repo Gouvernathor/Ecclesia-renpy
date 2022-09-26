@@ -129,7 +129,7 @@ _constant = True
 
 from collections import defaultdict
 import abc
-from statistics import median
+from statistics import fmean, median
 from store import results_format
 
 renpy.store.attribution_methods = attribution_methods = []
@@ -288,7 +288,7 @@ class AverageScore(Attribution):
             for score, qty in enumerate(tup):
                 counts[parti].extend([score]*qty)
 
-        count = {parti:sum(liz)/len(liz) for parti, liz in counts.items()}
+        count = {parti:fmean(liz) for parti, liz in counts.items()}
 
         return [(max(count, key=count.get), self.nseats)]
 
