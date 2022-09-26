@@ -80,9 +80,8 @@ init python:
                 return members
 
             scoress = []
-            for circo in self.circos:
-                elect_method = circo[1]
-                scoress.append(elect_method.election(circo[2]))
+            for _nseats, elect_method, pool in self.circos:
+                scoress.append(elect_method.election(pool))
             joinedlist = sorted(join_results(scoress).items(), key=(lambda p:p[0].alignment))
             self.members = OrderedDict(joinedlist)
             return self.members
