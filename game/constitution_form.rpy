@@ -582,14 +582,14 @@ init python:
             executive = actors.Executive(name=name, nseats=nseats, origin=origin, vetopower=vetopower, vetoverride=vetoverride, supermajority=supermajority)
         return
 
-    def ppcm(lis):
-        if len(lis)>2:
-            return ppcm([ppcm(lis[0:2])]+lis[2:])
-        if 0 in lis:
+    def ppcm(a, *ot):
+        if not ot:
+            return a
+        if (0 in ot) or not a:
             return 0
-        if len(lis) == 1:
-            return lis[0]
-        a, b = lis
+        b, *ot = ot
+        if ot:
+            return ppcm(ppcm(a, b), *ot)
         p = a*b
         while a != b:
             if a < b:
@@ -603,11 +603,10 @@ init python:
         # diviser les circo en classes
         # faire une liste des nombres de circo dans chaque classe dans chaque chambre
         # et renvoyer le ppcm de tous ces nombres
-        numbers = []
+        numbers = set()
         for house in houses+([executive] if executive.origin=='people' else []):
-            classes = house.classes()
-            numbers += [classes[classe] for classe in classes]
-        return ppcm(numbers)
+            numbers |= frozenset(house.classes().values())
+        return ppcm(*numbers)
 
     def minncitizen():
         mins = set()
