@@ -66,6 +66,6 @@ screen stats():
         default popularopinions = actors.pollopinions(citizenpool)
         vbox:
             xfill True
+            for k, d in enumerate(popularopinions):
                 text ""
-            for k in popularopinions:
                 # ajouter un graphe de -opinrange à +opinrange qui montre les éléments de popularopinions[k]
