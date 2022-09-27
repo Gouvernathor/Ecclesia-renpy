@@ -592,10 +592,8 @@ init python:
             return ppcm(ppcm(a, b), *ot)
         p = a*b
         while a != b:
-            if a < b:
-                b -= a
-            else:
-                a -= b
+            a, b = sorted((a, b))
+            b -= a
         return p//a
 
     def ncounties():
