@@ -397,8 +397,8 @@ screen constit(npage, pagename=''):
                             xalign 1.0
                             yalign .5
                             style_prefix "constform_selector"
-                            textbutton "-1" action SetScreenVariable("citizens", citizens-1) sensitive (citizens-1 > max(0, minncitizen()))
-                            text str(citizens)
+                            textbutton "-1" action SetScreenVariable("citizens", citizens-1) sensitive (citizens-1 >= max(1, minncitizen()))
+                            text "[citizens]"
                             textbutton "+1" action SetScreenVariable("citizens", citizens+1) sensitive (citizens+1 <= 50)
                     # null height gui.choice_spacing
                     # demander l'échelle de représentation
