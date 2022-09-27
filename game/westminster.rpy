@@ -91,7 +91,7 @@ init python:
             if sumdelegates['head'] > 1:
                 raise ValueError(_("There can't be more than one Speaker."))
                 # Il ne peut y avoir plus d'un président pour la chambre
-            if sumdelegates.values() == [0, 0, 0, 0]:
+            if not any(sumdelegates.values()):
                 raise ValueError(_("There are no delegate seats to be found."))
                 # Aucun siège n'a été trouvé
             # calcul du nombre de rangs

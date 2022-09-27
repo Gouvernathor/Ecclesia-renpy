@@ -159,7 +159,7 @@ class Pavia4(Proportional):
     number of seats.
     """
     """
-    Here is a more optimized version.
+    Here is a more optimized version, using a cache.
     """
 
     name = _("Proportional (Pavia)")

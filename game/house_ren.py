@@ -106,7 +106,7 @@ class Executive(House):
     """
     def __init__(self, origin, # who elects it, a House or "people"
                        vetopower, # whether it has a veto power
-                       vetoverride, # who can override it (False or an iterable of House or "joint")
+                       vetoverride=False, # who can override it (False or an iterable of House or "joint")
                        supermajority=.5, # the qualified majority needed to override the veto
                        election_period=None,
                        *args,
@@ -136,7 +136,7 @@ class Executive(House):
 
         raise NotImplementedError
 
-class HasOpinions(object): # type: ignore
+class HasOpinions: # type: ignore
     """
     A mixin class for objects that have opinions on subjects.
     """
@@ -150,6 +150,8 @@ class HasOpinions(object): # type: ignore
             opinions = randomobj.choices(range(-opinmax, opinmax+1), k=nopinions)
             # opinions is a list of integers between -opinmax and opinmax
             # the length of the list is nopinions
+            # each element is about a closed question on a certain subject
+            # opinmax is totally agree, -opinmax is totally disagree, 0 is neutral
         self.opinions = opinions
 
         if type(self) is HasOpinions:
@@ -164,7 +166,7 @@ class Bill(HasOpinions):
         super().__init__(opinions)
         if opinion_weights is None:
             opinion_weights = [1]*nopinions
-        self.opinion_weights = opinion_weights
+        self.opinion_weights = opinion_weights # WIP
         raise NotImplementedError
 
 class Citizen(HasOpinions):
@@ -213,7 +215,10 @@ class Party(HasOpinions):
             # weighted, because for the same disagreement, if the citizen cares and the party doesn't,
             # it's worse than if the party cares and the citizen doesn't
             return sum(abs((self.opinions[k]-other.opinions[k])*other.opinions[k]) for k in range(nopinions))
-            # if isinstance(other, Party) # not really necessary
+        if isinstance(other, Party):
+            raise NotImplementedError
+        if isinstance(other, Bill):
+            raise NotImplementedError
         return NotImplemented
 
     __rxor__ = __xor__
