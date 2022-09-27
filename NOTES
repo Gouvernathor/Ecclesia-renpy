@@ -64,10 +64,10 @@ calculer l'exécutif en cours de partie uniquement si il a un rôle dans le proc
 
 faire un framework utilisable pour tout type de simulations politiques
     pouvoir faire un remake de democratic socialism simulator, mais pas que
-documenter ce que peut faire chaque classe, avec un cahier des charges et une vraie hiérarchie de types
-    faire une ABC/Mixin de Bill/Citizen, HasOpinion
-faire des named stores
-convertir tout en fichiers _ren.py
+# documenter ce que peut faire chaque classe, avec un cahier des charges et une vraie hiérarchie de types
+    # faire une ABC/Mixin de Bill/Citizen, HasOpinion
+# faire des named stores
+# convertir tout en fichiers _ren.py
     # mettre les attributions Pavia dans un fichier à part, avec les fonctions de métriques/mesures
 le reste du "jeu" n'est qu'un showcase, y compris le screen de constitution_form
 côté "jeu", faire des presets par pays
