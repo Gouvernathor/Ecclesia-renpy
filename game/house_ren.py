@@ -1,5 +1,4 @@
 """renpy
-
 default actors.nopinions = 5
 # the number of different subjects on which one can have an opinion
 
@@ -8,7 +7,7 @@ default actors.opinmax = 10
 
 default actors.opinion_alignment_factors = None
 # a list of factors for the alignment calculation, one for each opinion
-# if None, it's a decreasing series such that Un+1 = Un/2
+# if None, it's a decreasing series such that factors[0] = 1
 
 init python in actors:
 """
@@ -24,10 +23,12 @@ def _get_alignment(opinions):
     factors = opinion_alignment_factors
     if factors is None:
         # factors = [1/(2**i) for i in range(nopinions)]
-        factors = [1-i/(nopinions-1) for i in range(nopinions)]
+        factors = [1-i/(nopinions) for i in range(nopinions)]
     sm = sum(opinions[i]*factors[i] for i in range(nopinions))
     mx = opinmax*sum(factors)
-    return (sm + mx) / (2 * mx)
+    rawresult = (sm + mx) / (2 * mx)
+    # TODO normalize so that it ends up uniformly distributed between 0 and 1
+    return rawresult
 
 def house_election_check(houzes=None, elapsed=0):
     """
@@ -250,13 +251,18 @@ class Party(HasOpinions):
         lpartynamepool = random.sample(partynamepool, npartis)
         random.seed(store.citikey)
 
-        opnvals = tuple(poll[0])
-        for _k in range(npartis):
-            ops = []
-            for opn in range(nopinions):
-                ops.append(random.choices(opnvals, poll[opn].values())[0])
-            partis.append(cls(lpartynamepool.pop(), opinions=ops))
-        partis.sort(key=lambda p: p.alignment)
+        ops = [[] for _k in range(npartis)]
+        for opn, polln in enumerate(poll):
+            for pn in range(npartis):
+                pn -= opn%npartis
+                # a different party goes first for each opinion
+                # that is, if there are more opinions than parties, but even if not,
+                # at least it won't always be the same party
+                opval, = random.choices(tuple(polln), polln.values())
+                ops[pn].append(opval)
+                polln[opval] //= 2 # malus for ideas already chosen
+        partis = sorted((cls(lpartynamepool[i], opinions=ops[i]) for i in range(npartis)),
+                        key=lambda p:p.alignment)
         return partis
 
 def pollopinions(pool):
