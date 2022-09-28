@@ -225,15 +225,15 @@ class Party(HasOpinions):
 
     @property
     def alignment(self):
+        return self.color.hsv[0] / self.huemax
+
+    @alignment.setter
+    def alignment(self, value):
         """
         Takes a 0-1 float
         Turns it into a saturated TSV/HSV color
         Hue (first component) between .0 (red) and .66 (blue) or .75 (blue-purple)
         """
-        return self.color.hsv[0] / self.huemax
-
-    @alignment.setter
-    def alignment(self, value):
         self.color = store.Color(hsv=(value*self.huemax, 1., 1.))
 
     @classmethod
