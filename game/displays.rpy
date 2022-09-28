@@ -46,7 +46,12 @@ screen houses():
         # add Solid("#eee") xalign .5
         vbox:
             xfill True
-            for house in ([executive] if executive else [])+houses:
+            python:
+                houzes = []
+                if executive:
+                    houzes.append(executive)
+                houzes.extend(houses)
+            for house in houzes:
                 text house.name xalign .5 color gui.hover_color size 50
                 add house.displayable(xalign=.5, ysize=500)
                 #TODO lister les partis en présence avec les nombres de sièges

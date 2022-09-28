@@ -602,14 +602,20 @@ init python:
         # faire une liste des nombres de circo dans chaque classe dans chaque chambre
         # et renvoyer le ppcm de tous ces nombres
         numbers = set()
-        for house in houses+([executive] if executive.origin=='people' else []):
-            numbers |= frozenset(house.classes().values())
+        houzes = list(houses)
+        if executive.origin == 'people':
+            houzes.append(executive)
+        for house in houzes:
+            numbers.update(house.classes().values())
         return ppcm(*numbers)
 
     def minncitizen():
         mins = set()
         ncou = ncounties()
-        for house in houses+([executive] if executive.origin=='people' else []):
+        houzes = list(houses)
+        if executive.origin == 'people':
+            houzes.append(executive)
+        for house in houzes:
             clss = house.classes()
             for classe in clss:
                 mins.add(int(classe[0]/(ncou/clss[classe])))
@@ -621,21 +627,22 @@ init python:
         global citizenpool
         randomobj = renpy.random.Random(citikey)
         citizenpool = [actors.Citizen(randomobj=randomobj) for k in range(ncitizens*ncounties())]
-        for house in houses+([executive] if executive.origin=='people' else []):
+        houzes = list(houses)
+        if executive.origin == 'people':
+            houzes.append(executive)
+        for house in houzes:
             ramobj = renpy.random.Random(house.name)
             print(f"Populating {house.name}'s electoral district(s)")
-            clss = house.classes()
-            for cla in clss:
-                citpool = [cit for cit in citizenpool] # on vide celle-là mais pas la globale
+            for (cl_nseats, cl_elec), ncirco in house.classes().items():
+                citpool = list(citizenpool) # on vide celle-là mais pas la globale
                 ramobj.shuffle(citpool)
-                ncirco = clss[cla]
-                # print(cla, ncirco)
-                for circo in house.circos:
-                    if tuple(circo[0:2]) == cla:
+                for (nseats, elec, citilist) in house.circos:
+                    if (nseats, elec) == (cl_nseats, cl_elec):
                         # print(len(circo))
                         # print(len(citpool))
                         # print(ncitizens*ncounties()/ncirco)
-                        circo[2] = [citpool.pop() for k in range(ncitizens*ncounties()//ncirco)]
+                        boundary = ncitizens*ncounties()//ncirco
+                        citilist[:], citpool = citpool[:boundary], citpool[boundary:]
             if citpool:
                 raise RuntimeError("The citizens were not distributed properly.\nPerhaps the number of citizens was unaccurately set ?")
         return
