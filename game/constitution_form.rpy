@@ -539,6 +539,8 @@ style big_red_button_text:
     bold True
 
 init python:
+    import functools
+
     def create_houses(nhouses, housenames, houseperiods, houseseats):
         '''
         Crée les House pour chacune des chambres
@@ -548,6 +550,7 @@ init python:
             houses.append(actors.House(name, nseats=nseats, election_period=period))
         return
 
+    @functools.lru_cache
     def validnpdistricts(nseats):
         '''
         Les nombres valides d'élus par circonscription, pour partager nseats sièges
@@ -588,6 +591,7 @@ init python:
             executive = actors.Executive(name=name, nseats=nseats, origin=origin, vetopower=vetopower, vetoverride=vetoverride, supermajority=supermajority)
         return
 
+    @functools.lru_cache
     def ppcm(a, *ot):
         if not ot:
             return a
@@ -603,6 +607,11 @@ init python:
         return p//a
 
     def ncounties():
+        """
+        Returns the number of counties, so for each House, for each class,
+        all electoral districts have a set of counties, such that all the sets
+        are the same size, and disjoints (two-by-two).
+        """
         # pour chaque house et pour l'exécutif si il est élu par le peuple
         # diviser les circo en classes
         # faire une liste des nombres de circo dans chaque classe dans chaque chambre
@@ -630,6 +639,13 @@ init python:
         return max(mins)
 
     def populate(ncitizens):
+        """
+        Generates a list of `ncitizen` Citizens,
+        and stores it in the global `citizenpool` variable.
+        Then, assigns citizens to electoral districts so that each
+        citizen has one and only one electoral district, and each
+        electoral district of the same class has the same number of citizens.
+        """
         global citizenpool
         randomobj = renpy.random.Random(citikey)
         citizenpool = [actors.Citizen(randomobj=randomobj) for k in range(ncitizens*ncounties())]
