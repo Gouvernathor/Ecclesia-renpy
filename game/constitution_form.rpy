@@ -89,10 +89,10 @@ screen constit(npage, pagename=''):
                     use constit_title2(_("Article 1 : Legislature"))
                     null height gui.choice_spacing+gui.pref_spacing
                     default nHouses = 1
-                    default housenames = [_("House n°")+str(k+1) for k in range(maxnhouses)]
+                    default housenames = [_("House n°{}").format(k+1) for k in range(maxnhouses)]
                     default housenames_edit = [DictInputValue(housenames, k, default=False) for k in range(maxnhouses)]
-                    default houseperiods = [48 for k in range(maxnhouses)]
-                    default houseseats = [100 for k in range(maxnhouses)]
+                    default houseperiods = [48]*maxnhouses
+                    default houseseats = [100]*maxnhouses
                     hbox:
                         xfill True
                         text _("Number of Houses of Congress/Parliament") yalign .5
@@ -107,7 +107,7 @@ screen constit(npage, pagename=''):
                     for khouse index khouse in range(nHouses):
                         button:
                             style_prefix "constform_name"
-                            action [If(housenames[khouse].strip(), None, SetDict(housenames, khouse, _("House n°")+str(khouse+1))), housenames_edit[khouse].Toggle()]
+                            action [If(housenames[khouse].strip(), None, SetDict(housenames, khouse, _("House n°{}").format(khouse+1))), housenames_edit[khouse].Toggle()]
                             # action housenames_edit[khouse].Toggle()
                             input:
                                 value housenames_edit[khouse]
@@ -124,7 +124,10 @@ screen constit(npage, pagename=''):
                                 textbutton "-12" action SetDict(houseperiods, khouse, houseperiods[khouse]-12) sensitive (houseperiods[khouse]-12>=0)
                                 textbutton "-1" action SetDict(houseperiods, khouse, houseperiods[khouse]-1) sensitive (houseperiods[khouse]-1>=0)
                                 if houseperiods[khouse]:
-                                    text str(houseperiods[khouse])+" month"+['s', ''][houseperiods[khouse]==1]
+                                    if houseperiods[khouse] == 1:
+                                        text _("1 month")
+                                    else:
+                                        text _("{} months").format(houseperiods[khouse])
                                 else:
                                     text _("Life terms (no election)")
                                 textbutton "+1" action SetDict(houseperiods, khouse, houseperiods[khouse]+1)
@@ -136,9 +139,9 @@ screen constit(npage, pagename=''):
                                 style_prefix "constform_selector"
                                 xalign 1.0
                                 yalign .5
-                                textbutton "-100" action SetDict(houseseats, khouse, houseseats[khouse]-100) sensitive (houseseats[khouse]-100>0)# max(0, housestaggering[khouse]-1))
-                                textbutton "-10" action SetDict(houseseats, khouse, houseseats[khouse]-10) sensitive (houseseats[khouse]-10>0)# max(0, housestaggering[khouse]-1))
-                                textbutton "-1" action SetDict(houseseats, khouse, houseseats[khouse]-1) sensitive (houseseats[khouse]-1>0)# max(0, housestaggering[khouse]-1))
+                                textbutton "-100" action SetDict(houseseats, khouse, houseseats[khouse]-100) sensitive (houseseats[khouse]-100>0)
+                                textbutton "-10" action SetDict(houseseats, khouse, houseseats[khouse]-10) sensitive (houseseats[khouse]-10>0)
+                                textbutton "-1" action SetDict(houseseats, khouse, houseseats[khouse]-1) sensitive (houseseats[khouse]-1>0)
                                 text str(houseseats[khouse])
                                 textbutton "+1" action SetDict(houseseats, khouse, houseseats[khouse]+1)
                                 textbutton "+10" action SetDict(houseseats, khouse, houseseats[khouse]+10)
@@ -147,11 +150,8 @@ screen constit(npage, pagename=''):
                     null height gui.pref_spacing
                     textbutton _("Continue"):
                         style "big_blue_button"
-                        sensitive ([bool(housenames[k].strip()) for k in range(nHouses)] == [True for k in range(nHouses)])
-                        # action [Function(create_houses, nHouses, housenames, houseperiods, houseseats, housestaggering), Hide('constit'), Show('constit', transition=Fade(.5, .5, .5, color='#fff'), npage=2, pagename=('elections' if (nHouses and (True in [bool(houseperiods[k]) for k in range(nHouses)])) else 'executif'))]
-                        # action [Function(create_houses, nHouses, housenames, houseperiods, houseseats, housestaggering), Hide('constit', transition=Fade(.5, .5, .5, color='#fff')), Return(('elections' if (nHouses and (True in [bool(houseperiods[k]) for k in range(nHouses)])) else 'executif'))]
-                        # action [Function(create_houses, nHouses, housenames, houseperiods, houseseats, housestaggering), Return(('elections' if (nHouses and (True in [bool(houseperiods[k]) for k in range(nHouses)])) else 'executif'))]
-                        action [Function(create_houses, nHouses, housenames, houseperiods, houseseats), Return(('elections' if (nHouses and (True in [bool(houseperiods[k]) for k in range(nHouses)])) else 'executif'))]
+                        sensitive all(name.strip() for name in housenames)
+                        action [Function(create_houses, nHouses, housenames, houseperiods, houseseats), Return(('elections' if (nHouses and any(houseperiods)) else 'executif'))]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename == 'elections':
@@ -199,7 +199,13 @@ screen constit(npage, pagename=''):
                     default vetopower = False
                     default vetoverride = False
                     default superindex = 0
-                    default superlist = [(_("50%"), .5), (_("Three fifth, or 60%"), .6), (_("Two thirds, or 67%"), 2.0/3), (_("Three fourths, or 75%"), .75), (_("Four fifths, or 80%"), .8), (_("Nine tenths, or 90%"), .9), (_("Unanimity"), 1)]
+                    default superlist = [(_("50%"), .5),
+                                         (_("Three fifth, or 60%"), .6),
+                                         (_("Two thirds, or 67%"), 2.0/3),
+                                         (_("Three fourths, or 75%"), .75),
+                                         (_("Four fifths, or 80%"), .8),
+                                         (_("Nine tenths, or 90%"), .9),
+                                         (_("Unanimity"), 1)]
                     hbox:
                         xfill True
                         text _("Origin of the Executive branch") yalign .5
@@ -538,8 +544,8 @@ init python:
         Crée les House pour chacune des chambres
         avec le bon nom, la bonne période de renouvellement et le bon nombre de sièges
         '''
-        for khouse in range(nhouses):
-            houses.append(actors.House(housenames[khouse], nseats=houseseats[khouse], election_period=houseperiods[khouse]))
+        for _k, name, nseats, period in zip(range(nhouses), housenames, houseseats, houseperiods):
+            houses.append(actors.House(name, nseats=nseats, election_period=period))
         return
 
     def validnpdistricts(nseats):
@@ -547,7 +553,7 @@ init python:
         Les nombres valides d'élus par circonscription, pour partager nseats sièges
         Aka les diviseurs de nseats, 1 inclus et nseats exclus
         '''
-        return [x for x in range(1, nseats+1) if ((nseats/x) == int(nseats/x)) and x != nseats]
+        return [x for x in range(1, nseats) if ((nseats/x) == int(nseats/x))]
 
     def validattribfuncs(circoseats, votingfunc):
         '''
@@ -617,8 +623,8 @@ init python:
             houzes.append(executive)
         for house in houzes:
             clss = house.classes()
-            for classe in clss:
-                mins.add(int(classe[0]/(ncou/clss[classe])))
+            for (nseats, _elec), ncirco in clss.items():
+                mins.add(nseats//(ncou/ncirco))
                 # nombre d'élus par circo divisé par le nombre de comtés dans la circo
         # prendre le max
         return max(mins)
