@@ -201,7 +201,7 @@ screen constit(npage, pagename=''):
                     default superindex = 0
                     default superlist = [(_("50%"), .5),
                                          (_("Three fifth, or 60%"), .6),
-                                         (_("Two thirds, or 67%"), 2.0/3),
+                                         (_("Two thirds, or 67%"), 2/3),
                                          (_("Three fourths, or 75%"), .75),
                                          (_("Four fifths, or 80%"), .8),
                                          (_("Nine tenths, or 90%"), .9),
@@ -540,6 +540,7 @@ style big_red_button_text:
 
 init python:
     import functools
+    from math import lcm as ppcm
 
     def create_houses(nhouses, housenames, houseperiods, houseseats):
         '''
@@ -590,21 +591,6 @@ init python:
             global executive
             executive = actors.Executive(name=name, nseats=nseats, origin=origin, vetopower=vetopower, vetoverride=vetoverride, supermajority=supermajority)
         return
-
-    @functools.lru_cache
-    def ppcm(a, *ot):
-        if not ot:
-            return a
-        if (0 in ot) or not a:
-            return 0
-        b, *ot = ot
-        if ot:
-            return ppcm(ppcm(a, b), *ot)
-        p = a*b
-        while a != b:
-            a, b = sorted((a, b))
-            b -= a
-        return p//a
 
     def ncounties():
         """
