@@ -108,7 +108,7 @@ class Executive(House):
     def __init__(self, origin, # who elects it, a House or "people"
                        vetopower, # whether it has a veto power
                        vetoverride=False, # who can override it (False or an iterable of House or "joint")
-                       supermajority=.5, # the qualified majority needed to override the veto
+                       supermajority=.5, # the qualified majority required to override the veto
                        election_period=None,
                        *args,
                        **kwargs):
@@ -137,7 +137,7 @@ class Executive(House):
 
         raise NotImplementedError
 
-class HasOpinions: # type: ignore
+class HasOpinions:
     """
     A mixin class for objects that have opinions on subjects.
     """
