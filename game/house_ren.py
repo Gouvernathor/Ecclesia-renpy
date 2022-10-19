@@ -15,7 +15,15 @@ default actors.opinion_alignment_factors = None
 init python in actors:
 """
 from collections import defaultdict, OrderedDict
+import math
 import store
+
+def _normal_to_uniform(x, mu, sigma):
+    """
+    From a x value generated from a normal distribution with mean mu and standard deviation sigma,
+    returns the corresponding value in a uniform distribution between 0 and 1.
+    """
+    return .5 * (1 + math.erf((x-mu) / (sigma*math.sqrt(2))))
 
 def _get_alignment(opinions):
     """
@@ -27,11 +35,12 @@ def _get_alignment(opinions):
     if factors is None:
         # factors = [1/(2**i) for i in range(nopinions)]
         factors = [1-i/(nopinions) for i in range(nopinions)]
-    sm = sum(opinions[i]*factors[i] for i in range(nopinions))
-    mx = opinmax*sum(factors)
-    rawresult = (sm + mx) / (2 * mx)
-    # TODO normalize so that it ends up uniformly distributed between 0 and 1
-    return rawresult
+    scapro = sum(opinions[i]*factors[i] for i in range(nopinions))
+    ran = range(-opinmax, opinmax+1)
+    one_sigma = math.sqrt(sum(x**2 for x in ran) / len(ran)) # standard dev of one opinion taken solo
+    sigma = math.hypot(*(one_sigma*fac for fac in factors))
+    rv = _normal_to_uniform(scapro, 0, sigma)
+    return rv
 
 def house_election_check(houzes=None, elapsed=0):
     """
