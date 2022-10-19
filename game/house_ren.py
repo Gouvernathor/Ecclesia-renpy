@@ -311,9 +311,9 @@ class Citizen(HasOpinions):
         The score is strictly positive, the higher the stronger the disagreement.
         """
         if isinstance(other, Citizen):
-            return opinion.symmetric_diff(tuple(self.opinions), tuple(other.opinions))
+            return self.symmetric_diff(tuple(self.opinions), tuple(other.opinions))
         if isinstance(other, Bill):
-            return opinion.frommax_diff(tuple(other.opinions), tuple(self.opinions))
+            return self.frommax_diff(tuple(other.opinions), tuple(self.opinions))
         return NotImplemented
 
     __rxor__ = __xor__
@@ -344,11 +344,11 @@ class Party(HasOpinions):
         if isinstance(other, Citizen):
             # weighted, because for the same disagreement, if the citizen cares and the party doesn't,
             # it's worse than if the party cares and the citizen doesn't
-            return opinion.pondered_diff(tuple(self.opinions), tuple(other.opinions))
+            return self.pondered_diff(tuple(self.opinions), tuple(other.opinions))
         if isinstance(other, Party):
-            return opinion.symmetric_diff(tuple(self.opinions), tuple(other.opinions))
+            return self.symmetric_diff(tuple(self.opinions), tuple(other.opinions))
         if isinstance(other, Bill):
-            return opinion.frommax_diff(tuple(other.opinions), tuple(self.opinions))
+            return self.frommax_diff(tuple(other.opinions), tuple(self.opinions))
         return NotImplemented
 
     __rxor__ = __xor__
