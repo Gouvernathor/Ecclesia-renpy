@@ -52,8 +52,7 @@ def house_election_check(houzes=None, elapsed=0):
     """
     if houzes is None:
         houzes = list(store.houses)
-        if store.executive.origin == "people":
-            houzes.append(store.executive)
+        houzes.append(store.executive)
     return [h for h in houzes if not (elapsed%h.election_period)]
 
 @renpy.pure
@@ -189,9 +188,29 @@ class Executive(House):
         self.vetoverride = vetoverride
         self.supermajority = supermajority
 
+    def election(self):
+        """
+        The case of the executive is a bit different, because it can be elected
+        by the parliament and not by the people.
+
+        In this case, the election is done in a proportional manner, because a majority
+        system could just elect one representative of the majority party, like the
+        prime minister in most parliamentary regimes.
+        """
+        origin = self.origin
+        if origin == "people":
+            return super().election()
+
+        if isinstance(origin, House):
+            origin = [origin]
+
+        pool = [p for house in origin for p, mul in house.members.items() for _k in range(mul)]
+        elect_meth = store.election_method.ElectionMethod(store.voting_method.SingleVote(),
+                                                          store.attribution_method.HighestAverages(nseats=self.seats))
+        self.members = OrderedDict(sorted(elect_meth.election(pool), key=(lambda x:x[0].alignment)))
+        return self.members
+
     def veto(self, bill):
-        """
-        """
         """
         Returns whether the bill is vetoed by the executive.
         """
