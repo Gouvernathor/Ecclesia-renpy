@@ -207,13 +207,13 @@ class Bill(HasOpinions):
     """
     A bill, subject to votes from Houses and vetos by the executive.
     """
-    def __init__(self, name, opinions, opinion_weights=None):
+    def __init__(self, name, *args, **kwargs):
         self.name = name
-        super().__init__(opinions)
-        if opinion_weights is None:
-            opinion_weights = [1]*nopinions
-        self.opinion_weights = opinion_weights # WIP
-        raise NotImplementedError
+        super().__init__(*args, **kwargs)
+
+    def __repr__(self):
+        id_ = super().__repr__().rpartition(" at ")[2][:-1]
+        return f"<{type(self).__name__} {id_}, {self.name!r}>"
 
 class Citizen(HasOpinions):
     """
