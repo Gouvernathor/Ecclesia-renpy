@@ -14,7 +14,8 @@ default actors.opinion_alignment_factors = None
 
 init python in actors:
 """
-from collections import defaultdict, OrderedDict
+from collections import defaultdict, OrderedDict, namedtuple
+import functools
 import math
 import store
 
@@ -54,6 +55,50 @@ def house_election_check(houzes=None, elapsed=0):
         if store.executive.origin == "people":
             houzes.append(store.executive)
     return [h for h in houzes if not (elapsed%h.election_period)]
+
+@renpy.pure
+class Vote(namedtuple("Vote", ("votes_for", "votes_against"))):
+    """
+    The results of a House vote.
+    The blank votes are not counted. To calculate a threshold on the whole number of members,
+    use `vote.votes_for / house.seats`. To calculate the threshold on the number of duly elected
+    members, use `vote.votes_for / sum(house.members.values())`.
+    """
+    __slots__ = ()
+
+    __lt__ = __gt__ = __le__ = __ge__ = lambda self, other: NotImplemented
+
+    def __neg__(self):
+        """
+        Returns the reverse of the vote, inverting the for/against ratio.
+        Simulates a vote on the opposite motion.
+        """
+        return type(self)(self.votes_against, self.votes_for)
+
+    @property
+    @functools.lru_cache
+    def votes_cast(self):
+        return sum(self)
+
+    @property
+    @functools.lru_cache
+    def ratio(self):
+        """
+        Returns the ratio of votes for over the total of votes cast.
+        If there are no votes cast, returns a nan.
+        """
+        if not self.votes_cast:
+            return float("nan")
+        return self.votes_for / self.votes_cast
+
+    @staticmethod
+    def order(*votes):
+        """
+        Returns the votes in order of decreasing ratio.
+        The ties are ordered by decreasing number of positive votes,
+        then by the order they came in.
+        """
+        return sorted(votes, key=(lambda v:(-v.ratio, -v.votes_for)))
 
 class House:
     """
