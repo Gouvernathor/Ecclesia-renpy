@@ -182,6 +182,60 @@ class Executive(House):
 
         raise NotImplementedError
 
+"""renpy
+init python in actors.opinion:
+"""
+from store import actors
+import functools
+
+# functions taking two tuples of length nopinions and value between -opinmax and +opinmax
+# and returning a value between 0 and 1
+
+@functools.lru_cache
+def symmetric_diff(op_a, op_b):
+    """
+    Typically for comparing HasOpinions of the same type.
+    """
+    return sum(abs(a-b) for a, b in zip(op_a, op_b)) / (actors.nopinions*2*actors.opinmax)
+
+@functools.lru_cache
+def pondered_diff(op_a, op_b):
+    """
+    The second operand is the one ponderating the difference.
+    It's the one whose point of view we're taking, the "most human" of the two.
+    """
+    return sum(abs((a-b)*b) for a, b in zip(op_a, op_b)) / (actors.nopinions*2*actors.opinmax**2)
+
+@functools.lru_cache
+def frommax_diff(op_a, op_b):
+    """
+    The second operand is the "most human", the one whose point of view we're taking.
+    This simulates agreeing plainly with laws that aren't going far enough, but
+    disagreeing with laws that go too far, or which go the wrong way.
+    For each opinion:
+        if A's opinion a is of the opposite sign as B's b, it goes "the wrong way"
+            the difference is abs(a)
+        if A's opinion a is of the same sign as B's b but closer to 0, it "doesn't go far enough"
+            the difference is 0
+        otherwise, it "goes too far"
+            the difference is abs(a-b)
+    """
+    rv = []
+    for a, b in zip(op_a, op_b):
+        absa = abs(a)
+        absb = abs(b)
+        if a*b <= 0:
+            rv.append(absa*absb)
+        elif absa < abs(b):
+            rv.append(0)
+        else:
+            rv.append(abs(a-b))
+    return sum(rv) / (actors.opinmax**2*actors.nopinions)
+
+"""renpy
+init python in actors:
+"""
+
 class HasOpinions:
     """
     A mixin class for objects that have opinions on subjects.
@@ -227,9 +281,9 @@ class Citizen(HasOpinions):
         The score is strictly positive, the higher the stronger the disagreement.
         """
         if isinstance(other, Citizen):
-            return sum(abs(self.opinions[i]-other.opinions[i]) for i in range(nopinions))
+            return opinion.symmetric_diff(tuple(self.opinions), tuple(other.opinions))
         if isinstance(other, Bill):
-            raise NotImplementedError
+            return opinion.frommax_diff(tuple(other.opinions), tuple(self.opinions))
         return NotImplemented
 
     __rxor__ = __xor__
@@ -260,11 +314,11 @@ class Party(HasOpinions):
         if isinstance(other, Citizen):
             # weighted, because for the same disagreement, if the citizen cares and the party doesn't,
             # it's worse than if the party cares and the citizen doesn't
-            return sum(abs((self.opinions[k]-other.opinions[k])*other.opinions[k]) for k in range(nopinions))
+            return opinion.pondered_diff(tuple(self.opinions), tuple(other.opinions))
         if isinstance(other, Party):
-            raise NotImplementedError
+            return opinion.symmetric_diff(tuple(self.opinions), tuple(other.opinions))
         if isinstance(other, Bill):
-            raise NotImplementedError
+            return opinion.frommax_diff(tuple(other.opinions), tuple(self.opinions))
         return NotImplemented
 
     __rxor__ = __xor__
