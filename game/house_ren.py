@@ -142,6 +142,27 @@ class House:
         self.members = OrderedDict(sorted(joined_results.items(), key=(lambda x:x[0].alignment)))
         return self.members
 
+    def vote(self, ho:HasOpinions):
+        """
+        Simulates a vote on `ho`.
+        Returns a Vote.
+        """
+        votes_for = 0
+        votes_against = 0
+        for party, nseats in self.members.items():
+            disag = party ^ ho
+            if disag < .5:
+                votes_for += nseats
+            else:
+                votes_against += nseats
+        return Vote(votes_for, votes_against)
+
+    def vetoverride(self, bill, thresh):
+        """
+        Returns whether the bill has enough support for the veto to get overridden.
+        """
+        return self.vote(bill).ratio >= thresh
+
     def __repr__(self):
         return f"<{type(self).__name__} {self.name!r}>"
 
@@ -150,7 +171,7 @@ class Executive(House):
     The executive branch.
     Its internal behavior (same as an ordinary House), and its legislative powers.
     """
-    def __init__(self, origin, # who elects it, a House or "people"
+    def __init__(self, origin, # who elects it, a House or an iterable of Houses or "people"
                        vetopower, # whether it has a veto power
                        vetoverride=False, # who can override it (False or an iterable of House or "joint")
                        supermajority=.5, # the qualified majority required to override the veto
@@ -170,17 +191,14 @@ class Executive(House):
 
     def veto(self, bill):
         """
+        """
+        """
         Returns whether the bill is vetoed by the executive.
-        """
-        """
-        Un membre de l'exécutif votera pour le veto si le désaccord entre le (parti du) membre
-        et la loi est supérieur à la moitié du désaccord maximal.
-        2*opinmax*nopinions/2 < sum(abs(parti_du_membre.opinions[l]-bill.opinions[k]) for k in range(nopinions) if bill.has_opinion[k])
         """
         if not self.vetopower:
             return False
 
-        raise NotImplementedError
+        return self.vote(bill).votes_against/self.seats > self.majority
 
 """renpy
 init python in actors:
