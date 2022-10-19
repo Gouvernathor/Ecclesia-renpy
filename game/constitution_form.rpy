@@ -539,6 +539,7 @@ style big_red_button_text:
     bold True
 
 init python:
+    from collections import defaultdict
     import functools
     from math import lcm as ppcm
 
