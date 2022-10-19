@@ -592,6 +592,20 @@ init python:
             executive = actors.Executive(name=name, nseats=nseats, origin=origin, vetopower=vetopower, vetoverride=vetoverride, supermajority=supermajority)
         return
 
+    def house_classes(hous):
+        """
+        Converts the different circos to a {(nseats, electionmethod) : number} format.
+
+        The (nseats, electionmethod) tuples are considered to be classes inside
+        the House, such that members from the same class are elected the same
+        way (albeit not from the same place) and members from different classes
+        are elected differently (albeit possibly from the same voters).
+        """
+        clss = defaultdict(int)
+        for nseats, meth, *_o in hous.circos:
+            clss[nseats, meth] += 1
+        return clss
+
     def ncounties():
         """
         Returns the number of counties, so for each House, for each class,
@@ -607,7 +621,7 @@ init python:
         if executive.origin == 'people':
             houzes.append(executive)
         for house in houzes:
-            numbers.update(house.classes().values())
+            numbers.update(house_classes(house).values())
         return ppcm(*numbers)
 
     def minncitizen():
@@ -617,9 +631,8 @@ init python:
         if executive.origin == 'people':
             houzes.append(executive)
         for house in houzes:
-            clss = house.classes()
-            for (nseats, _elec), ncirco in clss.items():
-                mins.add(nseats//(ncou/ncirco))
+            for (nseats, _elec), ncirco in house_classes(house).items():
+                mins.add(int(nseats//(ncou/ncirco))) # int because // returns a float for some reason
                 # nombre d'élus par circo divisé par le nombre de comtés dans la circo
         # prendre le max
         return max(mins)
@@ -641,7 +654,7 @@ init python:
         for house in houzes:
             ramobj = renpy.random.Random(house.name)
             print(f"Populating {house.name}'s electoral district(s)")
-            for (cl_nseats, cl_elec), ncirco in house.classes().items():
+            for (cl_nseats, cl_elec), ncirco in house_classes(house).items():
                 citpool = list(citizenpool) # on vide celle-là mais pas la globale
                 ramobj.shuffle(citpool)
                 for (nseats, elec, citilist) in house.circos:

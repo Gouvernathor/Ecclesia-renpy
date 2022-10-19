@@ -66,20 +66,6 @@ class House:
     def seats(self):
         return sum(c[0] for c in self.circos)
 
-    def classes(self):
-        """
-        Converts the different circos to a {(nseats, electionmethod) : number} format.
-
-        The (nseats, electionmethod) tuples are considered to be classes inside
-        the House, such that members from the same class are elected the same
-        way (albeit not from the same place) and members from different classes
-        are elected differently (albeit possibly from the same voters).
-        """
-        clss = defaultdict(int)
-        for nseats, meth, *_o in self.circos:
-            clss[nseats, meth] += 1
-        return dict(clss)
-
     def displayable(self, *args, **kwargs):
         liste = [(nmembers, getattr(parti, "color", "#000")) for parti, nmembers in self.members.items() if nmembers]
         return self.display(liste, *args, **kwargs)
