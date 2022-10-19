@@ -1,5 +1,8 @@
 """renpy
-default actors.nopinions = 5
+default actors.opinion_labels = ("Economy", "Environment", "Immigration", "Healthcare", "Culture")
+# the labels for the opinions, has no actual impact on the framework's behavior
+
+default actors.nopinions = len(actors.opinion_labels) # 5
 # the number of different subjects on which one can have an opinion
 
 default actors.opinmax = 10

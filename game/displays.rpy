@@ -71,6 +71,7 @@ screen stats():
         default popularopinions = actors.pollopinions(citizenpool)
         vbox:
             xfill True
-            for k, d in enumerate(popularopinions):
-                text ""
+            for lab, d in zip(actors.opinion_labels, popularopinions):
+                text "[lab]" xalign .5
+                add Chart(d.values(), data_area_color='#f008', draw_spokes=False, bg=None) size (800, 200) xalign .5
                 # ajouter un graphe de -opinrange à +opinrange qui montre les éléments de popularopinions[k]
