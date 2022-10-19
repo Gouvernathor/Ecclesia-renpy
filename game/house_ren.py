@@ -219,10 +219,6 @@ class Executive(House):
 
         return self.vote(bill).votes_against/self.seats > self.majority
 
-"""renpy
-init python in actors:
-"""
-
 class HasOpinions:
     """
     A mixin class for objects that have opinions on subjects.
