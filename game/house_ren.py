@@ -18,12 +18,14 @@ from collections import defaultdict, OrderedDict
 import math
 import store
 
+SQ2 = math.sqrt(2)
+
 def _normal_to_uniform(x, mu, sigma):
     """
     From a x value generated from a normal distribution with mean mu and standard deviation sigma,
     returns the corresponding value in a uniform distribution between 0 and 1.
     """
-    return .5 * (1 + math.erf((x-mu) / (sigma*math.sqrt(2))))
+    return .5 * (1 + math.erf((x-mu) / (sigma*SQ2)))
 
 def _get_alignment(opinions):
     """
@@ -38,7 +40,7 @@ def _get_alignment(opinions):
     scapro = sum(opinions[i]*factors[i] for i in range(nopinions))
     ran = range(-opinmax, opinmax+1)
     one_sigma = math.sqrt(sum(x**2 for x in ran) / len(ran)) # standard dev of one opinion taken solo
-    sigma = math.hypot(*(one_sigma*fac for fac in factors))
+    sigma = math.hypot(*(one_sigma*fac for fac in factors)) # using Lyapunov's central limit theorem
     rv = _normal_to_uniform(scapro, 0, sigma)
     return rv
 
