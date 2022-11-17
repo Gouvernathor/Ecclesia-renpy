@@ -104,14 +104,17 @@ class House:
     A whole House, in which all members have the same voting power.
     """
     def __init__(self, name,
-                       nseats,
+                       circos,
+                       members=None,
                        election_period=48, # durée en mois
                        majority=.5,
                        ):
         self.name = name
-        self.circos = ((nseats, None, ()),)
+        self.circos = circos
         # list of tuples (nseats, electionmethod, [citizens]) for each circo
-        self.members = {None : self.seats}
+        if members is None:
+            members = {None : self.seats}
+        self.members = members
         # dict of {party : nseats}
         self.election_period = election_period
         self.majority = majority

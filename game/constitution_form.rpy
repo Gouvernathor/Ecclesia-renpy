@@ -58,14 +58,14 @@ screen constit_elect_districts(house, distindex, validhd):
     null height gui.choice_spacing
     hbox:
         xfill True
-        text _("Number of seats per electoral district")+(_(" (Districts : {})").format(house.seats//validhd[distindex]) if distindex else "") yalign .5
+        text _("Number of seats per electoral district")+(_(" (Districts : {})").format(house.nseats//validhd[distindex]) if distindex else "") yalign .5
         hbox:
             xalign 1.0
             yalign .5
             style_prefix "constform_selector"
             textbutton "-1" action SetScreenVariable("distindex", distindex-1) sensitive (distindex-1 > 0)
             if distindex == 0:
-                text _("[house.seats] (nationwide district)")
+                text _("[house.nseats] (nationwide district)")
             else:
                 text str(validhd[distindex])
             textbutton "+1" action SetScreenVariable("distindex", distindex+1) sensitive (distindex+1 < len(validhd)) and distindex
@@ -158,7 +158,7 @@ screen constit(npage, pagename=''):
                     use constit_title2(_("Article [npage] : Elections for the {}").format(houses[npage-2].name))
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
-                    default validhd = [0]+validnpdistricts(houses[npage-2].seats) # nombres de circonscriptions valides
+                    default validhd = [0]+validnpdistricts(houses[npage-2].nseats) # nombres de circonscriptions valides
                     default votingfunc = False # fonction de modalité de vote
                     default attribfunc = False # fonction d'attribution des sièges à partir des résultats du vote
                     default thresh = 0
@@ -182,7 +182,7 @@ screen constit(npage, pagename=''):
                     textbutton _("Continue"):
                         style "big_blue_button"
                         sensitive attribfunc in validattribfuncs(distindex, votingfunc)
-                        action [Function(applyelec, houses[npage-2], (validhd[distindex] if distindex else houses[npage-2].seats), votingfunc, attribfunc, thresh), Return('elections' if (npage<=len(houses)) else 'executif')]
+                        action [Function(applyelec, houses[npage-2], (validhd[distindex] if distindex else houses[npage-2].nseats), votingfunc, attribfunc, thresh), Return('elections' if (npage<=len(houses)) else 'executif')]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename == 'executif':
@@ -264,7 +264,7 @@ screen constit(npage, pagename=''):
                                     text _("[nseats] [exenameb]s")
                                 else:
                                     text _("[nseats] members of the [exenamec] Council")
-                                textbutton "+1" action SetScreenVariable("nseats", nseats+1) sensitive (nseats+1 <= (.1*min([house.seats for house in houses]) if houses else 25))
+                                textbutton "+1" action SetScreenVariable("nseats", nseats+1) sensitive (nseats+1 <= (.1*min([house.nseats for house in houses]) if houses else 25))
                                 # on ne peut pas avoir plus de sièges que 10% de la chambre moins peuplée si on a des chambres, ou 25 si on n'en a pas
                         if houses:
                             hbox:
@@ -315,7 +315,7 @@ screen constit(npage, pagename=''):
                     use constit_title2(_("Article [npage] : Elections for the [executive.name]"))
                     null height gui.choice_spacing+gui.pref_spacing
                     default distindex = 0 # indice donnant le nombre d'élus par circonscription, 0 si ils sont tous dans une seule circo
-                    default validhd = [0]+validnpdistricts(executive.seats) # nombres de circonscriptions valides
+                    default validhd = [0]+validnpdistricts(executive.nseats) # nombres de circonscriptions valides
                     default votingfunc = False # fonction de modalité de vote
                     default attribfunc = False # fonction d'attribution des sièges à partir des résultats du vote
                     default execperiod = 60
@@ -334,14 +334,14 @@ screen constit(npage, pagename=''):
                                 text _("Life terms (no election)")
                             textbutton "+1" action SetScreenVariable("execperiod", execperiod+1)
                             textbutton "+12" action SetScreenVariable("execperiod", execperiod+12)
-                    if executive.seats>1:
+                    if executive.nseats>1:
                         use constit_elect_districts(executive, distindex, validhd)
-                    use constit_election_type((distindex if executive.seats>1 else 1), votingfunc)
+                    use constit_election_type((distindex if executive.nseats>1 else 1), votingfunc)
                     null height gui.pref_spacing
                     textbutton _("Continue"):
                         style "big_blue_button"
-                        sensitive attribfunc in validattribfuncs((distindex if executive.seats>1 else 1), votingfunc)
-                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.seats), votingfunc, attribfunc, 0, execperiod), Return('trivia')]
+                        sensitive attribfunc in validattribfuncs((distindex if executive.nseats>1 else 1), votingfunc)
+                        action [Function(applyelec, executive, (validhd[distindex] if distindex else executive.nseats), votingfunc, attribfunc, 0, execperiod), Return('trivia')]
                     null height gui.choice_spacing+gui.pref_spacing
 
                 elif pagename == 'trivia':
@@ -445,7 +445,7 @@ screen constit(npage, pagename=''):
                         xfill True
                         style_prefix "constform_radio"
                         text _("Electeds per inhabitant") yalign .5
-                        textbutton "1/"+str((ncounties()*citizens*popscale)/(sum([house.seats for house in houses+[executive]]))):
+                        textbutton "1/"+str((ncounties()*citizens*popscale)/(sum([house.nseats for house in houses+[executive]]))):
                             selected True
                             text_color '#000'
                     null height gui.pref_spacing
@@ -538,10 +538,28 @@ style big_red_button_text:
     size 80
     bold True
 
-init python:
+init 1 python:
     from collections import defaultdict
     import functools
     from math import lcm as ppcm
+
+    class HouseData:
+        """
+        Placeholder to store incomplete data about a house
+        """
+        clss = actors.House
+
+        def __init__(self, **kwargs):
+            for k, v in kwargs.items():
+                setattr(self, k, v)
+
+        def create_house(self):
+            dic = self.__dict__.copy()
+            del dic["nseats"]
+            return self.clss(**dic)
+
+    class ExecutiveData(HouseData):
+        clss = actors.Executive
 
     def create_houses(nhouses, housenames, houseperiods, houseseats):
         '''
@@ -549,7 +567,7 @@ init python:
         avec le bon nom, la bonne période de renouvellement et le bon nombre de sièges
         '''
         for _k, name, nseats, period in zip(range(nhouses), housenames, houseseats, houseperiods):
-            houses.append(actors.House(name, nseats=nseats, election_period=period))
+            houses.append(HouseData(name=name, nseats=nseats, election_period=period))
         return
 
     @functools.lru_cache
@@ -582,7 +600,7 @@ init python:
 
         votingfonk = votingtype()
         attribfonk = attribtype(nseats=circoseats, **kwargs)
-        house.circos = [[circoseats, election_method.ElectionMethod(votingfonk, attribfonk), []] for _k in range(house.seats//circoseats)]
+        house.circos = [[circoseats, election_method.ElectionMethod(votingfonk, attribfonk), []] for _k in range(house.nseats//circoseats)]
         if house == executive:
             house.election_period = period
         return
@@ -590,7 +608,7 @@ init python:
     def create_exec(name, origin, nseats, vetopower, vetoverride, supermajority):
         if origin:
             global executive
-            executive = actors.Executive(name=name, nseats=nseats, origin=origin, vetopower=vetopower, vetoverride=vetoverride, supermajority=supermajority)
+            executive = ExecutiveData(name=name, nseats=nseats, origin=origin, vetopower=vetopower, vetoverride=vetoverride, supermajority=supermajority)
         return
 
     def house_classes(hous):
@@ -645,11 +663,13 @@ init python:
         Then, assigns citizens to electoral districts so that each
         citizen has one and only one electoral district, and each
         electoral district of the same class has the same number of citizens.
+        Finally, replaces the dummy instances by the actual House instances.
         """
         global citizenpool
         randomobj = renpy.random.Random(citikey)
         citizenpool = [actors.Citizen(randomobj=randomobj) for k in range(ncitizens*ncounties())]
         houzes = list(houses)
+        global executive
         if executive.origin == 'people':
             houzes.append(executive)
         for house in houzes:
@@ -667,4 +687,6 @@ init python:
                         citilist[:], citpool = citpool[:boundary], citpool[boundary:]
             if citpool:
                 raise RuntimeError("The citizens were not distributed properly.\nPerhaps the number of citizens was unaccurately set ?")
+        houses[:] = [hd.create_house() for hd in houses]
+        executive = executive.create_house()
         return
