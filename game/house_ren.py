@@ -106,7 +106,6 @@ class House:
     def __init__(self, name,
                        nseats,
                        election_period=48, # durée en mois
-                       display=None,
                        majority=.5,
                        ):
         self.name = name
@@ -115,18 +114,19 @@ class House:
         self.members = {None : self.seats}
         # dict of {party : nseats}
         self.election_period = election_period
-        if display is None:
-            display = store.newarch
-        self.display = display
         self.majority = majority
+        # ratio required for a vote to be considered successful
 
     @property
     def seats(self):
         return sum(c[0] for c in self.circos)
 
     def displayable(self, *args, **kwargs):
+        """
+        To customize this, use a subclass.
+        """
         liste = [(nmembers, getattr(parti, "color", "#000")) for parti, nmembers in self.members.items() if nmembers]
-        return self.display(liste, *args, **kwargs)
+        return store.newarch(liste, *args, **kwargs)
 
     def election(self):
         """
