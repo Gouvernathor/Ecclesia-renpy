@@ -196,6 +196,7 @@ class SuperMajority(Majority):
     name = _("(Super) Majority")
 
     def __init__(self, *args, threshold, **kwargs):
+        super().__init__(*args, **kwargs)
         self.threshold = threshold
 
 @listed_attrib
