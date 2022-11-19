@@ -40,8 +40,15 @@ label start:
 
     e "You've created a new Ren'Py game."
 
-    call constitution_form
-    $ partis = actors.Party.generate(10)
+    menu:
+        "Pick a country template":
+            call country_templates
+        "Draft your own {b}Constitution{/b}":
+            call constitution_form
+
+    if not partis:
+        $ partis = actors.Party.generate(10)
+
     show screen displayer
     e "hey"
     pause
@@ -67,5 +74,15 @@ label start:
         jump printer
 
     # This ends the game.
+
+    return
+
+label country_templates:
+    $ renpy.dynamic("ncitizen")
+
+    $ ncitizens = int(renpy.input(_("Please enter the number of simulated citizens per minimal electoral district (big numbers will multiply memory usage and lag) :"),
+                              default="10",
+                              allow="0123456789") or "1") or 1
+    $ houses[:], executive, partis = renpy.display_menu(templates.templates.items())(ncitizens=ncitizens)
 
     return
