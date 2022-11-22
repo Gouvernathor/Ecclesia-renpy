@@ -3,7 +3,9 @@ init python in templates:
 """
 _constant = True
 
-from collections import namedtuple
+from collections import namedtuple, defaultdict
+from itertools import combinations
+from math import ceil
 import store
 from store.actors import House, Executive, Party, Citizen
 from store import voting_method
@@ -113,3 +115,153 @@ def us(ncitizens, **kwargs):
                     (Party("Republican Party", color="#f00"),
                      Party("Democratic Party", color="#00f")))
 
+
+def get_coalition(members):
+    """
+    From a {party: number of seats} dict,
+    determines the coalition of parties that can form a government.
+    A coalition needs to have an alignment span of at most .5.
+    Among these, the most cohesive coalition uniting the absolute majority of the members.
+    If none does, the largest coalition in terms of number of members is returned.
+    """
+    members = {k:v for k, v in members.items() if v} # filter and convert to dict
+    house_pop = sum(members.values())
+
+    def max_disag(coal):
+        """
+        Use alignment rather than all-subjects disagreement.
+        Single-use majorities for bills will use disagreement,
+        but governmental majority won't.
+        """
+        # return max((a ^ b) for a in coal for b in coal)
+        return max(abs(a.alignment - b.alignment) for a in coal for b in coal)
+
+    valid_coals = []
+    # all coalitions whose span is less than half of the maximum possible disagreement
+    for r in range(len(members)):
+        for coalition in combinations(members, r+1):
+            if max_disag(coalition) < .5:
+                valid_coals.append(frozenset(coalition))
+    # print(f"valid : {sorted((max_disag(coal), sorted(p.color for p in coal)) for coal in valid_coals)}")
+
+    maj_coals = tuple(filter((lambda coal : sum(members[p] for p in coal) >= house_pop/2), valid_coals))
+    # all coalitions holding an absolute majority of the seats
+    # print(f"maj : {sorted((max_disag(coal), sorted(p.color for p in coal)) for coal in maj_coals)}")
+
+    if maj_coals:
+        # the most cohesive majority coalition wins
+        return min(maj_coals, key=max_disag)
+    else:
+        # the largest valid coalition wins
+        return max(valid_coals, key=(lambda coal : sum(members[p] for p in coal)))
+
+class Coalition(python_object):
+    """
+    Implements the nomination of an executive from an assembly.
+    The government coalition is determined by the `get_coalition` function.
+    Among it, either a proportional election is done (for nseats > 1),
+    or the median party wins the sole seat.
+    """
+    __slots__ = ("nseats", "randomobj")
+
+    def __init__(self, nseats, *, randomkey=None, randomobj=None):
+        self.nseats = nseats
+        if randomobj is None:
+            randomobj = renpy.random.Random(randomkey)
+        elif randomkey is not None:
+            raise TypeError("Only one of randomobj and randomkey must be provided.")
+        self.randomobj = randomobj
+
+    def election(self, pool):
+        dipool = defaultdict(int)
+        for p in pool:
+            dipool[p] += 1
+
+        win_coal = get_coalition(dipool)
+
+        pool = [p for p, mul in dipool.items() if p in win_coal for _k in range(mul)]
+        if self.nseats == 1:
+            pool.sort(key=(lambda p : p.alignment))
+            winner = pool[len(pool)//2]
+            return [(winner, 1)]
+        else:
+            return ElectionMethod(voting_method.SingleVote(),
+                                  attribution_method.HighestAverages(nseats=self.nseats,
+                                                                     randomobj=self.ranbdomobj),
+                                  ).election(pool)
+
+ElectionMethod.register(Coalition)
+
+class WestminsterHouse(House):
+    head = None
+    # {parti : nseats} or None
+    # defaults to one blank seat
+
+    locations = None
+    # {parti : "right" or "left" or "center"} or None
+    # defaults to auto-computing the govt and the opposition
+
+    _coalcache = (None, None)
+
+    def election(self):
+        rv = super().election()
+        self.head = self.locations = None
+        return rv
+
+    def displayable(self, *args, **kwargs):
+        if self.locations:
+            locations = self.locations
+        else:
+            hsh = hash(tuple(self.members.items()))
+            if hsh == self._coalcache[0]:
+                coal = self._coalcache[1]
+            else:
+                coal = get_coalition(self.members)
+                self._coalcache = hsh, coal
+
+            locations = defaultdict(lambda : "left")
+            for p in coal:
+                locations[p] = "right"
+
+        def aline(parti, nmembers):
+            loc = locations[parti]
+
+            if self.head:
+                nmembers -= self.head.get(parti, 0)
+
+            return nmembers, getattr(parti, "color", "#000"), loc
+
+        liste = [aline(parti, nmembers) for parti, nmembers in self.members.items() if nmembers]
+
+        if self.head is None:
+            liste.append((1, "#000", "head"))
+        else:
+            liste.extend((n, getattr(parti, "color", "#000"), "head")
+                         for parti, n in self.head.items())
+
+        return store.Westminster(liste, *args, **kwargs)
+
+@stor_deco(_("United Kingdom"))
+def uk(ncitizens, **kwargs):
+    """
+    The House of Lords is ignored, because... come on.
+    """
+    randomobj = renpy.random.Random(store.citikey)
+    citizenpool = [Citizen(randomobj=randomobj) for _k in range(ncitizens*650)]
+    store.citizenpool = citizenpool
+
+    commons_circos = [[1,
+                       ElectionMethod(voting_method.SingleVote(),
+                                      attribution_method.Plurality(nseats=1)),
+                       citizenpool[ncitizens*i:ncitizens*(i+1)]]
+                      for i in range(650)]
+
+    commons = WestminsterHouse(_("House of Commons"), commons_circos, election_period=60)
+
+    return Template((commons,),
+                    Executive(origin=None,
+                              circos=[[1, Coalition(1), commons]],
+                              vetopower=False,
+                              name="Prime Minister",
+                              ),
+                    None)
