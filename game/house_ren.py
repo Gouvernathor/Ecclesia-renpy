@@ -136,9 +136,12 @@ class House:
         Triggers an election in each circo (electoral district), and joins the
         results in self.members
         """
-
         joined_results = defaultdict(int)
         for _nseats, elect_meth, pool in self.circos:
+            if (pool is None) or (pool == "people"):
+                pool = store.citizenpool
+            elif isinstance(pool, House):
+                pool = pool.members
             for party, nseats in elect_meth.election(pool):
                 joined_results[party] += nseats
         self.members = OrderedDict(sorted(joined_results.items(), key=(lambda x:x[0].alignment)))
@@ -178,40 +181,24 @@ class Executive(House):
                        vetoverride=False, # who can override it (False or an iterable of House or "joint")
                        supermajority=.5, # the qualified majority required to override the veto
                        election_period=None,
-                       *args,
+                       *,
+                       circos, # if an int, interpreted as the number of seats
                        **kwargs):
         if election_period is None:
             if isinstance(origin, House):
                 election_period = origin.election_period
             else:
                 election_period = 60
-        super().__init__(*args, election_period=election_period, **kwargs)
+        if isinstance(circos, int):
+            circos = [[circos,
+                       store.election_method.ElectionMethod(store.voting_method.SingleVote(),
+                                                            store.attribution_method.HighestAverages(nseats=circos)),
+                       origin]]
+        super().__init__(circos=circos, election_period=election_period, **kwargs)
         self.origin = origin
         self.vetopower = vetopower
         self.vetoverride = vetoverride
         self.supermajority = supermajority
-
-    def election(self):
-        """
-        The case of the executive is a bit different, because it can be elected
-        by the parliament and not by the people.
-
-        In this case, the election is done in a proportional manner, because a majority
-        system could just elect one representative of the majority party, like the
-        prime minister in most parliamentary regimes.
-        """
-        origin = self.origin
-        if origin == "people":
-            return super().election()
-
-        if isinstance(origin, House):
-            origin = [origin]
-
-        pool = [p for house in origin for p, mul in house.members.items() for _k in range(mul)]
-        elect_meth = store.election_method.ElectionMethod(store.voting_method.SingleVote(),
-                                                          store.attribution_method.HighestAverages(nseats=self.seats))
-        self.members = OrderedDict(sorted(elect_meth.election(pool), key=(lambda x:x[0].alignment)))
-        return self.members
 
     def veto(self, bill):
         """
