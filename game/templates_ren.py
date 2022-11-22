@@ -5,7 +5,7 @@ _constant = True
 
 from collections import namedtuple, defaultdict
 from itertools import combinations
-from math import ceil
+from math import lcm as ppcm
 import store
 from store.actors import House, Executive, Party, Citizen
 from store import voting_method
@@ -115,6 +115,48 @@ def us(ncitizens, **kwargs):
                     (Party("Republican Party", color="#f00"),
                      Party("Democratic Party", color="#00f")))
 
+@stor_deco(_("France (Vth Republic)"))
+def vth_rep(ncitizens, **kwargs):
+    randomobj = renpy.random.Random(store.citikey)
+    senate_pops = (3, 3, 2, 1, 1, 5, 2, 2, 1, 2, 2, 2, 8, 3, 2, 2, 3, 2, 2, 1, 1, 3, 3, 2,
+                   2, 3, 3, 3, 3, 4, 3, 5, 2, 6, 4, 4, 2, 3, 5, 2, 2, 2, 4, 2, 5, 3, 2, 2,
+                   1, 4, 3, 3, 2, 2, 4, 2, 3, 5, 2, 11, 4, 2, 7, 3, 3, 2, 2, 5, 4, 7, 2, 3,
+                   3, 2, 3, 12, 6, 6, 6, 2, 3, 2, 2, 4, 3, 3, 2, 2, 2, 2, 1, 5, 7, 6, 6, 5,
+                   3, 2, 2, 4, 2, 2, 2, 1, 1, 1, 1, 12)
+    citizenpool = [Citizen(randomobj=randomobj) for _k in range(ncitizens*ppcm(sum(senate_pops), 577))]
+    store.citizenpool = citizenpool
+
+    cit_per_dept = len(citizenpool)//577
+    cit_per_sen_seat = len(citizenpool)//sum(senate_pops)
+
+    assnat_circos = [[1,
+                      ElectionMethod(voting_method.SingleVote(),
+                                     attribution_method.Plurality(nseats=1)),
+                      citizenpool[cit_per_dept*i:cit_per_dept*(i+1)]]
+                     for i in range(577)]
+    senat_circos = []
+    accu = 0
+    for nb in senate_pops:
+        if nb < 3:
+            attrib = attribution_method.Plurality(nseats=nb)
+        else:
+            attrib = attribution_method.HighestAverages(nseats=nb)
+        senat_circos.append([nb,
+                             ElectionMethod(voting_method.SingleVote(),
+                                            attrib),
+                             citizenpool[accu:accu+nb*cit_per_sen_seat]])
+        accu += cit_per_sen_seat*nb
+
+    return Template((House(_("National Assembly"), assnat_circos, election_period=60),
+                     House(_("Senate"), senat_circos, election_period=72)),
+                    Executive(origin="people",
+                              vetopower=False,
+                              election_period=60,
+                              name=_("President of the Republic"),
+                              circos=[[1,
+                                       ElectionMethod(voting_method.SingleVote(),
+                                                      attribution_method.Plurality(nseats=1)),
+                                       citizenpool]]))
 
 def get_coalition(members):
     """

@@ -81,9 +81,10 @@ label start:
 label country_templates:
     $ renpy.dynamic("ncitizen")
 
-    $ ncitizens = int(renpy.input(_("Please enter the number of simulated citizens per minimal electoral district :\n(big numbers will multiply memory usage and lag)"),
-                              default="10",
-                              allow="0123456789") or "1") or 1
+    $ ncitizens = int(renpy.input(_("Please enter the number of simulated citizens per minimal electoral district :\n"
+                                    "(big numbers will multiply memory usage and lag, importance differs depending on the country)"),
+                                  default="10",
+                                  allow="0123456789") or "1") or 1
     $ houses[:], executive, partis = renpy.display_menu(templates.templates.items())(ncitizens=ncitizens)
 
     return
