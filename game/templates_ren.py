@@ -108,7 +108,7 @@ def us(ncitizens, **kwargs):
     congress = (house, senate)
     prez_circos = [[1, USPrezElection(prez_elector_circos, senate), ()]]
     president = Executive(origin="people", vetopower=True, vetoverride=congress, supermajority=2/3,
-                          name=_("President"), circos=prez_circos, election_period=48)
+                          name=_("President of the United States"), circos=prez_circos, election_period=48)
 
     return Template(congress,
                     president,
@@ -262,6 +262,6 @@ def uk(ncitizens, **kwargs):
                     Executive(origin=None,
                               circos=[[1, Coalition(1), commons]],
                               vetopower=False,
-                              name="Prime Minister",
+                              name=_("Prime Minister"),
                               ),
                     None)
