@@ -47,6 +47,7 @@ label start:
             call constitution_form
 
     if not partis:
+        $ renpy.notify(_("Generating random political parties..."))
         $ partis = actors.Party.generate(10)
 
     show screen displayer
@@ -80,7 +81,7 @@ label start:
 label country_templates:
     $ renpy.dynamic("ncitizen")
 
-    $ ncitizens = int(renpy.input(_("Please enter the number of simulated citizens per minimal electoral district (big numbers will multiply memory usage and lag) :"),
+    $ ncitizens = int(renpy.input(_("Please enter the number of simulated citizens per minimal electoral district :\n(big numbers will multiply memory usage and lag)"),
                               default="10",
                               allow="0123456789") or "1") or 1
     $ houses[:], executive, partis = renpy.display_menu(templates.templates.items())(ncitizens=ncitizens)

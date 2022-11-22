@@ -11,6 +11,7 @@ from store import attribution_method
 from store.election_method import ElectionMethod
 
 templates = {}
+# {translatable name : function (number of electors per smallest district -> (houses, executive, partis))}
 
 class stor_deco(python_object):
     def __init__(self, key):
@@ -29,7 +30,7 @@ class USPrezElection(python_object):
     def election(self, _pool):
         electors = House("Great Electors of the POTUS", self.circos, election_period=48)
         pool = [p for p, mul in electors.election().items() for _k in range(mul)]
-        print("presidential electors pool :", electors.members)
+        # print("presidential electors pool :", electors.members)
 
         true_elect = ElectionMethod(voting_method.SingleVote(),
                                     attribution_method.SuperMajority(nseats=1, threshold=.5))
@@ -50,6 +51,13 @@ ElectionMethod.register(USPrezElection)
 
 @stor_deco(_("United States"))
 def us(ncitizens, **kwargs):
+    """
+    The Senate is renewed in its integrality every 6 years, instead of by thirds every 2 years.
+    Nebraska and Maine's special way of alotting electors for presidential election is also ignored
+    and replaced with winner-takes-all.
+    All House seats are filled using plurality single-turn elections (no runoffs).
+    Other than that, it's pretty accurate - apart from the random generation of citizens of course.
+    """
     randomobj = renpy.random.Random(store.citikey)
     citizenpool = [Citizen(randomobj=randomobj) for _k in range(ncitizens*436)]
     # 435 for the representatives + 1 for DC
@@ -73,8 +81,8 @@ def us(ncitizens, **kwargs):
         for _i in range(mul):
             senate_circos.append([2,
                                   ElectionMethod(voting_method.SingleVote(),
-                                                #  attribution_method.Plurality(nseats=2)),
-                                                 attribution_method.FakeHondt(nseats=2)),
+                                                 attribution_method.Plurality(nseats=2)),
+                                                #  attribution_method.FakeHondt(nseats=2)),
                                   citizenpool[accu:accu+n*ncitizens]])
             accu += ncitizens*n
     # a, b, c = sum((cir[2] for cir in house_circos), start=[]), sum((cir[2] for cir in senate_circos), start=[]), citizenpool[:435*ncitizens]
@@ -84,7 +92,8 @@ def us(ncitizens, **kwargs):
                             ElectionMethod(voting_method.SingleVote(),
                                            attribution_method.Plurality(nseats=nb)),
                                         #    attribution_method.FakeHondt(nseats=nb)),
-                            pool] for _2, _em, pool in senate_circos]
+                            pool]
+                           for _2, _em, pool in senate_circos]
     prez_elector_circos.append([3,
                                 ElectionMethod(voting_method.SingleVote(),
                                                attribution_method.Plurality(nseats=3)),
