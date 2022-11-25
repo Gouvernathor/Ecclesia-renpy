@@ -229,7 +229,7 @@ class Coalition(python_object):
         else:
             return ElectionMethod(voting_method.SingleVote(),
                                   attribution_method.HighestAverages(nseats=self.nseats,
-                                                                     randomobj=self.ranbdomobj),
+                                                                     randomobj=self.randomobj),
                                   ).election(pool)
 
 ElectionMethod.register(Coalition)
