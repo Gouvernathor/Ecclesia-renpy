@@ -70,8 +70,10 @@ faire un framework utilisable pour tout type de simulations politiques
 # convertir tout en fichiers _ren.py
     # mettre les attributions Pavia dans un fichier à part, avec les fonctions de métriques/mesures
 le reste du "jeu" n'est qu'un showcase, y compris le screen de constitution_form
-côté "jeu", faire des presets par pays
+# côté "jeu", faire des presets par pays
 prévoir comment faire une élection de "sélection", comme le 1er tour de la présidentielle, ou une primaire d'état
+réorganiser le système de contingency
+retirer le premier élément de `circos` (le nombre de sièges), le rendre visible depuis attribution à travers electionmethod
 
 Caveats et facteurs ignorés (volontairement ou non)
 le choix des individus élus (seul leur programme est pris en compte)
