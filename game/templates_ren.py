@@ -307,3 +307,59 @@ def uk(ncitizens, **kwargs):
                               name=_("Prime Minister"),
                               ),
                     None)
+
+@stor_deco(_("Italy"))
+def italia(ncitizens, **kwargs):
+    """
+    The representatives of the abroad citizens are grouped in a single constituency.
+    The number of representatives for the chamber of deputies is 148 instead of 147 for
+    the single-member constituencies, and 244 instead of 245 for the proportional one.
+    """
+    randomobj = renpy.random.Random(store.citikey)
+    citizenpool = [Citizen(randomobj=randomobj) for _k in range(ncitizens*(148+1))]
+    store.citizenpool = citizenpool
+
+    national, abroad = citizenpool[:-ncitizens], citizenpool[-ncitizens:]
+
+    # 148 single, 244 list prop, 8 list prop abroad
+    # 74, 122, 4
+    deputato_circos = []
+    senato_circos = []
+    electo = ElectionMethod(voting_method.SingleVote(),
+                            attribution_method.Plurality(nseats=1))
+    for k in range(148):
+        deputato_circos.append([1, electo, [national[k]]])
+        if not k%2:
+            senato_circos.append([1, electo, national[k:k+2]])
+    deputato_circos.append([244,
+                            ElectionMethod(voting_method.SingleVote(),
+                                           attribution_method.HighestAverages(nseats=244,
+                                                                              randomobj=randomobj,
+                                                                              threshold=0.03)),
+                            national])
+    senato_circos.append([122,
+                          ElectionMethod(voting_method.SingleVote(),
+                                         attribution_method.HighestAverages(nseats=122,
+                                                                            randomobj=randomobj,
+                                                                            threshold=0.03)),
+                          national])
+    deputato_circos.append([8,
+                            ElectionMethod(voting_method.SingleVote(),
+                                           attribution_method.HighestAverages(nseats=8,
+                                                                              randomobj=randomobj)),
+                            abroad])
+    senato_circos.append([4,
+                          ElectionMethod(voting_method.SingleVote(),
+                                         attribution_method.HighestAverages(nseats=4,
+                                                                            randomobj=randomobj)),
+                          abroad])
+
+    deputato = House(_("Chamber of Deputies"), deputato_circos, election_period=60)
+    senato = House(_("Senate of the Republic"), senato_circos, election_period=60)
+    parlement = (deputato, senato)
+    return Template(parlement,
+                    Executive(origin="both",
+                              vetopower=False,
+                              circos=[[16, Coalition(16), parlement]], # 1 president + 15 ministers
+                              name=_("Government of the Republic")),
+                    None)
