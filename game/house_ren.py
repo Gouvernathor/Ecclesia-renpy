@@ -140,8 +140,14 @@ class House:
         for _nseats, elect_meth, pool in self.circos:
             if (pool is None) or (pool == "people"):
                 pool = store.citizenpool
-            elif isinstance(pool, House):
-                pool = pool.members
+            if isinstance(pool, House):
+                pool = (pool,)
+            if isinstance(pool, (list, tuple)) and isinstance(pool[0], House):
+                hs = pool
+                pool = defaultdict(int)
+                for h in hs:
+                    for p, n in h.members.items():
+                        pool[p] += n
             for party, nseats in elect_meth.election(pool):
                 joined_results[party] += nseats
         self.members = OrderedDict(sorted(joined_results.items(), key=(lambda x:x[0].alignment)))
