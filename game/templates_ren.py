@@ -158,14 +158,15 @@ def vth_rep(ncitizens, **kwargs):
                                                       attribution_method.Plurality(nseats=1)),
                                        citizenpool]]))
 
-def get_coalition(members):
+def get_coalition(members, max_span=.5):
     """
     From a {party: number of seats} dict,
     determines the coalition of parties that can form a government.
-    A coalition needs to have an alignment span of at most .5.
-    Among these, the most cohesive coalition uniting the absolute majority of the members.
+    A coalition needs to have an alignment span of at most `max_span`.
+    Among these, the most cohesive coalition uniting the absolute majority of the members wins.
     If none does, the largest coalition in terms of number of members is returned.
     """
+
     members = {k:v for k, v in members.items() if v} # filter and convert to dict
     house_pop = sum(members.values())
 
@@ -182,7 +183,7 @@ def get_coalition(members):
     # all coalitions whose span is less than half of the maximum possible disagreement
     for r in range(len(members)):
         for coalition in combinations(members, r+1):
-            if max_disag(coalition) < .5:
+            if max_disag(coalition) < max_span:
                 valid_coals.append(frozenset(coalition))
     # print(f"valid : {sorted((max_disag(coal), sorted(p.color for p in coal)) for coal in valid_coals)}")
 
