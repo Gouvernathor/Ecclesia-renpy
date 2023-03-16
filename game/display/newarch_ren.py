@@ -3,7 +3,22 @@ init python:
 """
 import math
 
-class Newarch(renpy.Displayable):
+class AntiAlias(renpy.Displayable):
+    aafactor = 1
+
+    def __new__(cls, *args, **kwargs):
+        """
+        Wraps the call so that it returns an anti-aliased version of the Displayable.
+        """
+        aaf = cls.aafactor
+        if aaf != 1:
+            self = super().__new__(cls, *args, **kwargs)
+            self.__init__(*args, **kwargs)
+            return renpy.store.Transform(self, zoom=1./aaf)
+
+        return super().__new__(cls, *args, **kwargs)
+
+class Newarch(AntiAlias):
     class Totals:
         def __getitem__(self, key):
             if isinstance(key, int) and (key >= 0):
@@ -19,23 +34,6 @@ class Newarch(renpy.Displayable):
         # totals[i] : nombre max de sièges quand on a i+1 rangs
     totals = Totals()
     aafactor = 2
-
-    def __new__(cls, *args, **kwargs):
-        """
-        Wraps the call so that it returns an anti-aliased version of the Newarch.
-        """
-        aaf = cls.aafactor
-        if aaf != 1:
-            # cls.aafactor = 1
-            # rv = renpy.store.Transform(cls(*args, **kwargs), zoom=1./aaf)
-            # cls.aafactor = aaf
-            # return rv
-
-            self = super().__new__(cls, *args, **kwargs)
-            self.__init__(*args, **kwargs)
-            return renpy.store.Transform(self, zoom=1./aaf)
-
-        return super().__new__(cls, *args, **kwargs)
 
     def __init__(self, the_list, bg=None, **kwargs):
         '''
