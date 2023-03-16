@@ -265,7 +265,7 @@ class HasOpinions:
         disagreeing with laws that go too far, or which go the wrong way.
         For each opinion:
             if A's opinion a is of the opposite sign as B's b, it goes "the wrong way"
-                the difference is abs(a)
+                the difference is abs(a)*abs(b)
             if A's opinion a is of the same sign as B's b but closer to 0, it "doesn't go far enough"
                 the difference is 0
             otherwise, it "goes too far"
@@ -277,7 +277,7 @@ class HasOpinions:
             absb = abs(b)
             if a*b <= 0:
                 rv.append(absa*absb)
-            elif absa < abs(b):
+            elif absa < absb:
                 rv.append(0)
             else:
                 rv.append(abs(a-b))
@@ -292,8 +292,9 @@ class Bill(HasOpinions):
         super().__init__(*args, **kwargs)
 
     def __repr__(self):
-        id_ = super().__repr__().rpartition(" at ")[2][:-1]
-        return f"<{type(self).__name__} {id_}, {self.name!r}>"
+        # id_ = super().__repr__().rpartition(" at ")[2][:-1]
+        # return f"<{type(self).__name__} {id_}, {self.name!r}>"
+        return f"<{type(self).__name__} {id(self):0>8}, {self.name!r}>"
 
 class Citizen(HasOpinions):
     """

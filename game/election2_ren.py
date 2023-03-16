@@ -1,5 +1,5 @@
 """renpy
-init python in attribution_method:
+init 1 python in attribution_method:
 """
 from statistics import fmean
 
