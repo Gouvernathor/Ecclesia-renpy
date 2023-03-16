@@ -67,7 +67,7 @@ label start:
     # gouvernement à droite, opposition à gauche
     $ seats = 1
     label printer:
-        show expression newarch([(seats, '#f00', 'left'), (23, '#090', 'center'), (24, '#009', 'right')]) as parli at truecenter
+        show expression Newarch([(seats, '#f00', 'left'), (23, '#090', 'center'), (24, '#009', 'right')]) as parli at truecenter
         pause
         show expression Westminster([(1, '#000', 'head'), (seats, '#f00', 'left'), (23, '#090', 'center'), (24, '#009', 'right')]) as parli at truecenter
         pause

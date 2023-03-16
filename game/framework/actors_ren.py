@@ -129,7 +129,7 @@ class House:
         To customize this, use a subclass.
         """
         liste = [(nmembers, getattr(parti, "color", "#000")) for parti, nmembers in self.members.items() if nmembers]
-        return store.newarch(liste, *args, **kwargs)
+        return store.Newarch(liste, *args, **kwargs)
 
     def election(self):
         """

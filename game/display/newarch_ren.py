@@ -4,12 +4,6 @@ init python:
 import math
 
 class Newarch(renpy.Displayable):
-    '''
-    Custom Displayable
-    Zoom .5 to have the real size
-    Not to use directly, use the newarch function as a handler proxy
-    '''
-
     class Totals:
         def __getitem__(self, key):
             if isinstance(key, int) and (key >= 0):
@@ -25,6 +19,23 @@ class Newarch(renpy.Displayable):
         # totals[i] : nombre max de sièges quand on a i+1 rangs
     totals = Totals()
     aafactor = 2
+
+    def __new__(cls, *args, **kwargs):
+        """
+        Wraps the call so that it returns an anti-aliased version of the Newarch.
+        """
+        aaf = cls.aafactor
+        if aaf != 1:
+            # cls.aafactor = 1
+            # rv = renpy.store.Transform(cls(*args, **kwargs), zoom=1./aaf)
+            # cls.aafactor = aaf
+            # return rv
+
+            self = super().__new__(cls, *args, **kwargs)
+            self.__init__(*args, **kwargs)
+            return renpy.store.Transform(self, zoom=1./aaf)
+
+        return super().__new__(cls, *args, **kwargs)
 
     def __init__(self, the_list, bg=None, **kwargs):
         '''
@@ -110,6 +121,3 @@ class Newarch(renpy.Displayable):
         # on range les points par angle croissant de gauche à droite
         poslist.sort(reverse=True)
         return [po[1:] for po in poslist], rad
-
-def newarch(the_list, *args, **kwargs):
-    return Transform(Newarch(the_list, *args, **kwargs), zoom=1.0/Newarch.aafactor)
