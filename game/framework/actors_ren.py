@@ -143,7 +143,7 @@ class House:
                 pool = store.citizenpool
             if isinstance(pool, House):
                 pool = (pool,)
-            if isinstance(pool, (list, tuple)) and isinstance(pool[0], House):
+            if pool and isinstance(pool, (list, tuple)) and isinstance(pool[0], House):
                 hs = pool
                 pool = defaultdict(int)
                 for h in hs:
