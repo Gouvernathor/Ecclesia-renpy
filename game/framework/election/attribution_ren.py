@@ -40,10 +40,10 @@ class Attribution(abc.ABC):
         if self.name is None:
             raise TypeError(f"{type(self)} is not instanciable. If it should be, it lacks a name.")
         self.nseats = nseats
-        if None not in (randomobj, randomkey):
-            raise TypeError("Only one of randomobj and randomkey must be provided.")
         if randomobj is None:
             randomobj = renpy.random.Random(randomkey)
+        elif randomkey is not None:
+            raise TypeError("Only one of randomobj and randomkey must be provided.")
         self.randomobj = randomobj
         super().__init__()
 
