@@ -60,7 +60,7 @@ class Majority(Attribution):
     def attrib(self, results):
         win = max(results, key=results.get)
         if (results[win] / sum(results.values())) > self.threshold:
-            return [(win, self.nseats)]
+            return {win : self.nseats}
         return self.contingency(results)
 
 @listed_attrib
@@ -97,7 +97,7 @@ class InstantRunoff(Attribution):
             total = sum(first_places.values())
             for parti, score in first_places.items():
                 if score > total/2:
-                    return [(parti, self.nseats)]
+                    return {parti : self.nseats}
             blacklisted.add(min(first_places, key=first_places.get))
         raise Exception("We should never end up here")
 
@@ -112,7 +112,7 @@ class Borda(Attribution):
         for ballot in results:
             for k, parti in enumerate(ballot):
                 scores[parti] += k
-        return [(min(scores, key=scores.get), self.nseats)]
+        return {min(scores, key=scores.get) : self.nseats}
 
 @listed_attrib
 class Condorcet(Attribution):
@@ -143,7 +143,7 @@ class Condorcet(Attribution):
             win[parti] = win.get(parti, True) and (count[parti, autre] > 0)
         for parti in win:
             if win[parti]:
-                return [(parti, self.nseats)]
+                return {parti : self.nseats}
         if getattr(self, "contingency", None) is None:
             raise Condorcet.Standoff
         return self.contingency.attrib(results)
@@ -170,7 +170,7 @@ class AverageScore(Attribution):
 
         count = {parti:fmean(liz) for parti, liz in counts.items()}
 
-        return [(max(count, key=count.get), self.nseats)]
+        return {max(count, key=count.get) : self.nseats}
 
 @listed_attrib
 class MedianScore(Attribution):
@@ -195,7 +195,7 @@ class MedianScore(Attribution):
         winners = [parti for parti, med in medians.items() if med == winscore]
 
         if len(winners) <= 1:
-            return [(winners[0], self.nseats)]
+            return {winners[0] : self.nseats}
         # remove the non-winners
         trimmed_results = {parti:tup for parti, tup in results.items() if parti in winners}
         return self.contingency.attrib(trimmed_results)
@@ -222,7 +222,7 @@ class HondtBase(Proportional):
             # take the party with the best ratio
             win = max(results, key=(lambda p:results[p]/(rv[p]+1)))
             rv[win] += 1
-        return rv.items()
+        return rv
 
 class HondtNoThreshold(HondtBase):
     __slots__ = ()
@@ -265,7 +265,7 @@ class HareBase(Proportional):
         winners = sorted(results, key=(lambda p:self.nseats*results[p]/allvotes%1), reverse=True)
         for win in winners[:self.nseats-sum(rv.values())]:
             rv[win] += 1
-        return rv.items()
+        return rv
 
 class HareNoThreshold(HareBase):
     __slots__ = ()
@@ -304,4 +304,4 @@ class Randomize(Attribution):
         rd = defaultdict(int)
         for _s in range(self.nseats):
             rd[self.randomobj.choices(tuple(results), results.values())[0]] += 1
-        return rd.items()
+        return rd

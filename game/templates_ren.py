@@ -232,7 +232,7 @@ class Coalition(python_object):
         if self.nseats == 1:
             pool.sort(key=(lambda p : p.alignment))
             winner = pool[len(pool)//2]
-            return [(winner, 1)]
+            return {winner : 1}
         else:
             return ElectionMethod(voting_method.SingleVote(),
                                   attribution_method.HighestAverages(nseats=self.nseats,

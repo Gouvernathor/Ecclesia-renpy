@@ -74,6 +74,9 @@ le reste du "jeu" n'est qu'un showcase, y compris le screen de constitution_form
 prévoir comment faire une élection de "sélection", comme le 1er tour de la présidentielle, ou une primaire d'état
 réorganiser le système de contingency
 retirer le premier élément de `circos` (le nombre de sièges), le rendre visible depuis attribution à travers electionmethod
+étudier l'idée de mettre un Counter pour les membres d'une House
+    .elements() permet d'énumérer les éléments
+    rend impossible le fait de mettre des vrais députés individuels après
 
 Caveats et facteurs ignorés (volontairement ou non)
 le choix des individus élus (seul leur programme est pris en compte)

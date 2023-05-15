@@ -7,7 +7,7 @@ init python in election_method:
 _constant = True
 
 import abc
-from collections import namedtuple
+from collections import namedtuple, Counter
 
 class ElectionMethod(namedtuple("ElectionMethod", ("voting_method", "attribution_method")), abc.ABC):
     __slots__ = ()
@@ -32,6 +32,7 @@ class Sortition(python_object):
         self.randomobj = randomobj
 
     def election(self, pool):
-        return [(c, 1) for c in self.randomobj.sample(pool, self.nseats)]
+        # return [(c, 1) for c in self.randomobj.sample(pool, self.nseats)]
+        return Counter(self.randomobj.sample(pool, self.nseats))
 
 ElectionMethod.register(Sortition)

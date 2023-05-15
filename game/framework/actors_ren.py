@@ -17,7 +17,7 @@ default actors.opinion_alignment_factors = None
 
 init python in actors:
 """
-from collections import defaultdict, OrderedDict, namedtuple
+from collections import defaultdict, OrderedDict, namedtuple, Counter
 import functools
 import math
 import store
@@ -137,7 +137,7 @@ class House:
         Triggers an election in each circo (electoral district), and joins the
         results in self.members
         """
-        joined_results = defaultdict(int)
+        joined_results = Counter()
         for _nseats, elect_meth, pool in self.circos:
             if (pool is None) or (pool == "people"):
                 pool = store.citizenpool
@@ -145,13 +145,11 @@ class House:
                 pool = (pool,)
             if pool and isinstance(pool, (list, tuple)) and isinstance(pool[0], House):
                 hs = pool
-                pool = defaultdict(int)
+                pool = Counter()
                 for h in hs:
-                    for p, n in h.members.items():
-                        pool[p] += n
-            for party, nseats in elect_meth.election(pool):
-                joined_results[party] += nseats
-        self.members = OrderedDict(sorted(joined_results.items(), key=(lambda x:x[0].alignment)))
+                    pool += h.members
+            joined_results += elect_meth.election(pool)
+        self.members = dict(sorted(joined_results.items(), key=(lambda x:x[0].alignment)))
         return self.members
 
     def vote(self, ho:HasOpinions):
