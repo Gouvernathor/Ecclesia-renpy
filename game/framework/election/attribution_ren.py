@@ -254,8 +254,8 @@ class HareBase(Proportional):
     name = _("Proportional (largest remainder)")
 
     def attrib(self, results):
-        allvotes = sum(results.values())
         if self.threshold:
+            allvotes = sum(results.values())
             results_ = results
             thresh = self.threshold * allvotes
             results = {p:s for p, s in results.items() if s >= thresh}
