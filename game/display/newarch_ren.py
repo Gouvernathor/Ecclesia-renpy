@@ -4,17 +4,20 @@ init python:
 import math
 
 class AntiAlias(renpy.Displayable):
-    aafactor = 1
+    aafactor = 1 # change in subclasses to set the default anti-aliasing factor
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, aafactor=None, **kwargs):
         """
         Wraps the call so that it returns an anti-aliased version of the Displayable.
+        The __init__ method will never be passed the aafactor argument.
         """
-        aaf = cls.aafactor
-        if aaf != 1:
+        if aafactor is None:
+            aafactor = cls.aafactor
+
+        if aafactor != 1:
             self = super().__new__(cls, *args, **kwargs)
             self.__init__(*args, **kwargs)
-            return renpy.store.Transform(self, zoom=1./aaf)
+            return renpy.store.Transform(self, zoom=1./aafactor)
 
         return super().__new__(cls, *args, **kwargs)
 
