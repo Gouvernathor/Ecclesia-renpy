@@ -96,5 +96,6 @@ class ApprovalVote(CardinalVote):
     return_format = results_format.SIMPLE
     name = _("Approval Vote")
 
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.grades = 2
