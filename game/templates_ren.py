@@ -1,3 +1,7 @@
+import renpy
+from store import _
+python_object = object
+
 """renpy
 init python in templates:
 """
@@ -216,7 +220,7 @@ class Coalition(python_object):
         self.randomobj = randomobj
 
     def election(self, pool):
-        dipool = defaultdict(int)
+        dipool = defaultdict(int) # Counter
         for p in pool:
             dipool[p] += 1
 
