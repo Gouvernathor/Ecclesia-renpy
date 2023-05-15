@@ -58,7 +58,7 @@ def house_election_check(houzes=None, elapsed=0):
 @renpy.pure
 class Vote(namedtuple("Vote", ("votes_for", "votes_against"))):
     """
-    The results of a House vote.
+    The results of a binary House vote.
     The blank votes are not counted. To calculate a threshold on the whole number of members,
     use `vote.votes_for / house.seats`. To calculate the threshold on the number of duly elected
     members, use `vote.votes_for / sum(house.members.values())`.
@@ -75,12 +75,10 @@ class Vote(namedtuple("Vote", ("votes_for", "votes_against"))):
         return type(self)(self.votes_against, self.votes_for)
 
     @property
-    @functools.lru_cache
     def votes_cast(self):
         return sum(self)
 
     @property
-    @functools.lru_cache
     def ratio(self):
         """
         Returns the ratio of votes for over the total of votes cast.
