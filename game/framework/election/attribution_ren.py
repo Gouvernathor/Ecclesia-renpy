@@ -6,7 +6,7 @@ init python in attribution_method:
 """
 _constant = True
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 import abc
 from statistics import fmean, median
 from store import results_format
@@ -108,7 +108,7 @@ class Borda(Attribution):
     name = _("Borda Count")
 
     def attrib(self, results):
-        scores = defaultdict(int)
+        scores = Counter()
         for ballot in results:
             for k, parti in enumerate(ballot):
                 scores[parti] += k
@@ -132,15 +132,16 @@ class Condorcet(Attribution):
             self.contingency = contingency(*args, **kwargs)
 
     def attrib(self, results):
-        count = defaultdict(int)
+        count = Counter()
         for tup in results:
             for k, parti1 in enumerate(tup):
                 for parti2 in tup[k+1:]:
                     count[parti1, parti2] += 1
                     count[parti2, parti1] -= 1
         win = {}
+        count = +count
         for parti, autre in count:
-            win[parti] = win.get(parti, True) and (count[parti, autre] > 0)
+            win[parti] = win.get(parti, True) and count[parti, autre]
         for parti in win:
             if win[parti]:
                 return {parti : self.nseats}
@@ -216,7 +217,7 @@ class HondtBase(Proportional):
             if not results:
                 return self.contingency.attrib(results_)
 
-        rv = defaultdict(int)
+        rv = Counter()
         for _k in range(self.nseats):
             # compute the ratio each party would get with one more seat
             # take the party with the best ratio
@@ -301,7 +302,4 @@ class Randomize(Attribution):
     name = _("Random Allotment")
 
     def attrib(self, results):
-        rd = defaultdict(int)
-        for _s in range(self.nseats):
-            rd[self.randomobj.choices(tuple(results), results.values())[0]] += 1
-        return rd
+        return Counter(self.randomobj.choices(tuple(results), results.values(), k=self.nseats))
