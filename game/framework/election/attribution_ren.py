@@ -250,15 +250,16 @@ class HareBase(Proportional):
     name = _("Proportional (largest remainder)")
 
     def attrib(self, results):
+        allvotes = sum(results.values())
         if self.threshold:
             results_ = results
-            thresh = self.threshold * sum(results.values())
+            thresh = self.threshold * allvotes
             results = {p:s for p, s in results.items() if s >= thresh}
             if not results:
                 return self.contingency.attrib(results_)
 
-        rv = {parti : int(self.nseats*score/sum(results.values())) for parti, score in results.items()}
-        winners = sorted(results, key=(lambda p:self.nseats*results[p]/sum(results.values())%1), reverse=True)
+        rv = {parti : int(self.nseats*score/allvotes) for parti, score in results.items()}
+        winners = sorted(results, key=(lambda p:self.nseats*results[p]/allvotes%1), reverse=True)
         for win in winners[:self.nseats-sum(rv.values())]:
             rv[win] += 1
         return rv.items()
