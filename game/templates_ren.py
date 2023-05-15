@@ -62,6 +62,8 @@ def us(ncitizens, **kwargs):
     Nebraska and Maine's special way of alotting electors for presidential election is also ignored
     and replaced with winner-takes-all.
     All House seats are filled using plurality single-turn elections (no runoffs).
+    The presidential contingency election is done by the Senate, not the House-by-state-delegation,
+    because it's simpler to implement and relatively equivalent.
     Other than that, it's pretty accurate - apart from the random generation of citizens of course.
     """
     randomobj = renpy.random.Random(store.citikey)
