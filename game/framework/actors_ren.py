@@ -1,3 +1,6 @@
+from __future__ import annotations
+import renpy
+
 """renpy
 default actors.opinion_labels = ("Economy", "Environment", "Immigration", "Healthcare", "Culture")
 # the labels for the opinions, has no actual impact on the framework's behavior

@@ -1,3 +1,5 @@
+import renpy
+
 """renpy
 init python:
 """

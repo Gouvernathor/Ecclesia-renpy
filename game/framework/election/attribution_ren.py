@@ -1,3 +1,6 @@
+import renpy
+from store import _
+
 """renpy
 init python in attribution_method:
 """

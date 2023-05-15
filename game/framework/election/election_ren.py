@@ -1,3 +1,6 @@
+import renpy
+python_object = object
+
 """renpy
 init python in election_method:
 """

@@ -1,6 +1,10 @@
+import renpy
+from store import _
+
 """renpy
 init python:
 """
+import math
 from pygame_sdl2 import Rect
 
 class Westminster(renpy.Displayable):

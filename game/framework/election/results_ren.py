@@ -1,3 +1,5 @@
+python_dict = dict
+
 """renpy
 init -1 python in results_format:
 """
@@ -15,11 +17,11 @@ _constant = True
 #       {PS : (0, 2, 5, 9, 1)} -> le PS a reçu 0 fois la pire note, 1 fois la meilleure et t'as compris
 #       (len(tup) for tup in result.values()) est constant, égal à votingmethod.grades
 
-class SIMPLE(_dict):
+class SIMPLE(python_dict):
     __slots__ = ()
 class ORDER(tuple):
     __slots__ = ()
-class SCORES(_dict):
+class SCORES(python_dict):
     __slots__ = ()
 
 formats = (SIMPLE, ORDER, SCORES)
