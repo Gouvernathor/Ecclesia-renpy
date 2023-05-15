@@ -5,6 +5,8 @@ init -1 python in results_format:
 """
 _constant = True
 
+from collections import Counter as _Counter
+
 # SIMPLE : dict(parti : nombre de voix)
 #       {PS : 5, LR : 7} -> 5 voix pour le PS, 7 pour LR
 # ORDER : iterable(iterable(partis ordonnés par préférence décroissante))
@@ -17,11 +19,11 @@ _constant = True
 #       {PS : (0, 2, 5, 9, 1)} -> le PS a reçu 0 fois la pire note, 1 fois la meilleure et t'as compris
 #       (len(tup) for tup in result.values()) est constant, égal à votingmethod.grades
 
-class SIMPLE(python_dict):
+class SIMPLE(_Counter):
     __slots__ = ()
 class ORDER(tuple):
     __slots__ = ()
 class SCORES(python_dict):
     __slots__ = ()
 
-formats = (SIMPLE, ORDER, SCORES)
+formats = frozenset((SIMPLE, ORDER, SCORES))
