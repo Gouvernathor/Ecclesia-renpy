@@ -7,8 +7,7 @@ label constitution_form:
     $ npage = 0
     while _return != "finish":
         if _return in {'executif', 'execelect'}:
-            if "/music/Hail to the Chief instrumental.mp3" != renpy.music.get_playing():
-                play music "/music/Hail to the Chief instrumental.mp3" fadeout 3.0
+            play music "/music/Hail to the Chief instrumental.mp3" fadeout 3.0 if_changed
         elif not renpy.music.get_playing() in audio.anthems:
             $ renpy.random.shuffle(audio.anthems)
             play music anthems fadein .5 fadeout 1.0
