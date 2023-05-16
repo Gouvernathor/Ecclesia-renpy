@@ -316,7 +316,7 @@ def test(i, n=None, h=None, limit=None):
 
 def test_proportionals(it=1000):
     from statistics import mean
-    from store.attribution_method import FakeHondt, SainteLagueBase, FakeHare, Pavia
+    from store.attribution_method import DHondt, SainteLagueBase, Hare, Pavia
 
     random = renpy.random.Random()
     solutions = 0
@@ -339,28 +339,28 @@ def test_proportionals(it=1000):
         maxdev = {}
         results = {}
         rtemplate = dict.fromkeys(votes, 0)
-        for Attrib in (FakeHondt, SainteLagueBase, FakeHare, Pavia):
+        for Attrib in (DHondt, SainteLagueBase, Hare, Pavia):
             result = dict(Attrib(nseats).attrib(votes))
             meandev[Attrib] = mean(abs(result.get(p, 0)-(j:=votes[p]*nseats/sumvotes))/j for p in votes)
             maxdev[Attrib] = max(abs(result.get(p, 0)-(j:=votes[p]*nseats/sumvotes))/j for p in votes)
             results[Attrib] = rtemplate | result
 
         # if min(meandev, key=meandev.get) != SainteLagueBase:
-        # if (meandev[FakeHare] != meandev[Pavia]) or (meandev[SainteLagueBase] != meandev[Pavia]) or (maxdev[FakeHare] != maxdev[Pavia]) or (maxdev[SainteLagueBase] != maxdev[Pavia]):
+        # if (meandev[Hare] != meandev[Pavia]) or (meandev[SainteLagueBase] != meandev[Pavia]) or (maxdev[Hare] != maxdev[Pavia]) or (maxdev[SainteLagueBase] != maxdev[Pavia]):
         # if (meandev[SainteLagueBase] != meandev[Pavia]) or (maxdev[SainteLagueBase] != maxdev[Pavia]):
         if results[SainteLagueBase] != results[Pavia]:
             solutions += 1
             print("Found solution:")
-            # if meandev[FakeHondt] < meandev[SainteLagueBase]:
-            #     print("UNEXPECTED : FakeHondt is better than SainteLague")
-            # if meandev[FakeHare] < meandev[SainteLagueBase]:
-            #     print("UNEXPECTED : FakeHare is better than SainteLague")
-            # if meandev[FakeHare] < meandev[FakeHondt]:
-            #     print("UNEXPECTED : FakeHare is better than FakeHondt")
+            # if meandev[DHondt] < meandev[SainteLagueBase]:
+            #     print("UNEXPECTED : DHondt is better than SainteLague")
+            # if meandev[Hare] < meandev[SainteLagueBase]:
+            #     print("UNEXPECTED : Hare is better than SainteLague")
+            # if meandev[Hare] < meandev[DHondt]:
+            #     print("UNEXPECTED : Hare is better than DHondt")
             if meandev[Pavia] != min(meandev.values()):
                 print(f"UNEXPECTED : Pavia is worse than {min(meandev, key=meandev.get)}, in the mean metric")
             # print(f"votes={dict(sorted(votes.items(), key=votes.get, reverse=True))}")
-            # if maxdev[Pavia] > maxdev[FakeHare]:
+            # if maxdev[Pavia] > maxdev[Hare]:
             #     print("UNEXPECTED : Pavia is worse than Hare")
             # if maxdev[Pavia] > maxdev[SainteLagueBase]:
             #     print("UNEXPECTED : Pavia is worse than SainteLague")
@@ -431,7 +431,7 @@ def test_quota(Attrib, tries=1):
 
 def test_sorting(it=1000):
     from itertools import starmap
-    from store.attribution_method import FakeHare, FakeHondt
+    from store.attribution_method import Hare, DHondt
 
     random = renpy.random.Random()
     found = 0
@@ -442,8 +442,8 @@ def test_sorting(it=1000):
         # allvotes = sum(votes.values())
         nseats = random.randrange(1, 2000)
 
-        hondt = FakeHondt(nseats).attrib(votes)
-        hare = FakeHare(nseats).attrib(votes)
+        hondt = DHondt(nseats).attrib(votes)
+        hare = Hare(nseats).attrib(votes)
 
         cumul_hare = sum(starmap(mul, enumerate(hare.values())))
         cumul_hondt = sum(starmap(mul, enumerate(hondt.values())))

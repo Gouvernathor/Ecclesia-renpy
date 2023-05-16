@@ -54,8 +54,42 @@ class Attribution(abc.ABC):
     def attrib(self, results): pass
 
 class Proportional(Attribution):
-    __slots__ = ()
+    __slots__ = ("threshold", "contingency")
     taken_format = results_format.SIMPLE
+
+    def __init__(self, *args, threshold=None, contingency=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.threshold = threshold
+        if threshold:
+            if contingency is None:
+                contingency = type(self)
+            if isinstance(contingency, type):
+                contingency = contingency(*args, **kwargs)
+        self.contingency = contingency
+
+    def __init_subclass__(cls, **clskwargs):
+        """
+        If the threshold is set, filter the voting results before attributing seats.
+        If no party has enough votes to pass the threshold, the class's attrib
+        will not be called, and the contingency will be called instead.
+        """
+        super().__init_subclass__(**clskwargs)
+        nothreshold_attrib = cls.attrib
+
+        def attrib(self, results, *args, **kwargs):
+            """
+            Wrapper, from the Proportional class, around the subclass's attrib method.
+            """
+            if self.threshold:
+                results_ = results
+                thresh = self.threshold * sum(results.values())
+                results = {p:s for p, s in results.items() if s >= thresh}
+                if not results:
+                    return self.contingency.attrib(results_, *args, **kwargs)
+
+            return nothreshold_attrib(self, results, *args, **kwargs)
+
+        cls.attrib = attrib
 
 class RankIndexMethod(Proportional):
     __slots__ = ()
@@ -249,56 +283,27 @@ class MedianScore(Attribution):
         trimmed_results = {parti:tup for parti, tup in results.items() if parti in winners}
         return self.contingency.attrib(trimmed_results)
 
-class HondtBase(DivisorMethod):
+@listed_attrib
+class DHondt(DivisorMethod):
     __slots__ = ("threshold")
-    name = _("Proportional (highest averages)")
-
-    def attrib(self, results):
-        if self.threshold:
-            results_ = results
-            thresh = self.threshold * sum(results.values())
-            results = {p:s for p, s in results.items() if s >= thresh}
-            if not results:
-                return self.contingency.attrib(results_)
-
-        return super().attrib(results)
+    name = _("Proportional (highest averages, Jefferson/D'Hondt)")
 
     def divisor(self, k):
         return k + 1
 
-class HondtNoThreshold(HondtBase):
-    __slots__ = ()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.threshold = 0
-
-class HondtWithThreshold(HondtBase):
-    __slots__ = ("contingency")
-
-    def __init__(self, *args, threshold, contingency=HondtNoThreshold, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.threshold = threshold
-        self.contingency = contingency(*args, **kwargs)
+HighestAverages = DHondt
 
 @listed_attrib
-class FakeHondt(HondtBase):
-    def __new__(cls, *args, threshold=0, **kwargs):
-        if threshold:
-            return HondtWithThreshold(threshold=threshold, *args, **kwargs)
-        return HondtNoThreshold(*args, **kwargs)
-
-HighestAverages = FakeHondt
-
 class Webster(DivisorMethod):
     __slots__ = ()
-    name = _("Proportional (Webster/Sainte-Laguë)")
+    name = _("Proportional (highest averages, Webster/Sainte-Laguë)")
 
     def divisor(self, k):
         # return k + .5
         return 2*k + 1 # int maths is more accurate
 
-class HareBase(Proportional):
+@listed_attrib
+class Hare(Proportional):
     __slots__ = ("threshold")
     name = _("Proportional (largest remainder)")
 
@@ -326,29 +331,7 @@ class HareBase(Proportional):
         seats.update(sorted(remainders, key=remainders.get, reverse=True)[:remaining])
         return seats
 
-class HareNoThreshold(HareBase):
-    __slots__ = ()
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.threshold = 0
-
-class HareWithThreshold(HareBase):
-    __slots__ = ("contingency")
-
-    def __init__(self, *args, threshold, contingency=HareNoThreshold, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.threshold = threshold
-        self.contingency = contingency(*args, **kwargs)
-
-@listed_attrib
-class FakeHare(HareBase):
-    def __new__(cls, *args, threshold=0, **kwargs):
-        if threshold:
-            return HareWithThreshold(threshold=threshold, *args, **kwargs)
-        return HareNoThreshold(*args, **kwargs)
-
-LargestRemainder = FakeHare
+LargestRemainder = Hare
 
 @listed_attrib
 class Randomize(Attribution):
