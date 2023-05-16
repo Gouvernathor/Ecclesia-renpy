@@ -2,6 +2,8 @@
 init 1 python in attribution_method:
 """
 import functools
+from math import sqrt
+from operator import mul
 from statistics import fmean
 
 class MedianScoreOld(Attribution):
@@ -67,6 +69,18 @@ class SainteLagueBase(Proportional):
             rv[win] += 1
             # print(f"Tally : {rv}")
         return [(p, s) for p, s in rv.items() if s]
+
+class HuntingtonHill(DivisorMethod):
+    __slots__ = ("threshold")
+    name = _("Proportional (Huntington-Hill)")
+
+    def __init__(self, *args, threshold=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.threshold = threshold
+
+    def divisor(self, k):
+        # won't work without initial seats value, causing division by zero
+        return sqrt(k*(k+1))
 
 class Pavia1(Proportional):
     name = _("Proportional (Pavia)")
@@ -353,6 +367,7 @@ def test_proportionals(it=1000):
             print(f"{results=}")
             print(f"{meandev=}")
             print(f"{maxdev=}")
+            print()
 
         if solutions >= 5:
             break
