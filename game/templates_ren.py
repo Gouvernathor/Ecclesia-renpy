@@ -7,7 +7,7 @@ init python in templates:
 """
 _constant = True
 
-from collections import namedtuple, defaultdict
+from collections import namedtuple, defaultdict, Counter
 from itertools import combinations
 from math import lcm as ppcm
 import store
@@ -166,14 +166,13 @@ def vth_rep(ncitizens, **kwargs):
 
 def get_coalition(members, max_span=.5):
     """
-    From a {party: number of seats} dict,
+    From a {party: number of seats} dict (preferably a +Counter),
     determines the coalition of parties that can form a government.
     A coalition needs to have an alignment span of at most `max_span`.
     Among these, the most cohesive coalition uniting the absolute majority of the members wins.
     If none does, the largest coalition in terms of number of members is returned.
     """
 
-    members = {k:v for k, v in members.items() if v} # filter and convert to dict
     house_pop = sum(members.values())
 
     def max_disag(coal):
@@ -206,15 +205,19 @@ def get_coalition(members, max_span=.5):
 
 class Coalition(python_object):
     """
-    Implements the nomination of an executive from an assembly.
+    Implements the nomination of an executive from an assembly, elected
+    from a coalition rather than from the full house.
     The government coalition is determined by the `get_coalition` function.
     Among it, either a proportional election is done (for nseats > 1),
     or the median party wins the sole seat.
+    Passing votingmethod or attributionmethod overrides these default ones.
     """
-    __slots__ = ("nseats", "randomobj")
+    __slots__ = ("nseats", "randomobj", "votingmethod", "attributionmethod")
 
-    def __init__(self, nseats, *, randomkey=None, randomobj=None):
+    def __init__(self, nseats, *, votingmethod=None, attributionmethod=None, randomkey=None, randomobj=None):
         self.nseats = nseats
+        self.votingmethod = votingmethod
+        self.attributionmethod = attributionmethod
         if randomobj is None:
             randomobj = renpy.random.Random(randomkey)
         elif randomkey is not None:
@@ -222,22 +225,23 @@ class Coalition(python_object):
         self.randomobj = randomobj
 
     def election(self, pool):
-        dipool = defaultdict(int) # Counter
-        for p in pool:
-            dipool[p] += 1
+        dipool = Counter(iter(pool))
 
         win_coal = get_coalition(dipool)
 
         pool = [p for p, mul in dipool.items() if p in win_coal for _k in range(mul)]
-        if self.nseats == 1:
+        votingmethod = self.votingmethod
+        attributionmethod = self.attributionmethod
+        if (self.nseats == 1) and (votingmethod is None) and (attributionmethod is None):
             pool.sort(key=(lambda p : p.alignment))
             winner = pool[len(pool)//2]
             return {winner : 1}
         else:
-            return ElectionMethod(voting_method.SingleVote(),
-                                  attribution_method.HighestAverages(nseats=self.nseats,
-                                                                     randomobj=self.randomobj),
-                                  ).election(pool)
+            if votingmethod is None:
+                votingmethod = voting_method.SingleVote()
+            if attributionmethod is None:
+                attributionmethod = attribution_method.Plurality(nseats=self.nseats, randomobj=self.randomobj)
+            return ElectionMethod(votingmethod, attributionmethod).election(pool)
 
 ElectionMethod.register(Coalition)
 
@@ -265,7 +269,7 @@ class WestminsterHouse(House):
             if hsh == self._coalcache[0]:
                 coal = self._coalcache[1]
             else:
-                coal = get_coalition(self.members)
+                coal = get_coalition(Counter(self.members))
                 self._coalcache = hsh, coal
 
             locations = defaultdict(lambda : "left")
