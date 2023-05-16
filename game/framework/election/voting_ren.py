@@ -51,7 +51,7 @@ class SingleVote(VotingMethod):
         Tactical voting isn't simulated. Everyone votes for their favorite party.
         """
         partees = list(store.partis)
-        scores = self.return_format.fromkeys(partees, 0)
+        scores = self.return_format()
         store.electrobj.shuffle(partees)
         for citizen in pool:
             # sélectionner le parti avec lequel le désaccord est le plus petit
