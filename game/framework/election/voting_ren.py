@@ -33,9 +33,16 @@ class VotingMethod(abc.ABC):
             voting_methods.append(cls)
 
     @abc.abstractmethod
-    def vote(self, pool):
+    def vote(self, pool:Collection, /):
         """
-        Returns an instance of the self.return_format class.
+        Override in subclasses.
+
+        `pool` contains the opinionated voters. Generally, though not necessarily,
+        Citizens (it can also be Parties). Their disagreement with the parties are
+        quantified by the `^` operator, returning values in the 0-1 range, the
+        higher the stronger disagreement.
+
+        Must return an instance of self.return_format.
         """
 
 class SingleVote(VotingMethod):
@@ -80,7 +87,7 @@ class CardinalVote(VotingMethod):
     """
     Each voter gives a note (or grade) for each of the candidates.
     """
-    __slots__ = ("grades") # le nombre de notes différentes, >1
+    __slots__ = ("grades") # the number of different grades, >1
     return_format = results_format.SCORES
     name = _("Score Vote")
 
@@ -90,12 +97,11 @@ class ApprovalVote(CardinalVote):
 
     Technically a special case of grading vote where grades are 0 and 1,
     but it makes it open to additional attribution methods (proportional ones for instance).
-    The format it returns data in, however, is (potentially) not the same as CardinalVote.
+    The format it returns data in, however, is not the same as CardinalVote.
     """
     __slots__ = ()
     return_format = results_format.SIMPLE
     name = _("Approval Vote")
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.grades = 2
+    def __init__(self):
+        super().__init__(grades=2)
