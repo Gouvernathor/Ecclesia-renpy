@@ -205,7 +205,7 @@ class Pavia4(Proportional):
             # print(f"Tally : {rv}")
         return rv.items()
 
-class Pavia5(Proportional, RankIndexMethod):
+class Pavia5(RankIndexMethod):
     __slots__ = ()
     name = _("Proportional (Pavia)")
 

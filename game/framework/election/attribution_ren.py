@@ -53,7 +53,11 @@ class Attribution(abc.ABC):
     @abc.abstractmethod
     def attrib(self, results): pass
 
-class RankIndexMethod(Attribution):
+class Proportional(Attribution):
+    __slots__ = ()
+    taken_format = results_format.SIMPLE
+
+class RankIndexMethod(Proportional):
     __slots__ = ()
 
     def __key(self, votes, seats):
@@ -245,11 +249,7 @@ class MedianScore(Attribution):
         trimmed_results = {parti:tup for parti, tup in results.items() if parti in winners}
         return self.contingency.attrib(trimmed_results)
 
-class Proportional(Attribution):
-    __slots__ = ()
-    taken_format = results_format.SIMPLE
-
-class HondtBase(Proportional, DivisorMethod):
+class HondtBase(DivisorMethod):
     __slots__ = ("threshold")
     name = _("Proportional (highest averages)")
 
@@ -290,7 +290,7 @@ class FakeHondt(HondtBase):
 
 HighestAverages = FakeHondt
 
-class Webster(Proportional, DivisorMethod):
+class Webster(DivisorMethod):
     __slots__ = ()
     name = _("Proportional (Webster/Sainte-Laguë)")
 
