@@ -33,7 +33,7 @@ class MedianScoreOld(Attribution):
         winners = [parti for parti, liz in counts.items() if liz[len(liz)//2] == winscore]
 
         if len(winners) <= 1:
-            return [(winners[0], self.nseats)]
+            return {winners[0] : self.nseats}
         # remove the non-winners
         trimmed_results = {parti:tup for parti, tup in results.items() if parti in winners}
         return self.contingency.attrib(trimmed_results)
@@ -61,14 +61,14 @@ class SainteLagueBase(Proportional):
             # print(f"- For party {p}, {ret=}")
             return ret
 
-        rv = dict.fromkeys(results, 0)
+        rv = Counter()
         for _k in range(self.nseats):
             # print(f"Seat n°{_k+1}")
             win = max(results, key=key)
             # print(f"-Winner : {win}")
             rv[win] += 1
             # print(f"Tally : {rv}")
-        return [(p, s) for p, s in rv.items() if s]
+        return rv
 
 class HuntingtonHill(DivisorMethod):
     __slots__ = ("threshold")
@@ -83,6 +83,10 @@ class HuntingtonHill(DivisorMethod):
         return sqrt(k*(k+1))
 
 class Pavia1(Proportional):
+    """
+    This is actually a Quota-Pavia method.
+    """
+
     name = _("Proportional (Pavia)")
 
     def attrib(self, results):
@@ -100,11 +104,11 @@ class Pavia1(Proportional):
         for p in winners:
             rv[p] += 1
 
-        return rv.items()
+        return rv
 
 class Pavia2(Proportional):
     """
-    A divisor method which seeks to minimize the average error (across all
+    A divisor(?) method which seeks to minimize the average error (across all
     states/candidates) between the theoretical floating-point number of
     seats and the apportioned number of seats, relative to the theoretical
     number of seats.
@@ -130,11 +134,11 @@ class Pavia2(Proportional):
             # were it given one more seat
             win = min(results, key=mean_error)
             rv[win] += 1
-        return rv.items()
+        return rv
 
 class Pavia3(Proportional):
     """
-    A divisor method which seeks to minimize the average error (across all
+    A divisor(?) method which seeks to minimize the average error (across all
     states/candidates) between the theoretical floating-point number of
     seats and the apportioned number of seats, relative to the theoretical
     number of seats.
@@ -166,11 +170,11 @@ class Pavia3(Proportional):
             # were it given one more seat
             win = min(results, key=relative_error_net_gain)
             rv[win] += 1
-        return rv.items()
+        return rv
 
 class Pavia4(Proportional):
     """
-    A divisor method which seeks to minimize the average error (across all
+    A divisor(?) method which seeks to minimize the average error (across all
     states/candidates) between the theoretical floating-point number of
     seats and the apportioned number of seats, relative to the theoretical
     number of seats.
@@ -219,7 +223,7 @@ class Pavia4(Proportional):
             del relative_cache[win]
             rv[win] += 1
             # print(f"Tally : {rv}")
-        return rv.items()
+        return rv
 
 class Pavia5(RankIndexMethod):
     __slots__ = ()
