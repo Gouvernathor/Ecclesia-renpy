@@ -8,6 +8,7 @@ from statistics import fmean
 
 from store.attribution_method import *
 
+class MedianScoreOld(Attribution, final=False):
     """
     Unoptimized, and uses the high median.
     """
@@ -39,7 +40,7 @@ from store.attribution_method import *
         trimmed_results = {parti:tup for parti, tup in results.items() if parti in winners}
         return self.contingency.attrib(trimmed_results)
 
-class SainteLagueBase(Proportional):
+class SainteLagueBase(Proportional, final=False):
     # Obsolete, the Webster implementation is better
     # __slots__ = ("threshold", "contingency")
     name = _("Proportional (largest averages)")
@@ -71,7 +72,7 @@ class SainteLagueBase(Proportional):
             # print(f"Tally : {rv}")
         return rv
 
-class HuntingtonHill(DivisorMethod):
+class HuntingtonHill(DivisorMethod, final=False):
     __slots__ = ("threshold")
     name = _("Proportional (Huntington-Hill)")
 
@@ -83,7 +84,7 @@ class HuntingtonHill(DivisorMethod):
         # won't work without initial seats value, causing division by zero
         return sqrt(k*(k+1))
 
-class Pavia1(Proportional):
+class Pavia1(Proportional, final=False):
     """
     This is actually a Quota-Pavia method.
     """
@@ -107,7 +108,7 @@ class Pavia1(Proportional):
 
         return rv
 
-class Pavia2(Proportional):
+class Pavia2(Proportional, final=False):
     """
     A divisor(?) method which seeks to minimize the average error (across all
     states/candidates) between the theoretical floating-point number of
@@ -137,7 +138,7 @@ class Pavia2(Proportional):
             rv[win] += 1
         return rv
 
-class Pavia3(Proportional):
+class Pavia3(Proportional, final=False):
     """
     A divisor(?) method which seeks to minimize the average error (across all
     states/candidates) between the theoretical floating-point number of
@@ -173,7 +174,7 @@ class Pavia3(Proportional):
             rv[win] += 1
         return rv
 
-class Pavia4(Proportional):
+class Pavia4(Proportional, final=False):
     """
     A divisor(?) method which seeks to minimize the average error (across all
     states/candidates) between the theoretical floating-point number of
@@ -226,7 +227,7 @@ class Pavia4(Proportional):
             # print(f"Tally : {rv}")
         return rv
 
-class Pavia5(RankIndexMethod):
+class Pavia5(RankIndexMethod, final=False):
     __slots__ = ()
     name = _("Proportional (Pavia)")
 

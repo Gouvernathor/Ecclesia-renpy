@@ -16,10 +16,6 @@ from store import results_format
 
 renpy.store.attribution_methods = attribution_methods = []
 
-def listed_attrib(func):
-    attribution_methods.append(func)
-    return func
-
 class Attribution(abc.ABC):
     """
     Determines how the votes determine the election.
@@ -49,6 +45,11 @@ class Attribution(abc.ABC):
             raise TypeError("Only one of randomobj and randomkey must be provided.")
         self.randomobj = randomobj
         super().__init__()
+
+    def __init_subclass__(cls, final=True, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if (cls.name is not None) and final:
+            attribution_methods.append(cls)
 
     @abc.abstractmethod
     def attrib(self, results): pass
@@ -145,13 +146,11 @@ class Majority(Attribution):
             return {win : self.nseats}
         return self.contingency(results)
 
-@listed_attrib
 class Plurality(Majority):
     __slots__ = ()
     threshold = 0
     name = _("Plurality")
 
-@listed_attrib
 class SuperMajority(Majority):
     __slots__ = ("threshold", "contingency")
     name = _("(Super) Majority")
@@ -160,7 +159,6 @@ class SuperMajority(Majority):
         super().__init__(*args, **kwargs)
         self.threshold = threshold
 
-@listed_attrib
 class InstantRunoff(Attribution):
     __slots__ = ()
     taken_format = results_format.ORDER
@@ -183,7 +181,6 @@ class InstantRunoff(Attribution):
             blacklisted.add(min(first_places, key=first_places.get))
         raise Exception("We should never end up here")
 
-@listed_attrib
 class Borda(Attribution):
     __slots__ = ()
     taken_format = results_format.ORDER
@@ -196,7 +193,6 @@ class Borda(Attribution):
                 scores[parti] += k
         return {min(scores, key=scores.get) : self.nseats}
 
-@listed_attrib
 class Condorcet(Attribution):
     """
     This code doesn't support equally-ranked candidates (because the taken format doesn't allow it).
@@ -231,7 +227,6 @@ class Condorcet(Attribution):
             raise Condorcet.Standoff
         return self.contingency.attrib(results)
 
-@listed_attrib
 class AverageScore(Attribution):
     """
     From a score/rating vote, averages all the scores and elects the one with the best mean.
@@ -255,7 +250,6 @@ class AverageScore(Attribution):
 
         return {max(count, key=count.get) : self.nseats}
 
-@listed_attrib
 class MedianScore(Attribution):
     __slots__ = ("contingency")
     taken_format = results_format.SCORES
@@ -283,7 +277,6 @@ class MedianScore(Attribution):
         trimmed_results = {parti:tup for parti, tup in results.items() if parti in winners}
         return self.contingency.attrib(trimmed_results)
 
-@listed_attrib
 class DHondt(DivisorMethod):
     __slots__ = ("threshold")
     name = _("Proportional (highest averages, Jefferson/D'Hondt)")
@@ -293,7 +286,6 @@ class DHondt(DivisorMethod):
 
 HighestAverages = DHondt
 
-@listed_attrib
 class Webster(DivisorMethod):
     __slots__ = ()
     name = _("Proportional (highest averages, Webster/Sainte-Laguë)")
@@ -302,7 +294,6 @@ class Webster(DivisorMethod):
         # return k + .5
         return 2*k + 1 # int maths is more accurate
 
-@listed_attrib
 class Hare(Proportional):
     __slots__ = ("threshold")
     name = _("Proportional (largest remainder)")
@@ -333,7 +324,6 @@ class Hare(Proportional):
 
 LargestRemainder = Hare
 
-@listed_attrib
 class Randomize(Attribution):
     """
     Everyone votes for their favorite candidate, then one ballot (per seat to fill) is selected at random.
