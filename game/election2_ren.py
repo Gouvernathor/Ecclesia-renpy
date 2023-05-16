@@ -1,6 +1,7 @@
 """renpy
 init 1 python in attribution_method:
 """
+import functools
 from statistics import fmean
 
 class MedianScoreOld(Attribution):
@@ -204,12 +205,94 @@ class Pavia4(Proportional):
             # print(f"Tally : {rv}")
         return rv.items()
 
-Pavia = Pavia4
+class Pavia5(Proportional, RankIndexMethod):
+    __slots__ = ()
+    name = _("Proportional (Pavia)")
+
+    def rank_index_function(self, t, a):
+        h = self.nseats
+        # current_prop_error = Fraction(Fraction(a, h) - t, t)
+        # prop_error_if_incr = Fraction(Fraction(a+1, h)-t, t)
+        # return abs(current_prop_error) - abs(prop_error_if_incr)
+        return self._rank_index_function(h, t, a)
+
+    @staticmethod
+    @functools.lru_cache
+    def _rank_index_function(h, t, a):
+        current_prop_error = Fraction(Fraction(a, h) - t, t)
+        prop_error_if_incr = Fraction(Fraction(a+1, h)-t, t)
+        return abs(current_prop_error) - abs(prop_error_if_incr)
+
+Pavia = Pavia5
 
 """renpy
 init python:
 """
+def sum_raw_error(seats, votes):
+    """
+    Doesn't actually represent anything : what I call "raw error" is not
+    actually what Sainte-Laguë tries to minimize.
+    """
+    all_votes = sum(votes.values())
+    h = sum(seats.values())
+    zp = [(seats[p], Fraction(votes[p], all_votes)) for p in seats]
+    return sum(abs(Fraction(a, h) - t) for a, t in zp)
+
+def sum_prop_error(seats, votes):
+    """
+    What I'm trying to minimize.
+    """
+    all_votes = sum(votes.values())
+    h = sum(seats.values())
+    zp = [(seats[p], Fraction(votes[p], all_votes)) for p in seats]
+    return sum(abs(Fraction(Fraction(a, h)-t, t)) for a, t in zp)
+
 alpha = 'abcdefghijklmnopqrstuvwxyz'
+
+def random_votes(n=None, random=renpy.random.Random()):
+    if n is None:
+        n = random.randrange(5, 27)
+    votes = sorted((random.randrange(1, 1_000_000) for _i in range(n)), reverse=True)
+    votes = dict(zip(alpha, votes))
+    return votes
+
+def test(i, n=None, h=None, limit=None):
+    from store.attribution_method import Webster, Pavia
+    random = renpy.random.Random()
+    if limit is None:
+        limit = float('inf')
+    sh = h
+
+    clss = (
+        Webster,
+        Pavia,
+    )
+
+    found = 0
+    for _i in range(i):
+        if sh is None:
+            h = random.randrange(10, 800)
+        votes = random_votes(n)
+        results = {}
+        for cls in clss:
+            results[cls] = cls(h).attrib(votes)
+        # if not (results[NotWebster] == results[Webster] == results[Pavia]):
+        if results[Pavia] != results[Webster]:
+        # if results[NotWebster] != results[Webster]:
+        # if results[SimpleNotWebster] != results[NotWebster]:
+            found += 1
+            print(f"{h=}\n{votes=}")
+
+            for cls, r in results.items():
+                print(cls.__name__, ":")
+                print(r)
+                print("prop. error :", float(sum_prop_error(r, votes)))
+                print("raw error :", float(sum_raw_error(r, votes)))
+
+            print()
+
+            if found > limit:
+                break
 
 def test_proportionals(it=1000):
     from statistics import mean
