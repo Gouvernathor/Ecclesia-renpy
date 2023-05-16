@@ -410,6 +410,34 @@ def test_quota(Attrib, tries=1):
     if lower and upper:
         print(f"{Attrib} (probably) respects the quota rule")
 
+def test_sorting(it=1000):
+    from itertools import starmap
+    from store.attribution_method import FakeHare, FakeHondt
+
+    random = renpy.random.Random()
+    found = 0
+
+    for _k in range(it):
+        votes = {l : random.randrange(1000, 100000) for l in alpha[:random.randrange(2, 20)]}
+        votes = dict(zip(votes, sorted(votes.values())))
+        # allvotes = sum(votes.values())
+        nseats = random.randrange(1, 2000)
+
+        hondt = FakeHondt(nseats).attrib(votes)
+        hare = FakeHare(nseats).attrib(votes)
+
+        cumul_hare = sum(starmap(mul, enumerate(hare.values())))
+        cumul_hondt = sum(starmap(mul, enumerate(hondt.values())))
+        if cumul_hare > cumul_hondt:
+            found += 1
+            print(f"Hondt favors smaller parties over Hare")
+            print(f"{votes=}")
+            print(f"{nseats=}")
+            print(f"{hondt=}")
+            print(f"{hare=}")
+            if found >= 5:
+                return
+
 def test_median(it=10):
     from statistics import median, median_low, median_high
     from collections import defaultdict
