@@ -249,7 +249,7 @@ class Proportional(Attribution):
     __slots__ = ()
     taken_format = results_format.SIMPLE
 
-class HondtBase(Proportional):
+class HondtBase(Proportional, DivisorMethod):
     __slots__ = ("threshold")
     name = _("Proportional (highest averages)")
 
@@ -261,13 +261,10 @@ class HondtBase(Proportional):
             if not results:
                 return self.contingency.attrib(results_)
 
-        rv = Counter()
-        for _k in range(self.nseats):
-            # compute the ratio each party would get with one more seat
-            # take the party with the best ratio
-            win = max(results, key=(lambda p:results[p]/(rv[p]+1)))
-            rv[win] += 1
-        return rv
+        return super().attrib(results)
+
+    def divisor(self, k):
+        return k + 1
 
 class HondtNoThreshold(HondtBase):
     __slots__ = ()
@@ -293,24 +290,41 @@ class FakeHondt(HondtBase):
 
 HighestAverages = FakeHondt
 
+class Webster(Proportional, DivisorMethod):
+    __slots__ = ()
+    name = _("Proportional (Webster/Sainte-Laguë)")
+
+    def divisor(self, k):
+        # return k + .5
+        return 2*k + 1 # int maths is more accurate
+
 class HareBase(Proportional):
     __slots__ = ("threshold")
     name = _("Proportional (largest remainder)")
 
     def attrib(self, results):
         if self.threshold:
-            allvotes = sum(results.values())
             results_ = results
-            thresh = self.threshold * allvotes
+            thresh = self.threshold * sum(results.values())
             results = {p:s for p, s in results.items() if s >= thresh}
             if not results:
                 return self.contingency.attrib(results_)
 
-        rv = {parti : int(self.nseats*score/allvotes) for parti, score in results.items()}
-        winners = sorted(results, key=(lambda p:self.nseats*results[p]/allvotes%1), reverse=True)
-        for win in winners[:self.nseats-sum(rv.values())]:
-            rv[win] += 1
-        return rv
+        seats = Counter()
+        remainders = {}
+        h = self.nseats
+        remaining = h
+        sumv = sum(results.values())
+        for p, v in results.items():
+            v = Fraction(h*v, sumv)
+            i = int(v)
+            r = v%1
+            seats[p] = i
+            remainders[p] = r
+            remaining -= i
+
+        seats.update(sorted(remainders, key=remainders.get, reverse=True)[:remaining])
+        return seats
 
 class HareNoThreshold(HareBase):
     __slots__ = ()
