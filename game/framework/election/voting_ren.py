@@ -27,9 +27,9 @@ class VotingMethod(abc.ABC):
         if None in (self.name, self.return_format):
             raise TypeError(f"Class {type(self)} is not instantiable.")
 
-    def __init_subclass__(cls, **kwargs):
+    def __init_subclass__(cls, final=None, **kwargs):
         super().__init_subclass__(**kwargs)
-        if cls.name is not None:
+        if (final is None) and (cls.name is not None) or final:
             voting_methods.append(cls)
 
     @abc.abstractmethod
