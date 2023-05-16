@@ -3,8 +3,7 @@ init python:
     def is_subclass(a, b, /):
         return isinstance(a, type) and issubclass(a, b)
 
-label constitution_form:
-    $ npage = 0
+label constitution_form(npage=0):
     while _return != "finish":
         if _return in {'executif', 'execelect'}:
             play music "/music/Hail to the Chief instrumental.mp3" fadeout 3.0 if_changed
@@ -88,7 +87,7 @@ screen constit(npage, pagename=''):
                     use constit_title2(_("Article 1 : Legislature"))
                     null height gui.choice_spacing+gui.pref_spacing
                     default nHouses = 1
-                    default housenames = [_("House n°{}").format(k+1) for k in range(maxnhouses)]
+                    default housenames = [__("House n°{}").format(k+1) for k in range(maxnhouses)]
                     default housenames_edit = [DictInputValue(housenames, k, default=False) for k in range(maxnhouses)]
                     default houseperiods = [48]*maxnhouses
                     default houseseats = [100]*maxnhouses
@@ -106,7 +105,7 @@ screen constit(npage, pagename=''):
                     for khouse index khouse in range(nHouses):
                         button:
                             style_prefix "constform_name"
-                            action [If(housenames[khouse].strip(), None, SetDict(housenames, khouse, _("House n°{}").format(khouse+1))), housenames_edit[khouse].Toggle()]
+                            action [If(housenames[khouse].strip(), None, SetDict(housenames, khouse, __("House n°{}").format(khouse+1))), housenames_edit[khouse].Toggle()]
                             # action housenames_edit[khouse].Toggle()
                             input:
                                 value housenames_edit[khouse]
@@ -577,6 +576,7 @@ init 1 python:
         '''
         return [x for x in range(1, nseats) if ((nseats/x) == int(nseats/x))]
 
+    @functools.lru_cache
     def validattribfuncs(circoseats, votingfunc):
         '''
         Renvoie les modes d'élection valides pour désigner circoseats dans une seule circonscription
@@ -587,7 +587,7 @@ init 1 python:
         attribk = attribution_methods
         if (circoseats == 1):
             attribk = (f for f in attribk if not issubclass(f, attribution_method.Proportional))
-        return (f for f in attribk if f.taken_format == votingfunc.return_format)
+        return frozenset(f for f in attribk if f.taken_format == votingfunc.return_format)
 
     def applyelec(house, circoseats, votingtype, attribtype, thresh=None, period=60):
         if issubclass(attribtype, attribution_method.SuperMajority):
