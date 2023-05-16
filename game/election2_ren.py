@@ -1,12 +1,13 @@
 """renpy
-init 1 python in attribution_method:
+init 1 python in more_attribution_method:
 """
 import functools
 from math import sqrt
 from operator import mul
 from statistics import fmean
 
-class MedianScoreOld(Attribution):
+from store.attribution_method import *
+
     """
     Unoptimized, and uses the high median.
     """
@@ -277,7 +278,7 @@ def random_votes(n=None, random=renpy.random.Random()):
     return votes
 
 def test(i, n=None, h=None, limit=None):
-    from store.attribution_method import Webster, Pavia
+    from store.more_attribution_method import Webster, Pavia
     random = renpy.random.Random()
     if limit is None:
         limit = float('inf')
@@ -316,7 +317,7 @@ def test(i, n=None, h=None, limit=None):
 
 def test_proportionals(it=1000):
     from statistics import mean
-    from store.attribution_method import DHondt, SainteLagueBase, Hare, Pavia
+    from store.more_attribution_method import DHondt, SainteLagueBase, Hare, Pavia
 
     random = renpy.random.Random()
     solutions = 0
@@ -431,7 +432,7 @@ def test_quota(Attrib, tries=1):
 
 def test_sorting(it=1000):
     from itertools import starmap
-    from store.attribution_method import Hare, DHondt
+    from store.more_attribution_method import Hare, DHondt
 
     random = renpy.random.Random()
     found = 0
@@ -460,7 +461,7 @@ def test_sorting(it=1000):
 def test_median(it=10):
     from statistics import median, median_low, median_high
     from collections import defaultdict
-    from store.attribution_method import MedianScoreOld, MedianScore
+    from store.more_attribution_method import MedianScoreOld, MedianScore
 
     random = renpy.random.Random()
     solutions = 0
