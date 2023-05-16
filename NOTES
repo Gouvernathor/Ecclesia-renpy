@@ -77,8 +77,8 @@ retirer le premier élément de `circos` (le nombre de sièges), le rendre visib
 étudier l'idée de mettre un Counter pour les membres d'une House
     .elements() permet d'énumérer les éléments
     rend impossible le fait de mettre des vrais députés individuels après
-changer la manière dont sont gérées les proportionnelles
-    gérer les seuils et les contingency depuis Proportional
+# changer la manière dont sont gérées les proportionnelles
+#     gérer les seuils et les contingency depuis Proportional
 ajouter un paramètre optionnel seats aux méthodes d'attributions, pour avoir des sièges initiaux (nécessaire pour Huntington-Hill)
 
 Caveats et facteurs ignorés (volontairement ou non)
