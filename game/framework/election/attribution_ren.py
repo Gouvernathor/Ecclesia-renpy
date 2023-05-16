@@ -46,9 +46,9 @@ class Attribution(abc.ABC):
         self.randomobj = randomobj
         super().__init__()
 
-    def __init_subclass__(cls, final=True, **kwargs):
+    def __init_subclass__(cls, final=None, **kwargs):
         super().__init_subclass__(**kwargs)
-        if (cls.name is not None) and final:
+        if (final is None) and (cls.name is not None) or final:
             attribution_methods.append(cls)
 
     @abc.abstractmethod
