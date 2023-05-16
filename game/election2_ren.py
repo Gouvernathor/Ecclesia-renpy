@@ -23,7 +23,8 @@ class MedianScoreOld(Attribution):
             for score, qty in enumerate(tup):
                 counts[parti].extend([score]*qty)
 
-        counts = {parti : sorted(liz) for parti, liz in counts.items()}
+        for liz in counts.values():
+            liz.sort()
 
         # ballots not voting for a candidate just do not count for that candidate
         winscore = max(liz[len(liz)//2] for liz in counts.values())
