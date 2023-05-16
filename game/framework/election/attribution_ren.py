@@ -8,8 +8,11 @@ _constant = True
 
 from collections import defaultdict, Counter
 import abc
+from fractions import Fraction
 from statistics import fmean, median
 from store import results_format
+
+# from operator import truediv as Fraction # faster but less accurate
 
 renpy.store.attribution_methods = attribution_methods = []
 
@@ -49,6 +52,47 @@ class Attribution(abc.ABC):
 
     @abc.abstractmethod
     def attrib(self, results): pass
+
+class RankIndexMethod(Attribution):
+    __slots__ = ()
+
+    def __key(self, votes, seats):
+        allvotes = sum(votes.values())
+        def f(p):
+            return self.rank_index_function(Fraction(votes[p], allvotes), seats[p])
+        return f
+
+    @abc.abstractmethod
+    def rank_index_function(self, t, a):
+        """
+        Override in subclasses
+
+        `t` is the percentage of votes received, as a Fraction
+        `a` is the number of seats already received (it will be an integer)
+        The total number of seats can be accessed as self.nseats
+
+        The function should be pure and return an integer or real value (ideally an int or a Fraction for exact calculations).
+        The return value should be increasing as `t` rises, and decreasing as `a` rises.
+        The seat will be awarded to the party maximizing that value.
+        """
+
+    def attrib(self, votes):
+        seats = Counter()
+
+        for _s in range(self.nseats):
+            seats[max(votes, key=self.__key(votes, seats))] += 1
+
+        return seats
+
+class DivisorMethod(RankIndexMethod):
+    __slots__ = ()
+
+    def rank_index_function(self, t, a):
+        return Fraction(t, self.divisor(a))
+
+    @abc.abstractmethod
+    def divisor(self, k): pass
+
 
 class Majority(Attribution):
     """
