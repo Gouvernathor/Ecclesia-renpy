@@ -20,8 +20,12 @@ from collections import Counter as _Counter
 #       (len(tup) for tup in result.values()) est constant, égal à votingmethod.grades
 
 class SIMPLE(_Counter):
-    fromkeys = super(_Counter, _Counter).fromkeys
     __slots__ = ()
+
+    @classmethod
+    def fromkeys(cls, keys, value=None):
+        return cls(python_dict.fromkeys(keys, value))
+
 class ORDER(tuple):
     __slots__ = ()
 class SCORES(python_dict):
