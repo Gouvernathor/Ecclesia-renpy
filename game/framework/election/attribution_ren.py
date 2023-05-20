@@ -52,7 +52,14 @@ class Attribution(abc.ABC):
             attribution_methods.append(cls)
 
     @abc.abstractmethod
-    def attrib(self, results): pass
+    def attrib(self, votes, /):
+        """
+        Override in subclasses
+
+        `votes` is an instance of self.taken_format
+
+        Must return a dict of party:nseats, preferably a Counter, where d.total() == nseats.
+        """
 
 class Proportional(Attribution):
     __slots__ = ("threshold", "contingency")
