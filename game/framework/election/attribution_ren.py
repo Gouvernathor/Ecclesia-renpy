@@ -84,7 +84,7 @@ class Proportional(Attribution):
             if self.threshold:
                 results_ = results
                 thresh = self.threshold * sum(results.values())
-                results = {p:s for p, s in results.items() if s >= thresh}
+                results = self.taken_format({p:s for p, s in results.items() if s >= thresh})
                 if not results:
                     return self.contingency.attrib(results_, *args, **kwargs)
 
