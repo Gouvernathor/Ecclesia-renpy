@@ -31,6 +31,21 @@ class ORDER(tuple):
     __slots__ = ()
 
 class SCORES(python_dict):
-    __slots__ = ()
+    __slots__ = ("ngrades")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ngrades = None
+
+    @classmethod
+    def fromgrades(cls, grades, /, *args, **kwargs):
+        self = cls(*args, **kwargs)
+        self.ngrades = grades
+        return self
+
+    def __missing__(self, key):
+        rv = [0]*self.ngrades
+        self[key] = rv
+        return rv
 
 formats = frozenset((SIMPLE, ORDER, SCORES))
