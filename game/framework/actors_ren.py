@@ -390,6 +390,9 @@ class Party(HasOpinions):
                         key=lambda p:p.alignment)
         return partis
 
+    def __repr__(self):
+        return f"<{type(self).__name__} {id(self):0>8}, {self.name!r}>"
+
 def pollopinions(pool):
     """
     Returns the distribution of every value for every opinion among a list of citizens.
