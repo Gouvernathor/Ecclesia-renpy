@@ -42,10 +42,7 @@ class MedianScoreOld(Attribution, final=False):
 
 class SainteLagueBase(Proportional, final=False):
     # Obsolete, the Webster implementation is better
-    # __slots__ = ("threshold", "contingency")
     name = _("Proportional (largest averages)")
-
-    threshold = 0 # remove
 
     def attrib(self, results):
         if self.threshold:
