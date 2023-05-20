@@ -10,9 +10,49 @@ from collections import defaultdict, Counter
 import abc
 from fractions import Fraction
 from statistics import fmean, median
+import sys
 from store import results_format
 
 # from operator import truediv as Fraction # faster but less accurate
+
+def __min(it, /, *, key=None, randomobj=None):
+    if randomobj is None:
+        randomobj = sys._getframe(1).f_locals.get("self").randomobj
+    if key is None:
+        key = lambda x:x
+
+    zp = zip(iter(it), map(key, it))
+    i, bestkey = next(zp)
+    best = [i]
+    for i, k in zp:
+        if k < bestkey:
+            best = [i]
+            bestkey = k
+        elif k == bestkey:
+            best.append(i)
+
+    return randomobj.choice(best)
+
+def __max(it, /, *, key=None, randomobj=None):
+    if randomobj is None:
+        randomobj = sys._getframe(1).f_locals.get("self").randomobj
+    if key is None:
+        key = lambda x:x
+
+    zp = zip(iter(it), map(key, it))
+    i, bestkey = next(zp)
+    best = [i]
+    for i, k in zp:
+        if k > bestkey:
+            best = [i]
+            bestkey = k
+        elif k == bestkey:
+            best.append(i)
+
+    return randomobj.choice(best)
+
+# min, max = __min, __max # a different way of managing ties
+# much slower, and the first-best-wins builtin approach is consistent so that's good enough
 
 renpy.store.attribution_methods = attribution_methods = []
 
