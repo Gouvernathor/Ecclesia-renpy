@@ -73,16 +73,30 @@ class SainteLagueBase(Proportional, final=False):
         return rv
 
 class HuntingtonHill(DivisorMethod, final=False):
-    __slots__ = ("threshold")
+    """
+    The normal divisor won't work without initial seats value, causing division by zero.
+    This requires some creativity and ignored edge cases.
+    """
+    __slots__ = ()
     name = _("Proportional (Huntington-Hill)")
 
-    def __init__(self, *args, threshold=None, **kwargs):
+    def __init__(self, *args, threshold, **kwargs):
         super().__init__(*args, **kwargs)
         self.threshold = threshold
 
     def divisor(self, k):
-        # won't work without initial seats value, causing division by zero
-        return sqrt(k*(k+1))
+        from fractions import Fraction
+        return Fraction(sqrt(k*(k+1))) # cast into Rational
+
+    def rank_index_function(self, t, a):
+        if not a:
+            return float("inf")
+        return super().rank_index_function(t, a)
+
+    def attrib(self, results):
+        threshold = self.threshold * sum(results.values())
+        results = self.taken_format({p:s for p, s in results.items() if s >= threshold})
+        return super().attrib(results)
 
 class Pavia1(Proportional, final=False):
     """
